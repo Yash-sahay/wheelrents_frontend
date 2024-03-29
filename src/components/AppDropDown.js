@@ -5,7 +5,7 @@ import AppText from './AppText';
 import { appstyle } from '../styles/appstyle';
 
   
-  const AppDropDown = ({label, data, labelField, valueField, setter, allValues, name}) => {
+  const AppDropDown = ({label, data, labelField, valueField, setter, allValues, search, name}) => {
     
     const [isFocus, setIsFocus] = useState(false);
 
@@ -28,8 +28,9 @@ import { appstyle } from '../styles/appstyle';
           selectedTextStyle={styles.selectedTextStyle}
           inputSearchStyle={styles.inputSearchStyle}
           iconStyle={styles.iconStyle}
+          itemTextStyle={styles?.itemTextStyle}
           data={data}
-          search
+          search={search}
           maxHeight={300}
           labelField={labelField}
           valueField={valueField}
@@ -55,6 +56,7 @@ import { appstyle } from '../styles/appstyle';
       borderColor: 'gray',
       borderWidth: 1,
       borderRadius: 5,
+      color: appstyle.tri,
       backgroundColor: 'white',
       paddingHorizontal: 8,
       marginTop: 20
@@ -65,6 +67,7 @@ import { appstyle } from '../styles/appstyle';
     label: {
       position: 'absolute',
       backgroundColor: appstyle.pri,
+      color: appstyle.tri,
       left: 7,
       top: 13,
       zIndex: 999,
@@ -72,6 +75,7 @@ import { appstyle } from '../styles/appstyle';
       fontSize: 12,
     },
     placeholderStyle: {
+      color: appstyle.tri,
       fontSize: 16,
       marginLeft: 5
     },
@@ -85,7 +89,11 @@ import { appstyle } from '../styles/appstyle';
       height: 20,
     },
     inputSearchStyle: {
+      color: appstyle.tri,
       height: 40,
       fontSize: 16,
     },
+    itemTextStyle: {
+      color: appstyle.tri,
+    }
   });

@@ -17,6 +17,7 @@ import AppLoader from '../components/AppLoader';
 import AppBottomBar from '../components/AppBottomBar';
 import Wishlist from '../screens/WishList';
 import Search from '../screens/Search';
+import Booking from '../screens/Booking';
 
 const Stack = createStackNavigator();
 const { width } = Dimensions.get("window")
@@ -52,6 +53,7 @@ const Navigation = () => {
             <Stack.Screen options={{ animationEnabled: false }} name="User" component={User} />
             <Stack.Screen name="Search" component={Search} />
             <Stack.Screen name="Notification" component={Notification} />
+            <Stack.Screen options={{ animationEnabled: false }} name="Booking" component={Booking} />
           </>
         ) : (
           <>

@@ -22,6 +22,7 @@ const AppBottomBar = () => {
     const navigationHost = [
         { routeName: role.includes("host") ? 'HostDashboard' : 'Home', icon: 'home' },
         { routeName: 'AddVehicle', icon: 'plus' },
+        { routeName: 'Booking', icon: 'bookmark' },
         { routeName: 'User', icon: 'user' },
     ]
 

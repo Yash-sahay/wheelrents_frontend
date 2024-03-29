@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import AppButton from '../../components/AppButton'
 import { deleteVehicleFromHost, getAllVehicle } from '../../axios/axios_services/vehicleService'
 import { useNavigation } from '@react-navigation/native'
-import { Card, AnimatedFAB, Text } from 'react-native-paper'
+import { Card, AnimatedFAB, Text, Chip } from 'react-native-paper'
 import AppText from '../../components/AppText'
 import FontAwesome from 'react-native-vector-icons/FontAwesome6'
 import { baseURL, dateSimplify } from '../../../common'
@@ -23,6 +23,7 @@ const HostDashboard = () => {
   const [categoryList, setCategoryList] = useState([]);
   const [modalValue, setModalValue] = useState({visible: false, id: null, name: ""});
   const { bookingStartDate, bookingEndDate } = useSelector(state => state.userReducer);
+  const [deleteLoader, setDeleteLoader] = useState(false)
 
 
   const getAllVehicleByUser = async () => {
@@ -56,6 +57,7 @@ const HostDashboard = () => {
   }
   const deleteVehicle = async () => {
     try {
+      setDeleteLoader(true)
       const payload = {
         vehicleId: modalValue?.id
       }
@@ -63,8 +65,10 @@ const HostDashboard = () => {
       if (res.data) {
         setModalValue({id: null, visible: false, name: ""})
         getAllVehicleByUser()
+        setDeleteLoader(false)
       }
     } catch (error) {
+      setDeleteLoader(false)
       console.error(error)
     }
   }
@@ -119,7 +123,7 @@ const HostDashboard = () => {
       /> */}
       <AppHeader filtersData={categoryList} filterPress={(retData) => setCategoryList(retData)} isExtended={isExtended} />
       <View style={{ backgroundColor: appstyle.pri, height: '100%', padding: 15, paddingTop: 0, position: 'relative' }}>
-
+      <AppText style={{ fontWeight: 'bold', fontSize: 20, marginVertical: 5, }}>Your Listed Vehicles</AppText>
         <VirtualizedList
           onRefresh={getAllVehicleByUser}
           refreshing={false}
@@ -174,10 +178,11 @@ const CardComponent = ({ item, navigation, key, setModalValue }) => (
       {item?.available ? 'Not booked yet' : 'Booked at selected time period!'}
     </AppText>
     <Card.Content>
-      <AppText style={{ color: 'grey', fontWeight: '900', marginTop: 10 }}><FontAwesome name="user-gear" size={12} />  {item?.transmission}    <FontAwesome name="gas-pump" size={12} />  {item?.fuelType}</AppText>
-      <AppText variant="bodyMedium" style={{ fontWeight: '900', marginTop: 10 }}>{item?.name}</AppText>
+    
+      <AppText style={{ color: 'grey', fontWeight: '900', marginTop: 10,  }}><Chip style={{backgroundColor: appstyle.pri}} textStyle={{color: 'black'}} ><FontAwesome name="user-gear" size={12} />  {item?.transmission}</Chip>    <Chip style={{backgroundColor: appstyle.pri}} ><FontAwesome name="gas-pump" size={12} />  {item?.fuelType}</Chip></AppText>
+      <AppText variant="bodyMedium" style={{ fontWeight: '900', marginTop: 10, textTransform: "capitalize" }}>{item?.name}</AppText>
       {/* <AppText variant="bodyMedium" style={{ fontWeight: '900', marginTop: 10 }}>{item?.available ? "Available" : "Booked"}</AppText> */}
-      <AppText variant="titleLarge" style={{ color: 'darkgreen', fontWeight: '900' }}>{item?.cost}rs/hr</AppText>
+      <AppText variant="titleLarge" style={{ color: 'darkgreen', fontWeight: '900', fontSize: 25 }}>{item?.cost}₹/hr</AppText>
       <AppText variant="bodyMedium" style={{ color: 'grey', fontWeight: '900', marginTop: 10 }}>Added on {dateSimplify(item?.date)}</AppText>
     </Card.Content>
     <Card.Actions style={{ paddingBottom: 10, borderTopWidth: 1, borderColor: appstyle.pri, marginTop: 20, paddingTop: 10 }}>
