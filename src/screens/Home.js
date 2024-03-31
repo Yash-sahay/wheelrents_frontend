@@ -308,7 +308,7 @@ const CardComponent = ({ item, navigation, getAllVehicle }) => {
         </Text> */}
       </Card.Content>
       <Card.Actions style={styles.actions}>
-        <AppButton outlined icon={'eye'} onPress={() => navigation.navigate('VehicleDetails', { ...item })}>
+        <AppButton buttonColor={appstyle.priBack} outlined icon={'eye'} onPress={() => navigation.navigate('VehicleDetails', { ...item })}>
           View Details
         </AppButton>
       </Card.Actions>

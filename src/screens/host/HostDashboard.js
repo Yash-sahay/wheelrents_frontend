@@ -179,7 +179,7 @@ const CardComponent = ({ item, navigation, key, setModalValue }) => (
     </AppText>
     <Card.Content>
     
-      <AppText style={{ color: 'grey', fontWeight: '900', marginTop: 10,  }}><Chip style={{backgroundColor: appstyle.pri}} textStyle={{color: 'black'}} ><FontAwesome name="user-gear" size={12} />  {item?.transmission}</Chip>    <Chip style={{backgroundColor: appstyle.pri}} ><FontAwesome name="gas-pump" size={12} />  {item?.fuelType}</Chip></AppText>
+      <AppText style={{ color: 'grey', fontWeight: '900', marginTop: 10,  }}><Chip style={{backgroundColor: appstyle.sec}} textStyle={{color: 'black'}} ><FontAwesome name="user-gear" size={12} />  {item?.transmission}</Chip>    <Chip style={{backgroundColor: appstyle.sec}} ><FontAwesome name="gas-pump" size={12} />  {item?.fuelType}</Chip></AppText>
       <AppText variant="bodyMedium" style={{ fontWeight: '900', marginTop: 10, textTransform: "capitalize" }}>{item?.name}</AppText>
       {/* <AppText variant="bodyMedium" style={{ fontWeight: '900', marginTop: 10 }}>{item?.available ? "Available" : "Booked"}</AppText> */}
       <AppText variant="titleLarge" style={{ color: 'darkgreen', fontWeight: '900', fontSize: 25 }}>{item?.cost}₹/hr</AppText>

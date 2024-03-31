@@ -186,6 +186,7 @@ const AppHeader = ({ ui2, name, isExtended, filterPress, filtersData, accent, sc
                             </AppText>
                         </TouchableOpacity>
                         <View style={{ flexDirection: 'row' }}>
+                            <IconButton onPress={() => navigation.navigate("QRScanner")} style={{ backgroundColor: appstyle.accent, elevation: 10, shadowColor: appstyle.shadowColor, borderWidth: 1, borderColor: '#fff' }} iconColor={appstyle.tri} size={20} icon="qrcode-scan" />
                             <IconButton onPress={() => navigation.navigate('Notification')} style={{ backgroundColor: appstyle.accent, elevation: 10, shadowColor: appstyle.shadowColor, borderWidth: 1, borderColor: '#fff' }} iconColor={appstyle.tri} size={20} icon="bell" />
                         </View>
                     </Animated.View>
@@ -246,10 +247,10 @@ const AppHeader = ({ ui2, name, isExtended, filterPress, filtersData, accent, sc
         <View style={{ backgroundColor: appstyle.tri, paddingTop: 35 }}>
             <StatusBar animated backgroundColor={appstyle.tri} barStyle={'light-content'} showHideTransition={'fade'} />
             <View mode="center-aligned" style={{ flexDirection: 'row', alignItems: 'center', padding: 10, paddingVertical: 20, justifyContent: 'space-between' }}>
-                <TouchableOpacity style={{ borderRadius: 100, elevation: 5, backgroundColor: appstyle.pri, padding: 10 }} onPress={() => navigation.goBack()}>
+                <TouchableOpacity style={{ borderRadius: 100, elevation: 5, backgroundColor: appstyle.priBack, padding: 10 }} onPress={() => navigation.goBack()}>
                     <Icon name="arrow-left-long" size={20} color={appstyle.tri} />
                 </TouchableOpacity>
-                <AppText style={{ fontSize: 25, fontWeight: 'bold', color: appstyle.pri }}>{name || route.name}</AppText>
+                <AppText style={{ fontSize: 25, fontWeight: 'bold', color: appstyle.priBack }}>{name || route.name}</AppText>
                 <AppText style={{ fontSize: 25, fontWeight: 'bold', color: appstyle.pri }}>     </AppText>
             </View>
             {accent != 'opp' && <View style={{ width: '100%', backgroundColor: appstyle.pri, borderTopRightRadius: 10, borderTopLeftRadius: 10, padding: 10 }}></View>}

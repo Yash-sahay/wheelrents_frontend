@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, Image, ProgressBarAndroid, StyleSheet, FlatList, Pressable } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, Image, ProgressBarAndroid, StyleSheet, FlatList, Pressable, PermissionsAndroid } from 'react-native';
 import { appstyle } from '../styles/appstyle';
 import AppBottomBar from '../components/AppBottomBar';
 import AppHeader from '../components/AppHeader';
@@ -19,6 +19,8 @@ import {
 } from 'react-native-reanimated';
 import { PanGestureHandler } from 'react-native-gesture-handler';
 import AppDialog from '../components/AppDialog';
+import AppBottomSheet from '../components/AppBottomSheet';
+import QRCode from 'react-native-qrcode-svg';
 
 
 
@@ -29,11 +31,25 @@ const TABS = [
 ];
 
 
-const Booking = () => {
+const Booking = ({navigation}) => {
   const [bookings, setBookings] = useState([]);
   const [tabValue, setTabValue] = useState(TABS[0]);
   const [modalValue, setModalValue] = useState({});
   const [loader, setLoader] = useState(false)
+  // ref
+  const bottomSheetRef = useRef(null);
+  const [bottomSheet, setBottomSheet] = useState(false);
+  const [qrValues, setQrValues] = useState({})
+
+  const handleClosePress = () => {
+    setBottomSheet(false);
+    bottomSheetRef.current?.close();
+  };
+  const handleOpenPress = (item) => {
+    setQrValues(item)
+    setBottomSheet(true);
+    bottomSheetRef.current?.open();
+  };
 
 
   const [selectedBookingId, setSelectedBookingId] = useState(null);
@@ -44,10 +60,10 @@ const Booking = () => {
 
   const handleApprove = async (id) => {
     try {
-    setLoader(true)
-    const payload = { bookingId: id, bookingStatus: "active" }
+      setLoader(true)
+      const payload = { bookingId: id, bookingStatus: "active" }
       const res = await booking_status_change(payload)
-      alert(JSON.stringify(res.data)) 
+      alert(JSON.stringify(res.data))
       setLoader(false)
     } catch (error) {
       setLoader(false)
@@ -76,7 +92,7 @@ const Booking = () => {
 
   const getBookings = async () => {
     try {
-      const bookings = await getBookingsForHost({bookingStatus: tabValue?.id})
+      const bookings = await getBookingsForHost({ bookingStatus: tabValue?.id })
 
       setBookings(bookings?.data)
       setSelectedBookingId(bookings?.data?.[0]?._id);
@@ -84,6 +100,36 @@ const Booking = () => {
       console.error("err", error)
     }
   }
+
+  const requestCameraPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        {
+          title: 'Cool Photo App Camera Permission',
+          message:
+            'Cool Photo App needs access to your camera ' +
+            'so you can take awesome pictures.',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('You can use the camera');
+      } else {
+        console.log('Camera permission denied');
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  }
+
+    useEffect(() => {
+      requestCameraPermission()
+    }, [])
+    
+  
 
   useEffect(() => {
     getBookings()
@@ -118,14 +164,18 @@ const Booking = () => {
         </View>
 
         <View style={{ paddingHorizontal: 20, paddingVertical: 10 }}>
-          {tabValue.title == "Active" && <ProgressBar
+          {item?.bookingStatus == "started" && <ProgressBar
             style={styles.progressBar}
             progress={0.5} color={'#8fa3ea'} />}
         </View>
         {(selectedBookingId === item?._id && tabValue.title != "Completed") && (
           <View style={{ flexDirection: 'row', justifyContent: 'flex-end', padding: 10, borderTopWidth: 1, borderColor: appstyle.pri }}>
-            <AppButton icon="close" style={{ paddingHorizontal: 10 }} textColor={'tomato'} buttonColor={'white'} onPress={() => setModalValue(values => ({...values, bookingId: item?._id, name: item?.name, visible: true}))} outlined>Reject</AppButton>
-            <AppButton icon="check" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={'#00a400'} onPress={() => handleApprove(item?._id)}>Accept</AppButton>
+            <AppButton icon="close" style={{ paddingHorizontal: 10 }} textColor={'tomato'} buttonColor={'white'} onPress={() => setModalValue(values => ({ ...values, bookingId: item?._id, name: item?.name, visible: true }))} outlined>Reject</AppButton>
+            {item?.bookingStatus == "active" ? (
+              <AppButton icon="qrcode" style={{}} textColor={'white'} buttonColor={appstyle.tri} onPress={() => handleOpenPress(item)}>Open QR</AppButton>
+            ) : (
+              <AppButton icon="check" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={'#00a400'} onPress={() => handleApprove(item?._id)}>Accept</AppButton>
+            )}
           </View>
         )}
       </View>
@@ -135,6 +185,18 @@ const Booking = () => {
 
   return (
     <>
+      <AppBottomSheet bottomSheetRef={bottomSheetRef} snapPoints={['1%', '60%']} bottomSheet={bottomSheet} setBottomSheet={setBottomSheet}>
+        <View style={{flex: 1, alignItems: 'center', padding: 20, paddingTop: 40}}>
+          <QRCode
+            value={qrValues?._id}
+            logo={{ uri: baseURL() + "public/vehicle/" + qrValues?.images?.[0]?.fileName }}
+            logoSize={20}
+            size={200}
+            logoBackgroundColor={appstyle.priBack}
+          />
+          <AppText style={{textAlign: 'center', fontWeight: "600", fontSize: 16, padding: 40, color: 'grey'}}>Scan the QR code from you phone to start the trip!</AppText>
+        </View>
+      </AppBottomSheet>
       <AppDialog visible={modalValue.visible}
         title='Are you sure?'
         description={`You want to cancel booking request "${modalValue?.name}"? you will not be able to get again. `}
