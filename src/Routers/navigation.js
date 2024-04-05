@@ -36,7 +36,12 @@ const Navigation = () => {
     <NavigationContainer>
       <Stack.Navigator
         screenOptions={{ headerShown: false }}>
-        {isLoggedIn ? (
+        {!isLoggedIn ? (
+          <>
+            <Stack.Screen name="Login" component={Login} />
+            <Stack.Screen name="Signin" component={Signin} />
+          </>
+        ) : (
           <>
             {role?.includes('host') && (
               <>
@@ -56,11 +61,6 @@ const Navigation = () => {
             <Stack.Screen name="Notification" component={Notification} />
             <Stack.Screen options={{ animationEnabled: false }} name="Booking" component={Booking} />
             <Stack.Screen options={{}} name="QRScanner" component={QRScanner} />
-          </>
-        ) : (
-          <>
-            <Stack.Screen name="Login" component={Login} />
-            <Stack.Screen name="Signin" component={Signin} />
           </>
         )}
       </Stack.Navigator>

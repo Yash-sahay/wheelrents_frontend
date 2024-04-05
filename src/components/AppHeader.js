@@ -107,7 +107,7 @@ const AppHeader = ({ ui2, name, isExtended, filterPress, filtersData, accent, sc
     const [focus, setFocus] = useState(false);
     const [bottomSheet, setBottomSheet] = useState(false);
     
-    const { currRoute, searchString, recentSearches } = useSelector(state => state.userReducer)
+    const { currRoute, role, searchString, recentSearches } = useSelector(state => state.userReducer)
     const searchRef = useRef(null)
 
     const height = useSharedValue(0);
@@ -186,7 +186,7 @@ const AppHeader = ({ ui2, name, isExtended, filterPress, filtersData, accent, sc
                             </AppText>
                         </TouchableOpacity>
                         <View style={{ flexDirection: 'row' }}>
-                            <IconButton onPress={() => navigation.navigate("QRScanner")} style={{ backgroundColor: appstyle.accent, elevation: 10, shadowColor: appstyle.shadowColor, borderWidth: 1, borderColor: '#fff' }} iconColor={appstyle.tri} size={20} icon="qrcode-scan" />
+                            {role?.includes('client') && <IconButton onPress={() => navigation.navigate("QRScanner")} style={{ backgroundColor: appstyle.accent, elevation: 10, shadowColor: appstyle.shadowColor, borderWidth: 1, borderColor: '#fff' }} iconColor={appstyle.tri} size={20} icon="qrcode-scan" />}
                             <IconButton onPress={() => navigation.navigate('Notification')} style={{ backgroundColor: appstyle.accent, elevation: 10, shadowColor: appstyle.shadowColor, borderWidth: 1, borderColor: '#fff' }} iconColor={appstyle.tri} size={20} icon="bell" />
                         </View>
                     </Animated.View>

@@ -8,7 +8,7 @@ import AppButton from '../components/AppButton';
 import { MD3Colors, ProgressBar } from 'react-native-paper';
 import Animated from 'react-native-reanimated';
 import { booking_status_change, delete_booking_by_id, getBookingsForHost } from '../axios/axios_services/bookingService';
-import { baseURL, dateSimplify } from '../../common';
+import { baseURL, calculateTimePercentage, dateSimplify, timeSimplify } from '../../common';
 import AntDesign from 'react-native-vector-icons/AntDesign'
 
 import {
@@ -21,17 +21,19 @@ import { PanGestureHandler } from 'react-native-gesture-handler';
 import AppDialog from '../components/AppDialog';
 import AppBottomSheet from '../components/AppBottomSheet';
 import QRCode from 'react-native-qrcode-svg';
+import { useSelector } from 'react-redux';
 
 
 
 const TABS = [
-  { id: 'pending', title: 'New', content: 'New Bookings' },
-  { id: 'active', title: 'Active', content: 'Active Bookings' },
-  { id: 'completed', title: 'Completed', content: 'Completed Bookings' },
+  { id: 'pending', title: 'Pending', content: 'Pending Bookings', icon: 'exclamationcircle' },
+  { id: 'active', title: 'Active', content: 'Active Bookings', icon: 'checkcircle' },
+  { id: 'started', title: 'Running', content: 'Running Trips', icon: 'dashboard' },
+  // { id: 'completed', title: 'Completed', content: 'Completed Bookings' },
 ];
 
 
-const Booking = ({navigation}) => {
+const Booking = ({ navigation }) => {
   const [bookings, setBookings] = useState([]);
   const [tabValue, setTabValue] = useState(TABS[0]);
   const [modalValue, setModalValue] = useState({});
@@ -53,6 +55,9 @@ const Booking = ({navigation}) => {
 
 
   const [selectedBookingId, setSelectedBookingId] = useState(null);
+  const { role } = useSelector(state => state.userReducer)
+
+  const clientRole = role?.includes("client") ? true : false
 
   const handleCardPress = (id) => {
     setSelectedBookingId(id);
@@ -92,7 +97,7 @@ const Booking = ({navigation}) => {
 
   const getBookings = async () => {
     try {
-      const bookings = await getBookingsForHost({ bookingStatus: tabValue?.id })
+      const bookings = await getBookingsForHost({ isClient: clientRole, bookingStatus: tabValue?.id })
 
       setBookings(bookings?.data)
       setSelectedBookingId(bookings?.data?.[0]?._id);
@@ -101,92 +106,120 @@ const Booking = ({navigation}) => {
     }
   }
 
-  const requestCameraPermission = async () => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.CAMERA,
-        {
-          title: 'Cool Photo App Camera Permission',
-          message:
-            'Cool Photo App needs access to your camera ' +
-            'so you can take awesome pictures.',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
-        },
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('You can use the camera');
-      } else {
-        console.log('Camera permission denied');
-      }
-    } catch (err) {
-      console.warn(err);
-    }
-  }
-
-    useEffect(() => {
-      requestCameraPermission()
-    }, [])
-    
-  
 
   useEffect(() => {
     getBookings()
   }, [tabValue?.id])
 
 
+  function calculateRemainingTime(endTime) {
+    const currentTime = new Date().getTime();
+    const remainingTime = endTime - currentTime;
+  
+    // Convert remaining time from milliseconds to days, hours, and minutes
+    const days = Math.floor(remainingTime / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((remainingTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+  
+    return {
+      days: days,
+      hours: hours,
+      minutes: minutes
+    };
+  }
 
-  const renderBookingItem = ({ item }) => (
-    <Animated.View style={styles.bookingCard} onTouchEnd={() => handleCardPress(item._id)}>
-      <View style={{ width: '100%' }}>
-        <View style={{ width: '100%', flexDirection: 'row', padding: 15 }}>
-          <Image source={{ uri: baseURL() + "public/vehicle/" + item?.images?.[0]?.fileName }} style={styles.carImage} />
-          <View style={styles.bookingInfo}>
-            <AppText style={styles.carDescription}>{item?.name}</AppText>
-            <AppText style={{ fontWeight: 'bold', color: 'darkgrey', fontSize: 12, marginBottom: 5 }}>Booked By <AppText style={{ color: 'grey', textTransform: 'capitalize' }}>{item?.clientName}</AppText></AppText>
 
-            <AppText variant="titleLarge" style={{ color: 'darkgreen', fontWeight: '900', fontSize: 25 }}>{item?.totalPrice}₹</AppText>
+
+  // console.log(`Remaining time: ${remainingTime.hours} hours, ${remainingTime.minutes} minutes, ${remainingTime.seconds} seconds`);
+
+
+
+
+  const renderBookingItem = ({ item }) => {
+    // Example usage:
+    const endTime = new Date(item?.endDate).getTime(); // Example end time
+    const remainingTime = calculateRemainingTime(endTime);
+    return (
+      <Animated.View style={styles.bookingCard} onTouchEnd={() => handleCardPress(item._id)}>
+        <View style={{ width: '100%' }}>
+          <View style={{ width: '100%', flexDirection: 'row', padding: 15 }}>
+            <Image source={{ uri: baseURL() + "public/vehicle/" + item?.images?.[0]?.fileName }} style={styles.carImage} />
+            <View style={styles.bookingInfo}>
+              <AppText style={styles.carDescription}>{item?.name}</AppText>
+              <AppText style={{ fontWeight: 'bold', color: 'darkgrey', fontSize: 12, marginBottom: 5 }}>Booked By <AppText style={{ color: 'grey', textTransform: 'capitalize' }}>{item?.clientName}</AppText></AppText>
+
+              <AppText variant="titleLarge" style={{ color: 'green', fontWeight: '900', fontSize: 25 }}>₹{item?.totalPrice}</AppText>
+            </View>
           </View>
-        </View>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15 }}>
-          <AppText style={{ fontWeight: 'bold', fontSize: 14, color: appstyle.shadowColor }}>Pick Up</AppText>
-          <AppText style={{ fontWeight: 'bold', fontSize: 14, color: appstyle.shadowColor }}>Drop Off</AppText>
-        </View>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15 }}>
-          <AppText style={{ color: appstyle.tri, fontWeight: 'bold' }}>{dateSimplify(item?.startDate) || "N/A"}</AppText>
-          <AppText style={{ fontWeight: '900' }}><AntDesign name="swap" size={20} color={appstyle.tri} /> </AppText>
-          <AppText style={{ color: appstyle.tri, fontWeight: 'bold' }}>{dateSimplify(item?.endDate) || "N/A"}</AppText>
-        </View>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15 }}>
-          <AppText style={{ color: appstyle.tri, fontWeight: 'bold' }}>{new Date(item?.startDate).getHours()} : {new Date(item?.startDate).getMinutes() || "N/A"}</AppText>
-          <AppText style={{ color: appstyle.tri, fontWeight: 'bold' }}>{new Date(item?.endDate).getHours()} : {new Date(item?.endDate).getMinutes() || "N/A"}</AppText>
-        </View>
-
-        <View style={{ paddingHorizontal: 20, paddingVertical: 10 }}>
-          {item?.bookingStatus == "started" && <ProgressBar
-            style={styles.progressBar}
-            progress={0.5} color={'#8fa3ea'} />}
-        </View>
-        {(selectedBookingId === item?._id && tabValue.title != "Completed") && (
-          <View style={{ flexDirection: 'row', justifyContent: 'flex-end', padding: 10, borderTopWidth: 1, borderColor: appstyle.pri }}>
-            <AppButton icon="close" style={{ paddingHorizontal: 10 }} textColor={'tomato'} buttonColor={'white'} onPress={() => setModalValue(values => ({ ...values, bookingId: item?._id, name: item?.name, visible: true }))} outlined>Reject</AppButton>
-            {item?.bookingStatus == "active" ? (
-              <AppButton icon="qrcode" style={{}} textColor={'white'} buttonColor={appstyle.tri} onPress={() => handleOpenPress(item)}>Open QR</AppButton>
-            ) : (
-              <AppButton icon="check" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={'#00a400'} onPress={() => handleApprove(item?._id)}>Accept</AppButton>
-            )}
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15 }}>
+            <AppText style={{ fontWeight: 'bold', fontSize: 14, color: appstyle.shadowColor }}>Pick Up</AppText>
+            <AppText style={{ fontWeight: 'bold', fontSize: 14, color: appstyle.shadowColor }}>Drop Off</AppText>
           </View>
-        )}
-      </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15 }}>
+            <AppText style={{ color: appstyle.tri, fontWeight: 'bold' }}>{dateSimplify(item?.startDate) || "N/A"}</AppText>
+            <AppText style={{ fontWeight: '900' }}><AntDesign name="swap" size={20} color={appstyle.tri} /> </AppText>
+            <AppText style={{ color: appstyle.tri, fontWeight: 'bold' }}>{dateSimplify(item?.endDate) || "N/A"}</AppText>
+          </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15 }}>
+            <AppText style={{ color: appstyle.tri, fontWeight: 'bold' }}>{timeSimplify(item?.startDate)}</AppText>
+            <AppText style={{ color: appstyle.tri, fontWeight: 'bold' }}>{timeSimplify(item?.endDate)}</AppText>
+          </View>
 
-    </Animated.View>
-  );
+          <View style={{ paddingHorizontal: 20, paddingVertical: 10 }}>
+            {item?.bookingStatus == "started" && <ProgressBar
+              style={styles.progressBar}
+              progress={calculateTimePercentage(new Date(item?.startDate), new Date(item?.endDate))} color={'black'} />}
+          </View>
+          {(!clientRole && selectedBookingId === item?._id && tabValue.title != "Completed") && (
+            <>
+              {item?.bookingStatus == "pending" && (
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', padding: 10, borderTopWidth: 1, borderColor: appstyle.pri }}>
+                  <AppButton icon="close" style={{ paddingHorizontal: 10 }} textColor={'tomato'} buttonColor={'white'} onPress={() => setModalValue(values => ({ ...values, bookingId: item?._id, name: item?.name, visible: true }))} outlined>Reject</AppButton>
+                  <AppButton icon="check" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={'green'} onPress={() => handleApprove(item?._id)}>Accept</AppButton>
+                </View>
+              )}
+              {item?.bookingStatus == "active" && (
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', padding: 10, borderTopWidth: 1, borderColor: appstyle.pri }}>
+                  <AppButton icon="close" style={{ paddingHorizontal: 10 }} textColor={'tomato'} buttonColor={'white'} onPress={() => setModalValue(values => ({ ...values, bookingId: item?._id, name: item?.name, visible: true }))} outlined>Reject</AppButton>
+                  <AppButton icon="qrcode" style={{}} textColor={'white'} buttonColor={appstyle.tri} onPress={() => handleOpenPress(item)}>Open QR</AppButton>
+                </View>
+              )}
+            </>
+          )}
+
+          {(clientRole && selectedBookingId === item?._id && tabValue.title != "Completed") && (
+            <>
+              {item?.bookingStatus == "active" && (
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', padding: 10, borderTopWidth: 1, borderColor: appstyle.pri }}>
+                  <AppButton icon="qrcode-scan" style={{}} textColor={'white'} buttonColor={appstyle.tri} onPress={() => navigation.navigate("QRScanner")}>Initiate Trip with Scan</AppButton>
+                </View>
+              )}
+              {item?.bookingStatus == "pending" && (
+                <View style={{ flexDirection: 'row', justifyContent: 'center', padding: 10, borderTopWidth: 1, borderColor: appstyle.pri }}>
+                  <AppText style={{ fontWeight: '600', color: 'hsl(43,85%,33%)', fontSize: 12, }}>● Waiting for the vehicle owner to accept the request...</AppText>
+                  {/* <AppButton icon="check" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={'#00a400'} onPress={() => handleApprove(item?._id)}>Accept</AppButton> */}
+                </View>
+              )}
+              {item?.bookingStatus == "started" && (
+                <View style={{ flexDirection: 'row', justifyContent: 'center', padding: 10, borderTopWidth: 1, borderColor: appstyle.pri }}>
+                  <AppText style={{ fontWeight: '800', fontSize: 12, color: 'grey', textAlign: 'center' }}>{`Trip ending in ${remainingTime.days} days, ${remainingTime.hours} hours, and ${remainingTime.minutes} minutes. `}</AppText>
+                  {/* <AppButton icon="check" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={'#00a400'} onPress={() => handleApprove(item?._id)}>Accept</AppButton> */}
+                </View>
+              )}
+            </>
+          )}
+
+        </View>
+
+      </Animated.View>
+    )
+  };
 
   return (
     <>
       <AppBottomSheet bottomSheetRef={bottomSheetRef} snapPoints={['1%', '60%']} bottomSheet={bottomSheet} setBottomSheet={setBottomSheet}>
-        <View style={{flex: 1, alignItems: 'center', padding: 20, paddingTop: 40}}>
+        <View style={{ flex: 1, alignItems: 'center', padding: 20, paddingTop: 20 }}>
+          <AppText style={{ textAlign: 'center', fontWeight: "700", fontSize: 20, marginBottom: 20, color: appstyle.tri, textTransform: 'capitalize' }}><AppText style={{ textTransform: 'none' }}>Scan for</AppText> "{qrValues?.name}"</AppText>
           <QRCode
             value={qrValues?._id}
             logo={{ uri: baseURL() + "public/vehicle/" + qrValues?.images?.[0]?.fileName }}
@@ -194,12 +227,12 @@ const Booking = ({navigation}) => {
             size={200}
             logoBackgroundColor={appstyle.priBack}
           />
-          <AppText style={{textAlign: 'center', fontWeight: "600", fontSize: 16, padding: 40, color: 'grey'}}>Scan the QR code from you phone to start the trip!</AppText>
+          <AppText style={{ textAlign: 'center', fontWeight: "600", fontSize: 16, padding: 40, paddingTop: 20, color: 'grey' }}>Please scan the QR code from your phone to initiate the trip.</AppText>
         </View>
       </AppBottomSheet>
       <AppDialog visible={modalValue.visible}
         title='Are you sure?'
-        description={`You want to cancel booking request "${modalValue?.name}"? you will not be able to get again. `}
+        description={`Are you sure you want to cancel the booking request for "${modalValue?.name}"? Once canceled, this action cannot be undone. `}
         onCancelPress={() => {
           setModalValue({ id: null, visible: false, name: "" })
         }}
@@ -207,7 +240,7 @@ const Booking = ({navigation}) => {
           rejectApi()
         }} />
       <AppBottomBar />
-      <AppHeader ui2 />
+      <AppHeader ui2 name={"Bookings"} />
       <BookingTabs onChange={(tabVal) => setTabValue(prev => ({ ...tabVal }))}>
         <AppText style={styles.title}>{tabValue?.content}</AppText>
         <FlatList
@@ -230,12 +263,15 @@ const Booking = ({navigation}) => {
 
 
 
-const Tab = ({ title, onPress, isActive }) => {
+const Tab = ({ title, onPress, icon, isActive }) => {
   return (
     <TouchableOpacity
       style={[styles.tab, isActive && styles.activeTab]}
       onPress={onPress}
     >
+      {icon && (
+        <AntDesign color={isActive ? appstyle.priBack : 'grey'} style={{ marginRight: 8 }} name={icon} size={16} />
+      )}
       <Text style={[styles.tabText, isActive && styles.activeTabText]}>
         {title}
       </Text>
@@ -263,6 +299,7 @@ const BookingTabs = ({ children, onChange = () => { } }) => {
       <View style={styles.tabContainer}>
         {TABS.map((tab) => (
           <Tab
+            icon={tab?.icon}
             key={tab.id}
             title={tab.title}
             onPress={() => { handleTabPress(tab.id); onChange(tab) }}
@@ -383,6 +420,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     alignItems: 'center',
     justifyContent: 'center',
+    flexDirection: 'row'
   },
   activeTab: {
     backgroundColor: appstyle.tri,

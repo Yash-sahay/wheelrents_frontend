@@ -178,10 +178,10 @@ const CategoryList = () => {
         renderItem={({ item, index }) => {
           return (
             <View key={index} style={{ justifyContent: 'center', alignItems: 'center', marginTop: 10, marginRight: 15, marginLeft: index > 0 ? 0 : 20 }}>
-              <View style={{ height: 70, width: 70, backgroundColor: appstyle.accent, elevation: 10, shadowColor: appstyle.shadowColor, borderRadius: 100, borderWidth: 2, borderColor: '#fff', justifyContent: 'center', alignItems: "center" }}>
+              <View style={{ height: 70, width: 70, backgroundColor: '#fff', elevation: 10, shadowColor: appstyle.shadowColor, borderRadius: 100, borderWidth: 2, borderColor: '#fff', justifyContent: 'center', alignItems: "center" }}>
                 <Image resizeMode={'cover'} style={{ width: 40, height: 40 }} source={{ uri: baseURL() + "public/category/" + item?.image }} />
               </View>
-              <AppText style={{ fontWeight: 'bold' }} >{item?.name?.toUpperCase()}</AppText>
+              <AppText style={{ fontWeight: '700', marginTop: 10, fontSize: 13, }} >{item?.name?.toUpperCase()}</AppText>
             </View>
           )
         }}
@@ -294,14 +294,14 @@ const CardComponent = ({ item, navigation, getAllVehicle }) => {
 
       <Card.Content style={styles.content}>
         <AppText style={styles.infoText}>
-          <FontAwesome name="user-gear" size={12} /> {item?.transmission}{' '}
+          <FontAwesome name="user-gear" size={12} /> {item?.transmission}{'   '}
           <FontAwesome name="gas-pump" size={12} /> {item?.fuelType}
         </AppText>
         <Text variant="bodyMedium" style={styles.title}>
           {item?.name}
         </Text>
         <Text variant="titleLarge" style={styles.cost}>
-          {item.cost}rs/hr
+          ₹{item.cost}/hr
         </Text>
         {/* <Text variant="bodyMedium" style={styles.title}>
           {item?.name}

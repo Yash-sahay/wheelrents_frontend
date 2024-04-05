@@ -12,6 +12,37 @@ export function dateSimplify(date) {
   return ''
 }
 
+export function timeSimplify(currentDate) {
+  if (currentDate) {
+    var hours = new Date(currentDate).getHours();
+    
+    // Initialize variables for AM or PM
+    var ampm = hours >= 12 ? 'PM' : 'AM';
+    
+    // Convert to 12-hour format
+    hours = hours % 12;
+    hours = hours ? hours : 12; // Handle midnight (0 hours)
+    
+    
+    // Get the minutes and seconds
+    const minutes = JSON.stringify(new Date(currentDate).getMinutes()).length < 2 ? "0" + JSON.stringify(new Date(currentDate).getMinutes()) : JSON.stringify(new Date(currentDate).getMinutes())
+    // Format the time
+    var timeString = hours + ':' + minutes + ' ' + ampm;
+    return timeString
+  }
+  return ''
+}
+
+export function calculateTimePercentage(startTime, endTime) {
+  const currentTime = new Date().getTime();
+  const totalTime = endTime - startTime;
+  const elapsedTime = currentTime - startTime;
+
+  // Calculate percentage
+  const percentage = (elapsedTime / totalTime) * 100;
+
+  return (percentage / 10).toFixed(2) / 10; // Limiting to two decimal places
+}
 
 
 

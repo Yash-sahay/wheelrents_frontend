@@ -17,6 +17,7 @@ const AppBottomBar = () => {
     const navigationClient = [
         { routeName: role.includes("host") ? 'HostDashboard' : 'Home', icon: 'home' },
         { routeName: 'WishList', icon: 'heart' },
+        { routeName: 'Booking', icon: 'bookmark' },
         { routeName: 'User', icon: 'user' },
     ]
     const navigationHost = [

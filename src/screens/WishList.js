@@ -1,7 +1,7 @@
 // WishlistScreen.js
 import React, { useEffect, useState } from 'react';
 import { View, Text, VirtualizedList, TouchableOpacity, StyleSheet } from 'react-native';
-import { Card, Title, Paragraph, IconButton } from 'react-native-paper';
+import { Card, Title, Paragraph, IconButton, Chip } from 'react-native-paper';
 import AppHeader from '../components/AppHeader';
 import AppBottomBar from '../components/AppBottomBar';
 import AppText from '../components/AppText';
@@ -9,8 +9,10 @@ import { appstyle } from '../styles/appstyle';
 import { deleteWishListData, get_wishlist_by_user, toggleWishListForUser } from '../axios/axios_services/vehicleService';
 import { updateLoaderReducer } from '../redux/reducer/loaderReducer';
 import { useDispatch } from 'react-redux';
+import { baseURL, dateSimplify } from '../../common';
+import FontAwesome from 'react-native-vector-icons/FontAwesome6'
 
-const Wishlist = () => {
+const Wishlist = ({navigation}) => {
   const dispatch = useDispatch()
   const [wishlistItems, setWishlistItems] = useState([
     // { id: '1', title: 'Product 1', description: 'Description for Product 1', image: 'https://placekitten.com/200/300' },
@@ -49,6 +51,8 @@ const Wishlist = () => {
 
 
 
+
+
   const renderWishlistItem = ({ item }) => {
 
 
@@ -68,14 +72,17 @@ const Wishlist = () => {
       }
     };
     return (
-      <Card style={styles.cardContainer}>
-        <Card.Cover source={{ uri: item.image }} />
+      <Card style={styles.cardContainer} onPress={() => navigation.navigate('VehicleDetails', { ...item })}>
+        <Card.Cover source={{ uri: baseURL() + "public/vehicle/" + item?.files?.[0]?.fileName }} />
         <Card.Content>
-          <Title>{item.title}</Title>
-          <Paragraph>{item.description}</Paragraph>
+          <AppText style={{ color: 'grey', fontWeight: '900', marginTop: 10, }}><Chip style={{ backgroundColor: appstyle.sec }} textStyle={{ color: 'black' }} ><FontAwesome name="user-gear" size={12} />  {item?.transmission}</Chip>    <Chip style={{ backgroundColor: appstyle.sec }} ><FontAwesome name="gas-pump" size={12} />  {item?.fuelType}</Chip></AppText>
+          <AppText variant="bodyMedium" style={{ fontWeight: '900', marginTop: 10, textTransform: "capitalize" }}>{item?.name}</AppText>
+          {/* <AppText variant="bodyMedium" style={{ fontWeight: '900', marginTop: 10 }}>{item?.available ? "Available" : "Booked"}</AppText> */}
+          <AppText variant="titleLarge" style={{ color: 'darkgreen', fontWeight: '900', fontSize: 25 }}>{item?.cost}₹/hr</AppText>
+          <AppText variant="bodyMedium" style={{ color: 'grey', fontWeight: '900', marginTop: 10 }}>Added on {dateSimplify(item?.date)}</AppText>
         </Card.Content>
         <Card.Actions>
-          <IconButton icon="delete" iconColor="tomato" onPress={() => handleAddToWishlist()} />
+          <IconButton style={{borderColor: appstyle.sec}} icon="delete" iconColor="tomato" onPress={() => handleAddToWishlist()} />
         </Card.Actions>
       </Card>
     )
@@ -123,7 +130,7 @@ const styles = StyleSheet.create({
   cardContainer: {
     marginBottom: 15,
     borderRadius: 10,
-    backgroundColor: appstyle.accent,
+    backgroundColor: appstyle.priBack,
     borderWidth: 1,
     borderColor: '#fff',
     elevation: 20,

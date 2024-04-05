@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, PermissionsAndroid } from 'react-native';
 import { Camera, useCameraDevice, useCodeScanner } from 'react-native-vision-camera'
 import AppText from '../components/AppText';
 import AppHeader from '../components/AppHeader';
@@ -27,12 +27,41 @@ const QRScanner = () => {
   //   };
   // }, []);
 
+  const requestCameraPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        {
+          title: 'Cool Photo App Camera Permission',
+          message:
+            'Cool Photo App needs access to your camera ' +
+            'so you can take awesome pictures.',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('You can use the camera');
+      } else {
+        console.log('Camera permission denied');
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  }
+
+  useEffect(() => {
+    requestCameraPermission()
+  }, [])
+
+
   const device = useCameraDevice('back')
 
   const codeScanner = useCodeScanner({
     codeTypes: ['qr'],
     onCodeScanned: (codes) => {
-      alert(`Scanned ${codes.length} codes!`)
+      alert(`Scanned ${codes} codes!`)
     }
   })
 
@@ -44,25 +73,25 @@ const QRScanner = () => {
   return (
     <>
       <AppHeader ui2 name={"Scan"} />
-    <View style={styles.container}>
-        <AppText style={{textAlign: 'center', fontWeight: "bold", fontSize: 20, padding: 40}}>Scan the QR Code </AppText>
-      <View style={styles.cameraBorderContainer}>
-      <View style={styles.cameraContainer}>
-        <Camera
-          // ref={cameraRef}
-          codeScanner={codeScanner}
-          style={styles.camera}
-          device={device}
-          isActive={true}
-          cameraConfiguration={{
-            // Configure camera settings if needed
-          }}
-        />
+      <View style={styles.container}>
+        <AppText style={{ textAlign: 'center', fontWeight: "bold", fontSize: 20, padding: 40 }}>Scan the QR Code </AppText>
+        <View style={styles.cameraBorderContainer}>
+          <View style={styles.cameraContainer}>
+            <Camera
+              // ref={cameraRef}
+              codeScanner={codeScanner}
+              style={styles.camera}
+              device={device}
+              isActive={true}
+              cameraConfiguration={{
+                // Configure camera settings if needed
+              }}
+            />
+          </View>
+        </View>
+
+        <AppText style={{ width: 350, textAlign: 'center', fontWeight: "600", fontSize: 16, padding: 40, color: 'grey' }}>The vehicle owner has provided a QR code. Please scan the QR code to begin your trip!</AppText>
       </View>
-      </View>
-          
-          <AppText style={{width: 350, textAlign: 'center', fontWeight: "600", fontSize: 16, padding: 40, color: 'grey'}}>The vehicle owner has provided a QR code. Please scan the QR code to begin your trip!</AppText>
-    </View>
     </>
   );
 };
