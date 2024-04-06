@@ -1,7 +1,8 @@
 import { View, Text, TextInput, Dimensions, TouchableOpacity, Easing, FlatList, StatusBar, StyleSheet } from 'react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Appbar, Button, Chip, IconButton, Searchbar } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/FontAwesome6';
+import Icon from 'react-native-vector-icons/Ionicons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome6';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import AppText from './AppText';
@@ -182,7 +183,7 @@ const AppHeader = ({ ui2, name, isExtended, filterPress, filtersData, accent, sc
                         <TouchableOpacity onPress={handleOpenPress}>
                             <AppText style={styles.locationText}>Location</AppText>
                             <AppText style={styles.locationInfo}>
-                                <Icon name="location-dot" /> New Delhi, India <Icon name="chevron-down" />
+                                <FontAwesome name="map-pin" /> New Delhi, India  <FontAwesome color={appstyle.tri} name="chevron-down" />
                             </AppText>
                         </TouchableOpacity>
                         <View style={{ flexDirection: 'row' }}>
@@ -217,7 +218,7 @@ const AppHeader = ({ ui2, name, isExtended, filterPress, filtersData, accent, sc
                                     })
                                 }
                                 style={[styles.filterButton, !filterStatus && styles.filterStatusContainerClosed]}>
-                                {filterStatus ? <Icon style={styles.filterIcon} name="filter-circle-xmark" /> : <Icon style={styles.filterIcon} name="filter" />}
+                                {filterStatus ? <FontAwesome style={styles.filterIcon} name="filter-circle-xmark" /> : <FontAwesome style={styles.filterIcon} name="filter" />}
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -247,10 +248,10 @@ const AppHeader = ({ ui2, name, isExtended, filterPress, filtersData, accent, sc
         <View style={{ backgroundColor: appstyle.tri, paddingTop: 35 }}>
             <StatusBar animated backgroundColor={appstyle.tri} barStyle={'light-content'} showHideTransition={'fade'} />
             <View mode="center-aligned" style={{ flexDirection: 'row', alignItems: 'center', padding: 10, paddingVertical: 20, justifyContent: 'space-between' }}>
-                <TouchableOpacity style={{ borderRadius: 100, elevation: 5, backgroundColor: appstyle.priBack, padding: 10 }} onPress={() => navigation.goBack()}>
-                    <Icon name="arrow-left-long" size={20} color={appstyle.tri} />
+                <TouchableOpacity style={{ borderRadius: 100, elevation: 0, backgroundColor: appstyle.tri, padding: 10 }} onPress={() => navigation.goBack()}>
+                    <Icon name="chevron-back" size={20} color={appstyle.pri} />
                 </TouchableOpacity>
-                <AppText style={{ fontSize: 25, fontWeight: 'bold', color: appstyle.priBack }}>{name || route.name}</AppText>
+                <AppText style={{ fontSize: 25, fontWeight: 'bold', color: appstyle.priBack, textTransform: 'capitalize' }}>{name || route.name}</AppText>
                 <AppText style={{ fontSize: 25, fontWeight: 'bold', color: appstyle.pri }}>     </AppText>
             </View>
             {accent != 'opp' && <View style={{ width: '100%', backgroundColor: appstyle.pri, borderTopRightRadius: 10, borderTopLeftRadius: 10, padding: 10 }}></View>}

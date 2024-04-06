@@ -8,7 +8,7 @@ import AppButton from '../components/AppButton';
 import { MD3Colors, ProgressBar } from 'react-native-paper';
 import Animated from 'react-native-reanimated';
 import { booking_status_change, delete_booking_by_id, getBookingsForHost } from '../axios/axios_services/bookingService';
-import { baseURL, calculateTimePercentage, dateSimplify, timeSimplify } from '../../common';
+import { amountFormatter, baseURL, calculateTimePercentage, dateSimplify, timeSimplify } from '../../common';
 import AntDesign from 'react-native-vector-icons/AntDesign'
 
 import {
@@ -63,10 +63,10 @@ const Booking = ({ navigation }) => {
     setSelectedBookingId(id);
   };
 
-  const handleApprove = async (id) => {
+  const handleApprove = async (id, isAccept) => {
     try {
       setLoader(true)
-      const payload = { bookingId: id, bookingStatus: "active" }
+      const payload = isAccept ? { bookingId: id, payment: "pending" } : { bookingId: id, bookingStatus: "active" }
       const res = await booking_status_change(payload)
       alert(JSON.stringify(res.data))
       setLoader(false)
@@ -115,12 +115,12 @@ const Booking = ({ navigation }) => {
   function calculateRemainingTime(endTime) {
     const currentTime = new Date().getTime();
     const remainingTime = endTime - currentTime;
-  
+
     // Convert remaining time from milliseconds to days, hours, and minutes
     const days = Math.floor(remainingTime / (1000 * 60 * 60 * 24));
     const hours = Math.floor((remainingTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
-  
+
     return {
       days: days,
       hours: hours,
@@ -146,23 +146,23 @@ const Booking = ({ navigation }) => {
             <Image source={{ uri: baseURL() + "public/vehicle/" + item?.images?.[0]?.fileName }} style={styles.carImage} />
             <View style={styles.bookingInfo}>
               <AppText style={styles.carDescription}>{item?.name}</AppText>
-              <AppText style={{ fontWeight: 'bold', color: 'darkgrey', fontSize: 12, marginBottom: 5 }}>Booked By <AppText style={{ color: 'grey', textTransform: 'capitalize' }}>{item?.clientName}</AppText></AppText>
+              <AppText style={{ fontWeight: 'bold', color: appstyle.textSec, fontSize: 12, marginBottom: 5 }}>Booked By <AppText style={{ color: appstyle.textSec, textTransform: 'capitalize' }}>{item?.clientName}</AppText></AppText>
 
-              <AppText variant="titleLarge" style={{ color: 'green', fontWeight: '900', fontSize: 25 }}>₹{item?.totalPrice}</AppText>
+              <AppText variant="titleLarge" style={{ color: 'green', fontWeight: '900', fontSize: 25 }}>₹{amountFormatter(item?.totalPrice)}</AppText>
             </View>
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15 }}>
-            <AppText style={{ fontWeight: 'bold', fontSize: 14, color: appstyle.shadowColor }}>Pick Up</AppText>
-            <AppText style={{ fontWeight: 'bold', fontSize: 14, color: appstyle.shadowColor }}>Drop Off</AppText>
+            <AppText style={{ fontWeight: 'bold', fontSize: 14, color: appstyle.textSec }}>Pick Up</AppText>
+            <AppText style={{ fontWeight: 'bold', fontSize: 14, color: appstyle.textSec }}>Drop Off</AppText>
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15 }}>
-            <AppText style={{ color: appstyle.tri, fontWeight: 'bold' }}>{dateSimplify(item?.startDate) || "N/A"}</AppText>
-            <AppText style={{ fontWeight: '900' }}><AntDesign name="swap" size={20} color={appstyle.tri} /> </AppText>
-            <AppText style={{ color: appstyle.tri, fontWeight: 'bold' }}>{dateSimplify(item?.endDate) || "N/A"}</AppText>
+            <AppText style={{ color: appstyle.textBlack, fontWeight: 'bold' }}>{dateSimplify(item?.startDate) || "N/A"}</AppText>
+            <AppText style={{ fontWeight: '900' }}><AntDesign name="swap" size={20} color={appstyle.textBlack} /> </AppText>
+            <AppText style={{ color: appstyle.textBlack, fontWeight: 'bold' }}>{dateSimplify(item?.endDate) || "N/A"}</AppText>
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15 }}>
-            <AppText style={{ color: appstyle.tri, fontWeight: 'bold' }}>{timeSimplify(item?.startDate)}</AppText>
-            <AppText style={{ color: appstyle.tri, fontWeight: 'bold' }}>{timeSimplify(item?.endDate)}</AppText>
+            <AppText style={{ color: appstyle.textBlack, fontWeight: 'bold' }}>{timeSimplify(item?.startDate)}</AppText>
+            <AppText style={{ color: appstyle.textBlack, fontWeight: 'bold' }}>{timeSimplify(item?.endDate)}</AppText>
           </View>
 
           <View style={{ paddingHorizontal: 20, paddingVertical: 10 }}>
@@ -173,13 +173,17 @@ const Booking = ({ navigation }) => {
           {(!clientRole && selectedBookingId === item?._id && tabValue.title != "Completed") && (
             <>
               {item?.bookingStatus == "pending" && (
-                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', padding: 10, borderTopWidth: 1, borderColor: appstyle.pri }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', padding: 10, borderTopWidth: 1, borderColor: '#f4f4f2' }}>
                   <AppButton icon="close" style={{ paddingHorizontal: 10 }} textColor={'tomato'} buttonColor={'white'} onPress={() => setModalValue(values => ({ ...values, bookingId: item?._id, name: item?.name, visible: true }))} outlined>Reject</AppButton>
-                  <AppButton icon="check" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={'green'} onPress={() => handleApprove(item?._id)}>Accept</AppButton>
+                  {item?.payment == "pending" ? (
+                    <AppButton icon="check" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={'grey'}  loading={true}>Awaiting user payment</AppButton>
+                  ) : (
+                    <AppButton icon="check" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={'green'} onPress={() => handleApprove(item?._id, true)}>Accept</AppButton>
+                  )}
                 </View>
               )}
               {item?.bookingStatus == "active" && (
-                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', padding: 10, borderTopWidth: 1, borderColor: appstyle.pri }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', padding: 10, borderTopWidth: 1, borderColor: '#f4f4f2' }}>
                   <AppButton icon="close" style={{ paddingHorizontal: 10 }} textColor={'tomato'} buttonColor={'white'} onPress={() => setModalValue(values => ({ ...values, bookingId: item?._id, name: item?.name, visible: true }))} outlined>Reject</AppButton>
                   <AppButton icon="qrcode" style={{}} textColor={'white'} buttonColor={appstyle.tri} onPress={() => handleOpenPress(item)}>Open QR</AppButton>
                 </View>
@@ -190,19 +194,24 @@ const Booking = ({ navigation }) => {
           {(clientRole && selectedBookingId === item?._id && tabValue.title != "Completed") && (
             <>
               {item?.bookingStatus == "active" && (
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', padding: 10, borderTopWidth: 1, borderColor: appstyle.pri }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', padding: 10, borderTopWidth: 1, borderColor: '#f4f4f2' }}>
                   <AppButton icon="qrcode-scan" style={{}} textColor={'white'} buttonColor={appstyle.tri} onPress={() => navigation.navigate("QRScanner")}>Initiate Trip with Scan</AppButton>
                 </View>
               )}
               {item?.bookingStatus == "pending" && (
-                <View style={{ flexDirection: 'row', justifyContent: 'center', padding: 10, borderTopWidth: 1, borderColor: appstyle.pri }}>
-                  <AppText style={{ fontWeight: '600', color: 'hsl(43,85%,33%)', fontSize: 12, }}>● Waiting for the vehicle owner to accept the request...</AppText>
+                <View style={{ flexDirection: 'row', justifyContent: item?.payment == "pending" ? 'flex-end' : 'center', padding: 10, borderTopWidth: 1, borderColor: '#f4f4f2' }}>
+                  {item?.payment == "pending" ? (
+                    <AppButton icon="cash" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={'green'} onPress={() => handleApprove(item?._id)} >Pay to activate your trip</AppButton>
+                  ) : (
+                    <AppText style={{ fontWeight: '600', color: 'hsl(43,85%,33%)', fontSize: 12, }}>● Waiting for the vehicle owner to accept the request...</AppText>
+                  )}
+                  
                   {/* <AppButton icon="check" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={'#00a400'} onPress={() => handleApprove(item?._id)}>Accept</AppButton> */}
                 </View>
               )}
               {item?.bookingStatus == "started" && (
-                <View style={{ flexDirection: 'row', justifyContent: 'center', padding: 10, borderTopWidth: 1, borderColor: appstyle.pri }}>
-                  <AppText style={{ fontWeight: '800', fontSize: 12, color: 'grey', textAlign: 'center' }}>{`Trip ending in ${remainingTime.days} days, ${remainingTime.hours} hours, and ${remainingTime.minutes} minutes. `}</AppText>
+                <View style={{ flexDirection: 'row', justifyContent: 'center', padding: 10, borderTopWidth: 1, borderColor: '#f4f4f2' }}>
+                  <AppText style={{ fontWeight: '800', fontSize: 12, color: appstyle.textSec, textAlign: 'center' }}>{`Trip ending in ${remainingTime.days} days, ${remainingTime.hours} hours, and ${remainingTime.minutes} minutes. `}</AppText>
                   {/* <AppButton icon="check" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={'#00a400'} onPress={() => handleApprove(item?._id)}>Accept</AppButton> */}
                 </View>
               )}
@@ -219,7 +228,7 @@ const Booking = ({ navigation }) => {
     <>
       <AppBottomSheet bottomSheetRef={bottomSheetRef} snapPoints={['1%', '60%']} bottomSheet={bottomSheet} setBottomSheet={setBottomSheet}>
         <View style={{ flex: 1, alignItems: 'center', padding: 20, paddingTop: 20 }}>
-          <AppText style={{ textAlign: 'center', fontWeight: "700", fontSize: 20, marginBottom: 20, color: appstyle.tri, textTransform: 'capitalize' }}><AppText style={{ textTransform: 'none' }}>Scan for</AppText> "{qrValues?.name}"</AppText>
+          <AppText style={{ textAlign: 'center', fontWeight: "700", fontSize: 20, marginBottom: 20, color: appstyle.textBlack, textTransform: 'capitalize' }}><AppText style={{ textTransform: 'none' }}>Scan for</AppText> "{qrValues?.name}"</AppText>
           <QRCode
             value={qrValues?._id}
             logo={{ uri: baseURL() + "public/vehicle/" + qrValues?.images?.[0]?.fileName }}
@@ -227,7 +236,7 @@ const Booking = ({ navigation }) => {
             size={200}
             logoBackgroundColor={appstyle.priBack}
           />
-          <AppText style={{ textAlign: 'center', fontWeight: "600", fontSize: 16, padding: 40, paddingTop: 20, color: 'grey' }}>Please scan the QR code from your phone to initiate the trip.</AppText>
+          <AppText style={{ textAlign: 'center', fontWeight: "600", fontSize: 16, padding: 40, paddingTop: 20, color: appstyle.textSec }}>Please scan the QR code from your phone to initiate the trip.</AppText>
         </View>
       </AppBottomSheet>
       <AppDialog visible={modalValue.visible}
@@ -270,7 +279,7 @@ const Tab = ({ title, onPress, icon, isActive }) => {
       onPress={onPress}
     >
       {icon && (
-        <AntDesign color={isActive ? appstyle.priBack : 'grey'} style={{ marginRight: 8 }} name={icon} size={16} />
+        <AntDesign color={isActive ? appstyle.priBack : appstyle.textSec} style={{ marginRight: 8 }} name={icon} size={16} />
       )}
       <Text style={[styles.tabText, isActive && styles.activeTabText]}>
         {title}

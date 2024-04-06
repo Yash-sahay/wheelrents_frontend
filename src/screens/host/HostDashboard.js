@@ -122,8 +122,8 @@ const HostDashboard = () => {
 
       /> */}
       <AppHeader filtersData={categoryList} filterPress={(retData) => setCategoryList(retData)} isExtended={isExtended} />
-      <View style={{ backgroundColor: appstyle.pri, height: '100%', padding: 15, paddingTop: 0, position: 'relative' }}>
-      <AppText style={{ fontWeight: 'bold', fontSize: 20, marginVertical: 5, }}>Your Listed Vehicles</AppText>
+      <View style={{ backgroundColor: appstyle.pri, height: '100%', paddingVertical: 15, paddingTop: 0, position: 'relative' }}>
+      <AppText style={{ fontWeight: 'bold', fontSize: 20, marginTop: 5, marginLeft: 15 }}>Your Listed Vehicles</AppText>
         <VirtualizedList
           onRefresh={getAllVehicleByUser}
           refreshing={false}
@@ -154,7 +154,7 @@ const HostDashboard = () => {
 
 
 const CardComponent = ({ item, navigation, key, setModalValue }) => (
-  <Card key={key} mode="elevated" style={{ backgroundColor: appstyle.priBack, marginTop: 20, overflow: 'hidden' }}>
+  <Card key={key} style={{ backgroundColor: appstyle.priBack, marginTop: 20, marginHorizontal: 15, overflow: 'hidden' }}>
     <FlatList
       horizontal
       pagingEnabled
@@ -179,13 +179,13 @@ const CardComponent = ({ item, navigation, key, setModalValue }) => (
     </AppText>
     <Card.Content>
     
-      <AppText style={{ color: 'grey', fontWeight: '900', marginTop: 10,  }}><Chip style={{backgroundColor: appstyle.sec}} textStyle={{color: 'black'}} ><FontAwesome name="user-gear" size={12} />  {item?.transmission}</Chip>    <Chip style={{backgroundColor: appstyle.sec}} ><FontAwesome name="gas-pump" size={12} />  {item?.fuelType}</Chip></AppText>
+      <AppText style={{ color: appstyle.textSec, fontWeight: '900', marginTop: 10,  }}><Chip style={{backgroundColor: appstyle.sec}} textStyle={{color: 'black'}} ><FontAwesome name="user-gear" size={12} />  {item?.transmission}</Chip>    <Chip style={{backgroundColor: appstyle.sec}} ><FontAwesome name="gas-pump" size={12} />  {item?.fuelType}</Chip></AppText>
       <AppText variant="bodyMedium" style={{ fontWeight: '900', marginTop: 10, textTransform: "capitalize" }}>{item?.name}</AppText>
       {/* <AppText variant="bodyMedium" style={{ fontWeight: '900', marginTop: 10 }}>{item?.available ? "Available" : "Booked"}</AppText> */}
       <AppText variant="titleLarge" style={{ color: 'darkgreen', fontWeight: '900', fontSize: 25 }}>{item?.cost}₹/hr</AppText>
-      <AppText variant="bodyMedium" style={{ color: 'grey', fontWeight: '900', marginTop: 10 }}>Added on {dateSimplify(item?.date)}</AppText>
+      <AppText variant="bodyMedium" style={{ color: appstyle.textSec, fontWeight: '900', marginTop: 10 }}>Added on {dateSimplify(item?.date)}</AppText>
     </Card.Content>
-    <Card.Actions style={{ paddingBottom: 10, borderTopWidth: 1, borderColor: appstyle.pri, marginTop: 20, paddingTop: 10 }}>
+    <Card.Actions style={{ paddingBottom: 10, borderTopWidth: 1, borderColor: '#f4f4f2', marginTop: 20, paddingTop: 10 }}>
       <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end' }}>
         <AppButton icon={'circle-edit-outline'} onPress={() => navigation.navigate('AddVehicle', item)} >Edit Details</AppButton>
         <AppButton textColor={'tomato'} onPress={() => setModalValue({visible: true, id: item?._id, name: item?.name})} style={{ marginLeft: 10 }} icon={'delete'} >Delete</AppButton>

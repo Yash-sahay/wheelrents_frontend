@@ -3,13 +3,17 @@ import axios from 'axios';
 
 
 export function baseURL() {
-  return "http://192.168.1.8:5000/" // Local
-  // return "https://wheelrents-api.onrender.com/" // Live
+  // return "http://192.168.1.2:5000/" // Local
+  return "https://wheelrents-api.onrender.com/" // Live
 }
 
 export function dateSimplify(date) {
   if (date) return new Date(date).toDateString()
   return ''
+}
+
+export function amountFormatter(number) {
+  return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 export function timeSimplify(currentDate) {

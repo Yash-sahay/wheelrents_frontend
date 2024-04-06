@@ -61,7 +61,7 @@ const QRScanner = () => {
   const codeScanner = useCodeScanner({
     codeTypes: ['qr'],
     onCodeScanned: (codes) => {
-      alert(`Scanned ${codes} codes!`)
+      alert(`Scanned ${JSON.stringify(codes)} codes!`)
     }
   })
 
@@ -90,7 +90,7 @@ const QRScanner = () => {
           </View>
         </View>
 
-        <AppText style={{ width: 350, textAlign: 'center', fontWeight: "600", fontSize: 16, padding: 40, color: 'grey' }}>The vehicle owner has provided a QR code. Please scan the QR code to begin your trip!</AppText>
+        <AppText style={{ width: 350, textAlign: 'center', fontWeight: "600", fontSize: 16, padding: 40, color: appstyle.textSec }}>The vehicle owner has provided a QR code. Please scan the QR code to begin your trip!</AppText>
       </View>
     </>
   );
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 10,
     borderStyle: "dashed",
-    borderColor: 'grey'
+    borderColor: appstyle.textSec
   },
   cameraContainer: {
     width: 250,

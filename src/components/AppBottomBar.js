@@ -2,11 +2,12 @@ import { View, Text, StyleSheet, Pressable } from 'react-native'
 import React, { useEffect } from 'react'
 import { appstyle } from '../styles/appstyle'
 import { useNavigation, useRoute } from '@react-navigation/native';
-import FontAwesome6 from 'react-native-vector-icons/FontAwesome'
+import FontAwesome6 from 'react-native-vector-icons/Ionicons'
 import { useSelector } from 'react-redux';
 import Animated, { ReduceMotion, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 // import { BlurView } from '@react-native-community/blur';
 import LinearGradient from 'react-native-linear-gradient';
+import AppText from "./AppText"
 
 
 const AppBottomBar = () => {
@@ -15,16 +16,16 @@ const AppBottomBar = () => {
     
     
     const navigationClient = [
-        { routeName: role.includes("host") ? 'HostDashboard' : 'Home', icon: 'home' },
-        { routeName: 'WishList', icon: 'heart' },
-        { routeName: 'Booking', icon: 'bookmark' },
-        { routeName: 'User', icon: 'user' },
+        { routeName: role.includes("host") ? 'HostDashboard' : 'Home', icon: 'home', tilename: 'Home' },
+        { routeName: 'WishList', icon: 'heart', tilename: 'Wishlist' },
+        { routeName: 'Booking', icon: 'bookmark', tilename: 'Bookings' },
+        { routeName: 'User', icon: 'person', tilename: 'profile' },
     ]
     const navigationHost = [
-        { routeName: role.includes("host") ? 'HostDashboard' : 'Home', icon: 'home' },
-        { routeName: 'AddVehicle', icon: 'plus' },
-        { routeName: 'Booking', icon: 'bookmark' },
-        { routeName: 'User', icon: 'user' },
+        { routeName: role.includes("host") ? 'HostDashboard' : 'Home', icon: 'home', tilename: 'Home' },
+        { routeName: 'AddVehicle', icon: 'add', tilename: 'Add' },
+        { routeName: 'Booking', icon: 'bookmark', tilename: 'Bookings' },
+        { routeName: 'User', icon: 'person', tilename: 'profile' },
     ]
 
 
@@ -51,10 +52,11 @@ const AppBottomBar = () => {
         }
     }, [currRoute])
 
-    const IconsTile = ({ icon, active, routeName }) => {
+    const IconsTile = ({ icon, active, routeName, tilename }) => {
         return (
-            <Pressable onPress={() => navigation.navigate(routeName)} style={!active ? style.tileBtn : style.tileBtnActive}>
-                <FontAwesome6 name={icon} color={active ? appstyle.tri : appstyle.accent} size={ active ? 20 : 15} />
+            <Pressable onPress={() => navigation.navigate(routeName)} style={[style.tileBtn]}>
+                <FontAwesome6 name={!active ? icon + "-outline" : icon} color={appstyle.accent} size={20} />
+                {/* {active && <AppText style={{color: appstyle.pri, fontSize: 10}}>{tilename}</AppText>} */}
             </Pressable>
         )
     }
@@ -66,8 +68,8 @@ const AppBottomBar = () => {
             <Animated.View style={[style.container, styleHeader]}>
                 <LinearGradient colors={['transparent', '#ffffff94', '#ffffffdb']} style={[style.linearGradient]} >
                     <View style={style.child}>
-                        {role.includes("host") && navigationHost?.map(items => <IconsTile routeName={items.routeName} icon={items.icon} active={currRoute == items?.routeName} />)}
-                        {role.includes("client") && navigationClient?.map(items => <IconsTile routeName={items.routeName} icon={items.icon} active={currRoute == items?.routeName} />)}
+                        {role.includes("host") && navigationHost?.map(items => <IconsTile routeName={items.routeName} tilename={items?.tilename} icon={items.icon} active={currRoute == items?.routeName} />)}
+                        {role.includes("client") && navigationClient?.map(items => <IconsTile routeName={items.routeName} tilename={items?.tilename} icon={items.icon} active={currRoute == items?.routeName} />)}
                     </View>
                 </LinearGradient>
             </Animated.View>
@@ -118,6 +120,8 @@ const style = StyleSheet.create({
     tileBtn: {
         height: 50,
         width: 50,
+        // flexDirection: 'row',
+        justifyContent: 'center',
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 100,
@@ -131,7 +135,7 @@ const style = StyleSheet.create({
     },
     linearGradient: {
         flex: 1,
-        paddingHorizontal: 20,
+        paddingHorizontal: 10,
         paddingBottom: 10,
     },
 })

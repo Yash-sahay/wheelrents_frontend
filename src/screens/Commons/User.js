@@ -19,18 +19,18 @@ const User = () => {
       <AppBottomBar/>
       <AppHeader ui2 />
       <View style={{ width: '100%', padding: 20, justifyContent: 'center', alignItems: 'center', }}>
-        <View style={{ width: 150, height: 150, backgroundColor: 'lightgrey', borderRadius: 1000, borderWidth: 2, borderStyle: 'dashed', justifyContent: 'center', alignItems: 'center', }}>
+        <View style={{ width: 150, height: 150, backgroundColor: '#f4f4f2', borderRadius: 1000, borderWidth: 2, borderStyle: 'dashed', justifyContent: 'center', alignItems: 'center', }}>
           {/* <Image/> */}
           <FontAwesome6 name="user" size={70} />
         </View>
-        <AppText style={{ fontWeight: '900', color: appstyle.tri, fontSize: 20, marginTop: 10 }}>{username}</AppText>
-        <AppText style={{ fontWeight: '900', color: 'grey', fontSize: 15, marginBottom: 10 }}>{email}</AppText>
-        <View style={{ borderRadius: 20, backgroundColor: appstyle.accent, height: 300, elevation: 10, shadowColor: appstyle.shadowColor, borderWidth: 1, borderColor: '#fff', justifyContent: 'space-between', marginTop: 10, width: '100%', padding: 10 }}>
+        <AppText style={{ fontWeight: '900', color: appstyle.textBlack, fontSize: 20, marginTop: 10 }}>{username}</AppText>
+        <AppText style={{ fontWeight: '900', color: appstyle.textSec, fontSize: 15, marginBottom: 10 }}>{email}</AppText>
+        <View style={{ borderRadius: 20, backgroundColor: appstyle.pri, height: 300, elevation: 2, shadowColor: appstyle.shadowColor, borderWidth: 1, borderColor: '#f4f4f2', justifyContent: 'space-between', marginTop: 10, width: '100%', padding: 10 }}>
           <View>
             <TileBtn icon={'user'} text={"KYC"} />
             <TileBtn />
           </View>
-          <AppButton style={{backgroundColor: '#ff3b30'}} textColor="#fff" onPress={() => { dispatch(updateUserDetails({ isLoggedIn: false })) }} outlined icon={'logout-variant'}>LogOut</AppButton>
+          <AppButton style={{backgroundColor: '#ff3b302e'}} textColor="#ff3b30" onPress={() => { dispatch(updateUserDetails({ isLoggedIn: false })) }}  icon={'logout-variant'}>Logout</AppButton>
         </View>
       </View>
     </View>
@@ -40,14 +40,14 @@ const User = () => {
 
 const TileBtn = ({ onPress, text, icon }) => {
   return (
-    <Pressable onPress={onPress && onPress} style={{ width: '100%', borderBottomWidth: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 10, paddingVertical: 15, borderColor: appstyle.pri }}>
+    <Pressable onPress={onPress && onPress} style={{ width: '100%', borderBottomWidth: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 10, paddingVertical: 15, borderColor: '#f4f4f2' }}>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         {icon && (
-          <FontAwesome6 color={appstyle.tri} name={icon} size={17} />
+          <FontAwesome6 color={appstyle.textBlack} name={icon} size={17} />
         )}
-        <AppText style={{ fontSize: 17, fontWeight: '600', color: appstyle.tri }}>  {text}</AppText>
+        <AppText style={{ fontSize: 17, fontWeight: '700', color: appstyle.textBlack }}>  {text}</AppText>
       </View>
-      <FontAwesome6 name={'arrow-right'} color={appstyle.tri} size={20} />
+      <FontAwesome6 name={'arrow-right'} color={appstyle.textBlack} size={20} />
     </Pressable>
   )
 }

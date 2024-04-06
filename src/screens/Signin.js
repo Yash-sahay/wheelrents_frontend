@@ -93,15 +93,15 @@ const Signin = () => {
             <Divider
               style={{}}
               bold
-              theme={{ colors: { primary: 'grey' } }}
+              theme={{ colors: { primary: appstyle.textSec } }}
             />
-            <AppText style={{ textAlign: 'center', width: 30, top: -10, left: '45%', position: 'absolute', backgroundColor: appstyle.pri, fontWeight: 'bold', color: 'grey' }}>OR</AppText>
+            <AppText style={{ textAlign: 'center', width: 30, top: -10, left: '45%', position: 'absolute', backgroundColor: appstyle.pri, fontWeight: 'bold', color: appstyle.textSec }}>OR</AppText>
           </View>
         </View>
         <View>
           <AppButton mode="outlined" style={{ marginTop: 20 }} onPress={createUserFun}>Create Account    <Icon name={'arrow-right'} size={14} color={appstyle.pri} /></AppButton>
           <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-            <AppText style={{ textAlign: 'center', fontWeight: 'bold', color: 'grey', marginVertical: 10 }}>Already have an account? <AppText style={{ color: '#0163f7', textDecorationLine: 'underline', textDecorationColor: '#0163f7', textDecorationStyle: 'dashed' }}>Log In</AppText></AppText>
+            <AppText style={{ textAlign: 'center', fontWeight: 'bold', color: appstyle.textSec, marginVertical: 10 }}>Already have an account? <AppText style={{ color: '#0163f7', textDecorationLine: 'underline', textDecorationColor: '#0163f7', textDecorationStyle: 'dashed' }}>Log In</AppText></AppText>
           </TouchableOpacity>
         </View>
       </View>

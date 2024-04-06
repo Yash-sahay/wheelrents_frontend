@@ -4,7 +4,7 @@ import { Button, Text, Card, TextInput, Icon } from 'react-native-paper'
 import { useDispatch, useSelector } from 'react-redux'
 import { updateUserDetails } from '../redux/reducer/userReducer'
 import { getAllVehicleListings, toggleWishListForUser } from '../axios/axios_services/vehicleService'
-import { baseURL } from '../../common'
+import { amountFormatter, baseURL } from '../../common'
 import AppHeader from '../components/AppHeader'
 import AppText from '../components/AppText'
 import { get_vehicle_categories } from '../axios/axios_services/homeService'
@@ -47,7 +47,7 @@ const Home = () => {
 
   const getAllVehicle = async () => {
     try {
-      dispatch(updateLoaderReducer({ loading: true }))
+      // dispatch(updateLoaderReducer({ loading: true }))
       const data = {
         startDate: bookingStartDate,
         endDate: bookingEndDate
@@ -57,9 +57,9 @@ const Home = () => {
       if (response) {
         setDataList(response)
       }
-      dispatch(updateLoaderReducer({ loading: false }))
+      // dispatch(updateLoaderReducer({ loading: false }))
     } catch (error) {
-      dispatch(updateLoaderReducer({ loading: false }))
+      // dispatch(updateLoaderReducer({ loading: false }))
     }
   }
 
@@ -78,6 +78,21 @@ const Home = () => {
     index: index,
   });
 
+  const handleAddToWishlist = async (item) => {
+    try {
+      // dispatch(updateLoaderReducer({ loading: true }))
+      const data = {
+        vehicleId: item._id
+      }
+      await toggleWishListForUser({ data })
+      // dispatch(updateLoaderReducer({loading: false}))
+      getAllVehicle()
+    } catch (error) {
+      dispatch(updateLoaderReducer({ loading: false }))
+      console.error(error)
+    }
+  };
+
 
   return (
     <>
@@ -86,7 +101,7 @@ const Home = () => {
         <AppHeader isExtended={isExtended} />
         <ScrollView nestedScrollEnabled onScroll={onScroll} >
           <View style={{ paddingHorizontal: 20 }}>
-            <AppText style={{ fontSize: 18, marginTop: 20, fontWeight: '900' }}>Category</AppText>
+            <AppText style={{ fontSize: 20, marginTop: 20, fontWeight: '900' }}>Category</AppText>
           </View>
           <CategoryList />
           {/* <VirtualizedList
@@ -101,13 +116,13 @@ const Home = () => {
         getItem={getItem}
       /> */}
           <View style={{ paddingHorizontal: 20 }}>
-            <AppText style={{ fontSize: 18, marginTop: 20, fontWeight: '900' }}>Most Relevent</AppText>
+            <AppText style={{ fontSize: 20, marginTop: 20, fontWeight: '900' }}>Most Relevent</AppText>
           </View>
           <Carousel
             data={dataList}
             loop
             firstItem={0}
-            renderItem={({ item, index }) => <CardComponent item={item} key={index} navigation={navigation} getAllVehicle={getAllVehicle} />}
+            renderItem={({ item, index }) => <CardComponent item={item} key={index} handleAddToWishlist={handleAddToWishlist} navigation={navigation} getAllVehicle={getAllVehicle} />}
             sliderWidth={Device_Width + 50}
             itemWidth={Device_Width - 50}
             onSnapToItem={(index) => setActiveSlide(index)}
@@ -178,10 +193,10 @@ const CategoryList = () => {
         renderItem={({ item, index }) => {
           return (
             <View key={index} style={{ justifyContent: 'center', alignItems: 'center', marginTop: 10, marginRight: 15, marginLeft: index > 0 ? 0 : 20 }}>
-              <View style={{ height: 70, width: 70, backgroundColor: '#fff', elevation: 10, shadowColor: appstyle.shadowColor, borderRadius: 100, borderWidth: 2, borderColor: '#fff', justifyContent: 'center', alignItems: "center" }}>
+              <View style={{ height: 70, width: 70, backgroundColor: '#fff', elevation: 2, shadowColor: appstyle.shadowColor, borderRadius: 20, borderWidth: 1, borderColor: '#f4f4f2', justifyContent: 'center', alignItems: "center" }}>
                 <Image resizeMode={'cover'} style={{ width: 40, height: 40 }} source={{ uri: baseURL() + "public/category/" + item?.image }} />
               </View>
-              <AppText style={{ fontWeight: '700', marginTop: 10, fontSize: 13, }} >{item?.name?.toUpperCase()}</AppText>
+              <AppText style={{ fontWeight: '700', marginTop: 8, fontSize: 13, }} >{item?.name?.toUpperCase()}</AppText>
             </View>
           )
         }}
@@ -192,11 +207,11 @@ const CategoryList = () => {
 
 
 
-const CardComponent = ({ item, navigation, getAllVehicle }) => {
+const CardComponent = ({ item, navigation, handleAddToWishlist }) => {
   const dispatch = useDispatch();
   const styles = {
     card: {
-      marginTop: 20,
+      marginTop: 10,
       overflow: 'hidden',
       backgroundColor: appstyle.tri,
       borderColor: appstyle.priBack,
@@ -230,7 +245,7 @@ const CardComponent = ({ item, navigation, getAllVehicle }) => {
       height: 70,
     },
     infoText: {
-      color: 'grey',
+      color: appstyle.textSec,
       fontWeight: '900',
       fontSize: 12,
       marginTop: 10,
@@ -257,24 +272,10 @@ const CardComponent = ({ item, navigation, getAllVehicle }) => {
     }
   };
 
-  const handleAddToWishlist = async () => {
-    try {
-      dispatch(updateLoaderReducer({ loading: true }))
-      const data = {
-        vehicleId: item._id
-      }
-      await toggleWishListForUser({ data })
-      // dispatch(updateLoaderReducer({loading: false}))
-      getAllVehicle()
-    } catch (error) {
-      dispatch(updateLoaderReducer({ loading: false }))
-      console.error(error)
-    }
-  };
-
+  
   return (
     <Card style={styles.card}>
-      <Pressable onPress={handleAddToWishlist} style={styles.addToWishlistBtn}>
+      <Pressable onPress={() => handleAddToWishlist(item)} style={styles.addToWishlistBtn}>
         <Fontisto name={"heart"} style={{ elevation: 30 }} color={item.isWishList ? '#ff3b30' : '#ddd'} size={20} />
       </Pressable>
       <AppText style={styles.availabilityText}>
@@ -301,7 +302,7 @@ const CardComponent = ({ item, navigation, getAllVehicle }) => {
           {item?.name}
         </Text>
         <Text variant="titleLarge" style={styles.cost}>
-          ₹{item.cost}/hr
+          ₹{amountFormatter(item.cost)}/hr
         </Text>
         {/* <Text variant="bodyMedium" style={styles.title}>
           {item?.name}

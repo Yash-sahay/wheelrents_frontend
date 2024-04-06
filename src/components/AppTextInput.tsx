@@ -6,7 +6,8 @@ const AppTextInput = (props: TextInputProps ) => {
   return <TextInput {...props} 
   value={props?.allValues?.[props?.name]}
   activeOutlineColor={appstyle.tri}  
-  style={{marginTop: 15, backgroundColor: 'white',  ...props.style}} onChangeText={(text) => {
+  style={{marginTop: 15, backgroundColor: 'white', ...props.style}} 
+  onChangeText={(text) => {
     if(props.setter && props?.allValues && props?.name)  {
       props?.setter({...props?.allValues, [props?.name]: text})
     };

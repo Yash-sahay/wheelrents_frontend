@@ -75,11 +75,11 @@ const Wishlist = ({navigation}) => {
       <Card style={styles.cardContainer} onPress={() => navigation.navigate('VehicleDetails', { ...item })}>
         <Card.Cover source={{ uri: baseURL() + "public/vehicle/" + item?.files?.[0]?.fileName }} />
         <Card.Content>
-          <AppText style={{ color: 'grey', fontWeight: '900', marginTop: 10, }}><Chip style={{ backgroundColor: appstyle.sec }} textStyle={{ color: 'black' }} ><FontAwesome name="user-gear" size={12} />  {item?.transmission}</Chip>    <Chip style={{ backgroundColor: appstyle.sec }} ><FontAwesome name="gas-pump" size={12} />  {item?.fuelType}</Chip></AppText>
+          <AppText style={{ color: appstyle.textSec, fontWeight: '900', marginTop: 10, }}><Chip style={{ backgroundColor: appstyle.sec }} textStyle={{ color: 'black' }} ><FontAwesome name="user-gear" size={12} />  {item?.transmission}</Chip>    <Chip style={{ backgroundColor: appstyle.sec }} ><FontAwesome name="gas-pump" size={12} />  {item?.fuelType}</Chip></AppText>
           <AppText variant="bodyMedium" style={{ fontWeight: '900', marginTop: 10, textTransform: "capitalize" }}>{item?.name}</AppText>
           {/* <AppText variant="bodyMedium" style={{ fontWeight: '900', marginTop: 10 }}>{item?.available ? "Available" : "Booked"}</AppText> */}
           <AppText variant="titleLarge" style={{ color: 'darkgreen', fontWeight: '900', fontSize: 25 }}>{item?.cost}₹/hr</AppText>
-          <AppText variant="bodyMedium" style={{ color: 'grey', fontWeight: '900', marginTop: 10 }}>Added on {dateSimplify(item?.date)}</AppText>
+          <AppText variant="bodyMedium" style={{ color: appstyle.textSec, fontWeight: '900', marginTop: 10 }}>Added on {dateSimplify(item?.date)}</AppText>
         </Card.Content>
         <Card.Actions>
           <IconButton style={{borderColor: appstyle.sec}} icon="delete" iconColor="tomato" onPress={() => handleAddToWishlist()} />
