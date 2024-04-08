@@ -19,6 +19,8 @@ import Wishlist from '../screens/WishList';
 import Search from '../screens/Search';
 import Booking from '../screens/Booking';
 import QRScanner from '../screens/QRScanner';
+import SearchResultScreen from '../screens/Result';
+import Withdraw from '../screens/host/Withdraw';
 
 const Stack = createStackNavigator();
 const { width } = Dimensions.get("window")
@@ -47,6 +49,7 @@ const Navigation = () => {
               <>
                 <Stack.Screen options={{ animationEnabled: false }} name="HostDashboard" component={HostDashboard} />
                 <Stack.Screen name="AddVehicle" component={AddVehicle} />
+                <Stack.Screen name="Withdraw" options={{ animationEnabled: false }} component={Withdraw} />
               </>
             )}
             {role?.includes('client') && (
@@ -61,6 +64,7 @@ const Navigation = () => {
             <Stack.Screen name="Notification" component={Notification} />
             <Stack.Screen options={{ animationEnabled: false }} name="Booking" component={Booking} />
             <Stack.Screen options={{}} name="QRScanner" component={QRScanner} />
+            <Stack.Screen options={{}} name="Result" component={SearchResultScreen} />
           </>
         )}
       </Stack.Navigator>

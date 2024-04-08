@@ -1,4 +1,4 @@
-import { View, Text, FlatList, Dimensions, Image, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, Text, FlatList, Dimensions, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native'
 import React, { useRef, useState } from 'react'
 import AppHeader from '../components/AppHeader';
 import { Card, Divider } from 'react-native-paper';
@@ -63,7 +63,7 @@ const VehicleDetails = ({ route }) => {
             </AppBottomSheet>
             <View style={[StyleSheet.absoluteFill, { backgroundColor: appstyle.pri, }]}>
                 <AppHeader name={data?.name} ui2 accent={'opp'} />
-                <View style={{ width: '100%' }}>
+                <ScrollView contentContainerStyle={{ width: '100%', paddingBottom: 100 }}>
                     <View>
                         <View style={{ width: '100%', alignItems: 'center', paddingBottom: 40, backgroundColor: appstyle.tri }}>
                             <Carousel
@@ -100,13 +100,13 @@ const VehicleDetails = ({ route }) => {
                         <View style={{ width: '100%', flexDirection: 'row', paddingTop: 10 }}>
                             <View style={{ height: 100, width: 120, padding: 10, marginLeft: 10, backgroundColor: appstyle.tri, borderRadius: 15, elevation: 10, shadowColor: appstyle.shadowColor }}>
                                 <MaterialCommunityIcons size={30} color={appstyle.pri} name="car-shift-pattern" />
-                                <AppText style={{ fontWeight: 'bold', fontSize: 16, color: '#eee', marginTop: 10 }}>Transmission</AppText>
-                                <AppText style={{ color: appstyle.pri, textTransform: "capitalize"}} >{data?.transmission || "N/A"}</AppText>
+                                <AppText style={{  fontSize: 12, color: '#eee', marginTop: 10 }}>Transmission</AppText>
+                                <AppText style={{ color: appstyle.pri, fontWeight: 'bold', textTransform: "capitalize"}} >{data?.transmission || "N/A"}</AppText>
                             </View>
                             <View style={{ height: 100, width: 120, padding: 10, marginLeft: 10, backgroundColor: appstyle.tri, borderRadius: 15, elevation: 10, shadowColor: appstyle.shadowColor }}>
                                 <MaterialCommunityIcons size={30} color={appstyle.pri} name="fuel" />
-                                <AppText style={{ fontWeight: 'bold', fontSize: 16, color: '#eee', marginTop: 10  }}>Power Source</AppText>
-                                <AppText style={{ color: appstyle.pri, textTransform: "capitalize" }} >{data?.fuelType || "N/A"}</AppText>
+                                <AppText style={{ fontSize: 12, color: '#eee', marginTop: 10  }}>Power Source</AppText>
+                                <AppText style={{fontWeight: 'bold', color: appstyle.pri, textTransform: "capitalize" }} >{data?.fuelType || "N/A"}</AppText>
                             </View>
                         </View>
                        
@@ -135,13 +135,13 @@ const VehicleDetails = ({ route }) => {
                         </View>
                     </View>
 
-                </View>
+                </ScrollView>
                 <View style={{ width: '100%', padding: 10, paddingLeft: 20, borderTopLeftRadius: 20, borderTopRightRadius: 0, backgroundColor: appstyle?.tri, borderColor: appstyle.textSec, borderTopWidth: 1, position: 'absolute', bottom: 0, left: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                     <View>
                         <AppText style={{ fontWeight: 'bold', fontSize: 12, color: appstyle.pri }}>Total Price</AppText>
                         <AppText style={{ fontWeight: 'bold', fontSize: 20, color: "lightgreen" }}>₹{amountFormatter(getHoursDifference(bookingStartDate, bookingEndDate))}</AppText>
                     </View>
-                    <AppButton onPress={handleBooking} outlined icon={'cash-fast'} style={{ paddingVertical: 5, }} >Proceed to Pay</AppButton>
+                    <AppButton onPress={handleBooking} outlined icon={'bookmark-check'} style={{ paddingVertical: 5, }} >Book Now</AppButton>
                 </View>
             </View>
         </>

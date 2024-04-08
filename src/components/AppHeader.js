@@ -2,7 +2,9 @@ import { View, Text, TextInput, Dimensions, TouchableOpacity, Easing, FlatList, 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Appbar, Button, Chip, IconButton, Searchbar } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Ionicons';
+import Entypo from 'react-native-vector-icons/Entypo';
 import FontAwesome from 'react-native-vector-icons/FontAwesome6';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import AppText from './AppText';
@@ -35,21 +37,23 @@ const styles = StyleSheet.create({
     },
     locationInfo: {
         fontWeight: 'bold',
-        color: appstyle.tri,
+        
     },
     searchBarContainer: {
         flexDirection: 'row',
         width: Device_Width - 10 - 70,
         borderRadius: 10,
-        backgroundColor: appstyle.priBack,
-        borderWidth: 2,
-        borderColor: appstyle.tri,
-        borderStyle: 'dashed',
+        backgroundColor: '#1d1d1d',
+        color: appstyle.pri,
+        // borderWidth: 2,
+        borderColor: '#f4f4f2',
+        // borderStyle: 'dashed',
         marginTop: 10,
     },
     searchBar: {
         padding: 0,
         height: 40,
+        color: appstyle.pri
     },
     filterButtonContainer: {
         padding: 1,
@@ -98,7 +102,7 @@ const styles = StyleSheet.create({
     },
 });
 
-const AppHeader = ({ ui2, name, isExtended, filterPress, filtersData, accent, scrollPosition, search = false }) => {
+const AppHeader = ({ mode = "light", ui2, name, isExtended, filterPress, filtersData, accent, scrollPosition, search = false }) => {
     const route = useRoute();
     const dispatch = useDispatch();
     const navigation = useNavigation();
@@ -107,8 +111,8 @@ const AppHeader = ({ ui2, name, isExtended, filterPress, filtersData, accent, sc
     const [dontSet, setDontSet] = React.useState(0);
     const [focus, setFocus] = useState(false);
     const [bottomSheet, setBottomSheet] = useState(false);
-    
-    const { currRoute, role, searchString, recentSearches } = useSelector(state => state.userReducer)
+
+    const { currRoute, role, searchString, recentSearches, username, email } = useSelector(state => state.userReducer)
     const searchRef = useRef(null)
 
     const height = useSharedValue(0);
@@ -129,12 +133,12 @@ const AppHeader = ({ ui2, name, isExtended, filterPress, filtersData, accent, sc
     }));
 
     useEffect(() => {
-        
+
         if (scrollPosition > 0) {
         }
-        if(!isExtended){
+        if (!isExtended) {
             height.value = 0
-        }else {
+        } else {
             height.value = 50;
         }
         setBottomSheet(false);
@@ -143,11 +147,11 @@ const AppHeader = ({ ui2, name, isExtended, filterPress, filtersData, accent, sc
     useFocusEffect(
         React.useCallback(() => {
             dispatch(updateUserDetails({ currRoute: route.name || '' }));
-            if(route.name == "Search"){
+            if (route.name == "Search") {
                 setTimeout(() => {
                     searchRef.current.focus()
                 }, 200);
-            }else {
+            } else {
                 dispatch(updateUserDetails({ searchString: '' }));
             }
         }, [route.name])
@@ -164,11 +168,12 @@ const AppHeader = ({ ui2, name, isExtended, filterPress, filtersData, accent, sc
         bottomSheetRef.current?.open();
     };
 
-    const onChangeSearch = query => dispatch(updateUserDetails({searchString: query}));
+    const onChangeSearch = query => dispatch(updateUserDetails({ searchString: query }));
 
     const submitEdit = () => {
-        dispatch(updateUserDetails({recentSearches: recentSearches?.length > 0 ? [...recentSearches, searchString] : [searchString]}))
-    } 
+        navigation.navigate("Result", {searchString})
+        dispatch(updateUserDetails({ recentSearches: recentSearches?.length > 0 ? [...recentSearches, searchString] : [searchString] }))
+    }
 
 
     if (!ui2) {
@@ -177,50 +182,69 @@ const AppHeader = ({ ui2, name, isExtended, filterPress, filtersData, accent, sc
                 <AppBottomSheet bottomSheetRef={bottomSheetRef} snapPoints={['1%', '60%']} bottomSheet={bottomSheet} setBottomSheet={setBottomSheet}>
                     <AppDatePicker />
                 </AppBottomSheet>
-                <StatusBar animated backgroundColor={'transparent'} barStyle={'dark-content'} translucent showHideTransition={'fade'} />
-                <View style={[styles.container, !isExtended && { elevation: 5 }]}>
+                <StatusBar animated backgroundColor={'transparent'} barStyle={(route.name == "Search" || mode == "dark") ? "light-content" : 'dark-content'} translucent showHideTransition={'fade'} />
+                <View style={[styles.container, (route.name == "Search" || mode == "dark" ) && {backgroundColor: appstyle.tri}, !isExtended && { elevation: 5, borderBottomWidth: 2, borderColor: '#f4f4f2' }]}>
                     <Animated.View style={[styles.headerContainer, styleHeader]}>
                         <TouchableOpacity onPress={handleOpenPress}>
-                            <AppText style={styles.locationText}>Location</AppText>
-                            <AppText style={styles.locationInfo}>
-                                <FontAwesome name="map-pin" /> New Delhi, India  <FontAwesome color={appstyle.tri} name="chevron-down" />
+                            <AppText style={{...styles.locationText, color: mode == "dark" ? '#ddd' : appstyle.tri}}>Location</AppText>
+                            <AppText style={{...styles.locationInfo, color: mode == "dark" ? '#ddd' : appstyle.tri}}>
+                                <FontAwesome name="map-pin" /> New Delhi, India  <FontAwesome color={mode == "dark" ? appstyle.pri : appstyle.tri} name="chevron-down" />
                             </AppText>
                         </TouchableOpacity>
                         <View style={{ flexDirection: 'row' }}>
                             {role?.includes('client') && <IconButton onPress={() => navigation.navigate("QRScanner")} style={{ backgroundColor: appstyle.accent, elevation: 10, shadowColor: appstyle.shadowColor, borderWidth: 1, borderColor: '#fff' }} iconColor={appstyle.tri} size={20} icon="qrcode-scan" />}
-                            <IconButton onPress={() => navigation.navigate('Notification')} style={{ backgroundColor: appstyle.accent, elevation: 10, shadowColor: appstyle.shadowColor, borderWidth: 1, borderColor: '#fff' }} iconColor={appstyle.tri} size={20} icon="bell" />
+                            <IconButton onPress={() => navigation.navigate('Notification')} style={{ backgroundColor: mode == "dark" ? '#1d1d1d' : appstyle.accent, elevation: 10, shadowColor: appstyle.shadowColor, borderWidth: mode == "dark" ? 0 : 1, borderColor: '#fff' }} iconColor={mode == "dark" ? appstyle.pri : appstyle.tri} size={20} icon="bell" />
                         </View>
                     </Animated.View>
-                    <View onTouchEnd={() => navigation.navigate("Search")} style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                    <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                        {focus && <View style={[styles.filterButtonContainer]}>
+                            <TouchableOpacity
+                                onPress={() => navigation.goBack()}
+                                style={[styles.filterButton, {backgroundColor: appstyle.tri}]}>
+
+                                <FontAwesome5 style={[styles.filterIcon, {color: appstyle.pri}]} size={20} name="chevron-left" />
+                            </TouchableOpacity>
+                        </View>}
+                        
                         <Searchbar
                             onFocus={() => setFocus(true)}
-                            onBlur={() => setFocus(false)}
+                            // onBlur={() => setFocus(false)}
                             editable={search}
                             inputStyle={styles.searchBar}
                             onSubmitEditing={(val) => submitEdit(val)}
-                            style={[styles.searchBarContainer, focus && {borderColor: 'grey',}]}
-                            placeholder="Search"
+                            placeholderTextColor={appstyle.textSec}
+                            style={[styles.searchBarContainer, focus ? {} : { display: 'none' }]}
+                            placeholder="Search for vehicles"
                             disableFullscreenUI
                             ref={searchRef}
                             onChangeText={onChangeSearch}
                             value={searchString}
                         />
-                        <View style={[styles.filterButtonContainer, filterStatus && styles.filterStatusContainerOpen]}>
-                            <TouchableOpacity
-                                onPress={() =>
-                                    setFilterStatus(status => {
-                                        if (!status) {
-                                            filterHeight.value = 50;
-                                        } else {
-                                            filterHeight.value = 0;
-                                        }
-                                        return !status;
-                                    })
-                                }
-                                style={[styles.filterButton, !filterStatus && styles.filterStatusContainerClosed]}>
-                                {filterStatus ? <FontAwesome style={styles.filterIcon} name="filter-circle-xmark" /> : <FontAwesome style={styles.filterIcon} name="filter" />}
-                            </TouchableOpacity>
+                        {!focus && <View>
+                            <AppText style={{ fontWeight: 'bold', fontSize: 25, color: appstyle.textSec }}>Welcome,</AppText>
+                            <AppText style={{ fontWeight: 'bold', fontSize: 30, marginTop: -8, color: mode == 'dark' ? "#ddd" : appstyle.textBlack }}>{username}</AppText>
                         </View>
+                        }
+                        {!focus && (
+                            <View style={[styles.filterButtonContainer]}>
+                                <TouchableOpacity
+                                    onPress={() => mode == "dark" ? navigation.navigate("AddVehicle") : navigation.navigate("Search")
+                                        // setFilterStatus(status => {
+                                        //     if (!status) {
+                                        //         filterHeight.value = 50;
+                                        //     } else {
+                                        //         filterHeight.value = 0;
+                                        //     }
+                                        //     return !status;
+                                        // })
+                                    }
+                                    style={[styles.filterButton, {backgroundColor: mode == "dark" ? appstyle.tri : appstyle.pri}]}>
+                                    {mode == "dark" && <Entypo style={[styles.filterIcon, {color: mode == "dark" ? appstyle.pri : appstyle.tri}]} size={30} name="add-to-list" /> }
+                                    {mode != "dark" && <FontAwesome5 style={[styles.filterIcon, {color: mode == "dark" ? appstyle.pri : appstyle.tri}]} size={30} name="search" />}
+                                    {mode == "dark" && <AppText style={{ fontWeight: 'bold', fontSize: 16, color: mode == "dark" ? appstyle.pri : appstyle.tri }}>New</AppText>}
+                                </TouchableOpacity>
+                            </View>
+                        )}
                     </View>
                     <Animated.View style={styles.filterChipContainer}>{(filtersData && filterStatus) && <FlatList
                         data={filtersData}

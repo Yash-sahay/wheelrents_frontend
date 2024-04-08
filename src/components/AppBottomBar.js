@@ -3,6 +3,7 @@ import React, { useEffect } from 'react'
 import { appstyle } from '../styles/appstyle'
 import { useNavigation, useRoute } from '@react-navigation/native';
 import FontAwesome6 from 'react-native-vector-icons/Ionicons'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { useSelector } from 'react-redux';
 import Animated, { ReduceMotion, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 // import { BlurView } from '@react-native-community/blur';
@@ -23,7 +24,7 @@ const AppBottomBar = () => {
     ]
     const navigationHost = [
         { routeName: role.includes("host") ? 'HostDashboard' : 'Home', icon: 'home', tilename: 'Home' },
-        { routeName: 'AddVehicle', icon: 'add', tilename: 'Add' },
+        { routeName: 'Withdraw', icon: 'hand-coin', tilename: 'Withdraw', type: MaterialCommunityIcons },
         { routeName: 'Booking', icon: 'bookmark', tilename: 'Bookings' },
         { routeName: 'User', icon: 'person', tilename: 'profile' },
     ]
@@ -52,10 +53,11 @@ const AppBottomBar = () => {
         }
     }, [currRoute])
 
-    const IconsTile = ({ icon, active, routeName, tilename }) => {
+    const IconsTile = ({ icon, active, routeName, tilename, type }) => {
+        const Icon = type
         return (
             <Pressable onPress={() => navigation.navigate(routeName)} style={[style.tileBtn]}>
-                <FontAwesome6 name={!active ? icon + "-outline" : icon} color={appstyle.accent} size={20} />
+               {Icon ? <Icon name={!active ? icon + "-outline" : icon} color={appstyle.accent} size={20} /> : <FontAwesome6 name={!active ? icon + "-outline" : icon} color={appstyle.accent} size={20} />}
                 {/* {active && <AppText style={{color: appstyle.pri, fontSize: 10}}>{tilename}</AppText>} */}
             </Pressable>
         )
@@ -68,8 +70,8 @@ const AppBottomBar = () => {
             <Animated.View style={[style.container, styleHeader]}>
                 <LinearGradient colors={['transparent', '#ffffff94', '#ffffffdb']} style={[style.linearGradient]} >
                     <View style={style.child}>
-                        {role.includes("host") && navigationHost?.map(items => <IconsTile routeName={items.routeName} tilename={items?.tilename} icon={items.icon} active={currRoute == items?.routeName} />)}
-                        {role.includes("client") && navigationClient?.map(items => <IconsTile routeName={items.routeName} tilename={items?.tilename} icon={items.icon} active={currRoute == items?.routeName} />)}
+                        {role.includes("host") && navigationHost?.map(items => <IconsTile {...items} active={currRoute == items?.routeName} />)}
+                        {role.includes("client") && navigationClient?.map(items => <IconsTile {...items} active={currRoute == items?.routeName} />)}
                     </View>
                 </LinearGradient>
             </Animated.View>

@@ -193,10 +193,14 @@ const CategoryList = () => {
         renderItem={({ item, index }) => {
           return (
             <View key={index} style={{ justifyContent: 'center', alignItems: 'center', marginTop: 10, marginRight: 15, marginLeft: index > 0 ? 0 : 20 }}>
-              <View style={{ height: 70, width: 70, backgroundColor: '#fff', elevation: 2, shadowColor: appstyle.shadowColor, borderRadius: 20, borderWidth: 1, borderColor: '#f4f4f2', justifyContent: 'center', alignItems: "center" }}>
+              <View style={{ height: 70, minWidth: 120, backgroundColor: '#f4f4f2', elevation: 2, shadowColor: appstyle.shadowColor, borderRadius: 20, borderWidth: 1, borderColor: '#f4f4f2', flexDirection: 'row', justifyContent: 'center', alignItems: "center" }}>
                 <Image resizeMode={'cover'} style={{ width: 40, height: 40 }} source={{ uri: baseURL() + "public/category/" + item?.image }} />
+                <View style={{}}>
+                <AppText style={{ fontWeight: '700',  fontSize: 16, marginLeft: 10 }} >{item?.name?.toUpperCase()}</AppText>
+                <AppText style={{ fontWeight: '700', marginTop: -5, fontSize: 10, color: appstyle.textSec, marginLeft: 10 }} >{'View all'}</AppText>
+                </View>
               </View>
-              <AppText style={{ fontWeight: '700', marginTop: 8, fontSize: 13, }} >{item?.name?.toUpperCase()}</AppText>
+             
             </View>
           )
         }}
@@ -207,16 +211,15 @@ const CategoryList = () => {
 
 
 
-const CardComponent = ({ item, navigation, handleAddToWishlist }) => {
+function CardComponent ({ item, navigation, handleAddToWishlist }) {
   const dispatch = useDispatch();
   const styles = {
     card: {
       marginTop: 10,
       overflow: 'hidden',
       backgroundColor: appstyle.tri,
-      borderColor: appstyle.priBack,
-      borderWidth: 2,
       marginBottom: 2,
+      borderRadius: 20,
     },
     availabilityText: {
       position: 'absolute',
@@ -225,6 +228,8 @@ const CardComponent = ({ item, navigation, handleAddToWishlist }) => {
       zIndex: 1,
       paddingVertical: 2,
       paddingHorizontal: 10,
+      paddingTop: 3,
+      paddingLeft: 20,
       backgroundColor: item?.available ? 'hsl(148,75%,22%)' : 'hsl(43,85%,33%)',
       color: appstyle.priBack,
       elevation: 10,
@@ -276,7 +281,7 @@ const CardComponent = ({ item, navigation, handleAddToWishlist }) => {
   return (
     <Card style={styles.card}>
       <Pressable onPress={() => handleAddToWishlist(item)} style={styles.addToWishlistBtn}>
-        <Fontisto name={"heart"} style={{ elevation: 30 }} color={item.isWishList ? '#ff3b30' : '#ddd'} size={20} />
+        <Fontisto name={"heart"} style={{ elevation: 30 }} color={item?.isWishList ? '#ff3b30' : '#ddd'} size={20} />
       </Pressable>
       <AppText style={styles.availabilityText}>
         {item?.available ? 'Available' : 'Booked at selected time period!'}
@@ -288,7 +293,7 @@ const CardComponent = ({ item, navigation, handleAddToWishlist }) => {
           <Card.Cover
             resizeMode="cover"
             style={styles.image}
-            source={{ uri: baseURL() + 'public/vehicle/' + imgs.item?.fileName }}
+            source={{ uri: baseURL() + 'public/vehicle/' + imgs?.item?.fileName }}
           />
         )}
       />
@@ -302,7 +307,7 @@ const CardComponent = ({ item, navigation, handleAddToWishlist }) => {
           {item?.name}
         </Text>
         <Text variant="titleLarge" style={styles.cost}>
-          ₹{amountFormatter(item.cost)}/hr
+          ₹{amountFormatter(item?.cost)}/hr
         </Text>
         {/* <Text variant="bodyMedium" style={styles.title}>
           {item?.name}

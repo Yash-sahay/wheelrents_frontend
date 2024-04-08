@@ -7,7 +7,7 @@ import AppText from '../components/AppText';
 import AppButton from '../components/AppButton';
 import { MD3Colors, ProgressBar } from 'react-native-paper';
 import Animated from 'react-native-reanimated';
-import { booking_status_change, delete_booking_by_id, getBookingsForHost } from '../axios/axios_services/bookingService';
+import { booking_payment, booking_status_change, delete_booking_by_id, getBookingsForHost } from '../axios/axios_services/bookingService';
 import { amountFormatter, baseURL, calculateTimePercentage, dateSimplify, timeSimplify } from '../../common';
 import AntDesign from 'react-native-vector-icons/AntDesign'
 
@@ -66,9 +66,16 @@ const Booking = ({ navigation }) => {
   const handleApprove = async (id, isAccept) => {
     try {
       setLoader(true)
-      const payload = isAccept ? { bookingId: id, payment: "pending" } : { bookingId: id, bookingStatus: "active" }
-      const res = await booking_status_change(payload)
-      alert(JSON.stringify(res.data))
+      let res = null
+      if(isAccept){
+        const payload1 = { bookingId: id, payment: "pending" }
+        res = await booking_status_change(payload1)
+      }else {
+        const payload2 = { bookingId: id }
+        res = await booking_payment(payload2)
+      }
+      getBookings()
+      alert(JSON.stringify(res?.data))
       setLoader(false)
     } catch (error) {
       setLoader(false)
@@ -148,7 +155,7 @@ const Booking = ({ navigation }) => {
               <AppText style={styles.carDescription}>{item?.name}</AppText>
               <AppText style={{ fontWeight: 'bold', color: appstyle.textSec, fontSize: 12, marginBottom: 5 }}>Booked By <AppText style={{ color: appstyle.textSec, textTransform: 'capitalize' }}>{item?.clientName}</AppText></AppText>
 
-              <AppText variant="titleLarge" style={{ color: 'green', fontWeight: '900', fontSize: 25 }}>₹{amountFormatter(item?.totalPrice)}</AppText>
+              <AppText variant="titleLarge" style={{ color: '#008542', fontWeight: '900', fontSize: 25 }}>₹{amountFormatter(item?.totalPrice)}</AppText>
             </View>
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15 }}>
@@ -188,6 +195,12 @@ const Booking = ({ navigation }) => {
                   <AppButton icon="qrcode" style={{}} textColor={'white'} buttonColor={appstyle.tri} onPress={() => handleOpenPress(item)}>Open QR</AppButton>
                 </View>
               )}
+              {item?.bookingStatus == "started" && (
+                <View style={{ flexDirection: 'row', justifyContent: 'center', padding: 10, borderTopWidth: 1, borderColor: '#f4f4f2' }}>
+                  <AppText style={{ fontWeight: '800', fontSize: 12, color: appstyle.textSec, textAlign: 'center' }}>{`Trip ending in ${remainingTime?.days} days, ${remainingTime?.hours} hours, and ${remainingTime?.minutes} minutes. `}</AppText>
+                  {/* <AppButton icon="check" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={'#00a400'} onPress={() => handleApprove(item?._id)}>Accept</AppButton> */}
+                </View>
+              )}
             </>
           )}
 
@@ -201,7 +214,7 @@ const Booking = ({ navigation }) => {
               {item?.bookingStatus == "pending" && (
                 <View style={{ flexDirection: 'row', justifyContent: item?.payment == "pending" ? 'flex-end' : 'center', padding: 10, borderTopWidth: 1, borderColor: '#f4f4f2' }}>
                   {item?.payment == "pending" ? (
-                    <AppButton icon="cash" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={'green'} onPress={() => handleApprove(item?._id)} >Pay to activate your trip</AppButton>
+                    <AppButton icon="cash" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={appstyle.tri} onPress={() => handleApprove(item?._id)} >Pay to activate your trip</AppButton>
                   ) : (
                     <AppText style={{ fontWeight: '600', color: 'hsl(43,85%,33%)', fontSize: 12, }}>● Waiting for the vehicle owner to accept the request...</AppText>
                   )}
@@ -254,6 +267,7 @@ const Booking = ({ navigation }) => {
         <AppText style={styles.title}>{tabValue?.content}</AppText>
         <FlatList
           data={bookings}
+          style={{}}
           renderItem={renderBookingItem}
           keyExtractor={(item) => item?._id}
           contentContainerStyle={styles.flatListContent}
@@ -288,13 +302,15 @@ const Tab = ({ title, onPress, icon, isActive }) => {
   );
 };
 
-const BookingTabs = ({ children, onChange = () => { } }) => {
-  const [activeTab, setActiveTab] = useState('pending');
+export function BookingTabs ({ children, onChange = () => { }, tabs }) {
+  let newTab = tabs || TABS
+  const [activeTab, setActiveTab] = useState(newTab[0].id);
   const translateX = useSharedValue(0);
 
+
   const handleTabPress = (tabId) => {
-    const index = TABS.findIndex((tab) => tab.id === tabId);
-    translateX.value = withSpring(index * (100 / TABS.length));
+    const index = newTab.findIndex((tab) => tab.id === tabId);
+    translateX.value = withSpring(index * (100 / newTab.length));
     setActiveTab(tabId);
   };
 
@@ -306,13 +322,13 @@ const BookingTabs = ({ children, onChange = () => { } }) => {
   return (
     <View style={styles.container}>
       <View style={styles.tabContainer}>
-        {TABS.map((tab) => (
+        {newTab?.map((tab) => (
           <Tab
             icon={tab?.icon}
-            key={tab.id}
-            title={tab.title}
-            onPress={() => { handleTabPress(tab.id); onChange(tab) }}
-            isActive={activeTab === tab.id}
+            key={tab?.id}
+            title={tab?.title}
+            onPress={() => { handleTabPress(tab?.id); onChange(tab) }}
+            isActive={activeTab === tab?.id}
           />
         ))}
         <Animated.View style={[styles.tabIndicator, tabIndicatorStyle]} />
@@ -348,7 +364,8 @@ const styles = StyleSheet.create({
     marginLeft: 20
   },
   flatListContent: {
-    paddingBottom: 20,
+    // paddingBottom: 20,
+    paddingBottom: 100
   },
   bookingCard: {
     flexDirection: 'row',

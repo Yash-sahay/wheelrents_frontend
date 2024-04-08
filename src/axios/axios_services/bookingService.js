@@ -19,3 +19,12 @@ export function delete_booking_by_id({bookingId}) {
 export function booking_status_change(data) {
     return axiosInstance.post(url + 'booking_status_change', data);
 };
+// status change paymnet in host bookings
+export function booking_payment(data) {
+    return axiosInstance.post(url + 'booking_payment', data);
+};
+
+// status change paymnet in host bookings
+export function get_transaction_details(data) {
+    return axiosInstance.post(url + 'get_transaction_details', data);
+};
