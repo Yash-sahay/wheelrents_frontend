@@ -1,4 +1,4 @@
-import { View, Text, Pressable, Dimensions, Image, Alert, ScrollView } from 'react-native'
+import { View, Text, Pressable, Dimensions, Image, Alert, ScrollView, PermissionsAndroid } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import AppText from '../../components/AppText'
 import AppTextInput from '../../components/AppTextInput'
@@ -6,20 +6,21 @@ import AppButton from '../../components/AppButton'
 import { Button, Chip, Icon } from 'react-native-paper'
 import AppDropDown from '../../components/AppDropDown'
 import { get_vehicle_categories } from '../../axios/axios_services/homeService'
-import { vehicleAdd } from '../../axios/axios_services/vehicleService'
+import { updateVehicle, vehicleAdd } from '../../axios/axios_services/vehicleService'
 import FontAwesome from 'react-native-vector-icons/FontAwesome6'
 import ImagePicker from 'react-native-image-crop-picker';
-import { baseURL } from '../../../common'
+import { baseURL, getDetailsByLatLong } from '../../../common'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useNavigation } from '@react-navigation/native'
 import AppHeader from '../../components/AppHeader'
 import { appstyle } from '../../styles/appstyle'
+import Geolocation from '@react-native-community/geolocation';
 
 
 const Device_Width = Dimensions.get('window').width
 
 
-const AddVehicle = ({route}) => {
+const AddVehicle = ({ route }) => {
     const data = route.params
     const [allValues, setAllValues] = useState(data ? data : {})
     const [categoryList, setCategoryList] = useState([])
@@ -46,7 +47,7 @@ const AddVehicle = ({route}) => {
         }
     }
 
-    const addNewVehicle = async () => {
+    const addUpdateVehicle = async () => {
         try {
             setIsLoading(true)
             const data = new FormData();
@@ -55,23 +56,32 @@ const AddVehicle = ({route}) => {
                     data.append('files', imgs);
                 }
             })
-            data.append('name', allValues?.name);
-            data.append('vehicleNo', allValues?.vehicleNo);
-            data.append('vehicleCategory', allValues?.vehicleCategory);
-            data.append('transmission', allValues?.transmission);
-            data.append('fuelType', allValues?.fuelType);
-            data.append('cost', allValues?.cost);
-            data.append('description', allValues?.description);
-            data.append('address1', allValues?.address1);
-            data.append('address2', allValues?.address2);
-            data.append('pinCode', allValues?.pinCode);
+            data.append('name', allValues?.name || "");
+            data.append('vehicleNo', allValues?.vehicleNo || "");
+            data.append('vehicleCategory', allValues?.vehicleCategory || "");
+            data.append('transmission', allValues?.transmission || "");
+            data.append('fuelType', allValues?.fuelType || "");
+            data.append('cost', allValues?.cost || "");
+            data.append('description', allValues?.description || "");
+            data.append('address1', allValues?.address1 || "");
+            data.append('address2', allValues?.address2 || "");
+            data.append('pinCode', allValues?.pinCode || "");
+            data.append('city', allValues?.city || "");
+            data.append('country', allValues?.country || "");
+            data.append('latitude', allValues?.latitude || "");
+            data.append('longitude', allValues?.longitude || "");
 
 
-            const res = await vehicleAdd({ data });
+            let res;
+            if (allValues._id) {
+                data.append('_id', allValues._id || "");
+                res = await updateVehicle({ data });
+            } else {
+                res = await vehicleAdd({ data });
+            }
             if (res.data?.success) {
-                console.warn(res.data)
-                navigation.navigate("Home")
-            }else{
+                navigation.navigate("HostDashboard")
+            } else {
                 alert(JSON.stringify(res.data))
             }
             setIsLoading(false)
@@ -83,10 +93,10 @@ const AddVehicle = ({route}) => {
 
     useEffect(() => {
         getAllCategory()
-        if(data?.files){
+        if (data?.files) {
             let arr = [...images]
             data?.files?.map((imgs, i) => {
-                arr[i] = {uri: baseURL() + 'public/vehicle/' + imgs.fileName}
+                arr[i] = { uri: baseURL() + 'public/vehicle/' + imgs.fileName }
             })
             setImages(arr)
         }
@@ -130,117 +140,183 @@ const AddVehicle = ({route}) => {
         )
     }
 
+    async function requestLocationPermission() {
+        try {
+            const granted = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+
+            if (granted) {
+                console.log("You can use the ACCESS_FINE_LOCATION")
+
+                Geolocation.getCurrentPosition(
+                    //Will give you the current location
+                    async (position) => {
+                        //getting the Longitude from the location json
+                        const currentLongitude = JSON.stringify(position.coords.longitude);
+
+                        //getting the Latitude from the location json
+                        const currentLatitude = JSON.stringify(position.coords.latitude);
+
+                        const detailLocation = await getDetailsByLatLong(currentLatitude, currentLongitude)
+                        const address = detailLocation?.address
+                        setAllValues(prevState => {
+                            const prevLoc = { address1: prevState?.road, city: prevState?.city, pinCode: prevState?.pinCode, country: prevState?.country, latitude: prevState?.latitude, longitude: prevState?.longitude }
+                            let customObj = {}
+                            Object.keys(prevLoc).map(itkes => {
+                                if(JSON.stringify(prevLoc?.[itkes]?.length) > 0){
+                                    customObj = {...customObj, [itkes]: prevLoc[itkes]}
+                                } else {
+                                    if(itkes == "latitude"){
+                                        customObj = {...customObj, [itkes]: currentLatitude}
+                                    }else if (itkes == "longitude"){
+                                        customObj = {...customObj, [itkes]: currentLongitude}
+                                    }else if (itkes == "pinCode"){
+                                        customObj = {...customObj, [itkes]: address?.postcode}
+                                    }else if (itkes == "address1"){
+                                        customObj = {...customObj, [itkes]: address?.road}
+                                    }else if (itkes == "address2"){
+                                        customObj = {...customObj, [itkes]: allValues?.address2}
+                                    }else {
+                                        customObj = {...customObj, [itkes]: address[itkes]}
+                                    }
+                                } 
+                            })
+                            return {...prevState, ...customObj}
+                        })
+
+                    }, (error) => alert(error.message), {
+                    enableHighAccuracy: true, timeout: 20000, maximumAge: 1000
+                }
+                );
+            }
+            else {
+                alert("Locatin access denied!")
+                console.log("ACCESS_FINE_LOCATION permission denied")
+            }
+        } catch (err) {
+            console.warn(err)
+        }
+    }
+
+
+    useEffect(() => {
+        if (currStep == 3) {
+            requestLocationPermission()
+        }
+    }, [currStep])
+
 
     return (
         <>
-        <AppHeader ui2 name={data ? "Update Vehicle" : "Add Vehicle"}/>
-        <View style={{ padding: 15, backgroundColor: appstyle.pri, flex: 1 }}>
-            <CustomStepper currStep={currStep} setStep={setCurrStep} />
-            <ScrollView style={{ marginTop: 20 }}>
-                {currStep == 3 && (
-                    <>
-                        <AppTextInput setter={setAllValues} name="address1" allValues={allValues} label={"house no. / flat / area / block"} mode="outlined" />
-                        <AppTextInput setter={setAllValues} name="address2" allValues={allValues} label={`landmark / state`} mode="outlined" />
-                        <AppTextInput setter={setAllValues} name="pinCode" allValues={allValues} label={"Pin Code"} keyboardType="number-pad" maxLength={6} mode="outlined" />
-                        <AppTextInput setter={setAllValues} style={{height: 200}} multiline name="decsription" allValues={allValues} label={"Vehicle Description"} mode="outlined" />
-                        <View style={{ flexDirection: 'row', width: '100%' }}>
-                            <AppButton icon={'arrow-left'}  outlined onPress={() => setCurrStep(currStep - 1)} style={{ marginTop: 20, marginRight: 10, width: Device_Width / 2 - 20, borderWidth: 1, borderColor: appstyle.tri }}>
-                                Previous
-                            </AppButton>
-                            <AppButton icon={'check'} onPress={() => addNewVehicle()} loading={isLoading} style={{ marginTop: 20, width: Device_Width / 2 - 20 }}>
-                                Submit
-                            </AppButton>
-                        </View>
-                    </>
-                )}
-                {currStep == 2 && (
-                    <>
-                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-                            {images?.map((imgs, index) => (
-                                <AddPictures data={images} setter={setImages} index={index} onPress={(newData) => { }} uri={imgs?.uri} />
-                            ))}
-                        </View>
-                        <View style={{ flexDirection: 'row', width: '100%' }}>
-                            <AppButton icon={'arrow-left'} outlined onPress={() => setCurrStep(currStep - 1)} style={{ marginTop: 20, marginRight: 10, width: Device_Width / 2 - 20, borderWidth: 1, borderColor: appstyle.tri }}>
-                                Previous
-                            </AppButton>
-                            <AppButton onPress={() => setCurrStep(currStep + 1)} style={{ marginTop: 20, width: Device_Width / 2 - 20 }}>
+            <AppHeader ui2 name={data ? "Update Vehicle" : "Add Vehicle"} />
+            <View style={{ padding: 15, backgroundColor: appstyle.pri, flex: 1 }}>
+                <CustomStepper currStep={currStep} setStep={setCurrStep} />
+                <ScrollView style={{ marginTop: 20 }}>
+                    {currStep == 3 && (
+                        <>
+                            <AppTextInput setter={setAllValues} name="address1" allValues={allValues} label={"house no. / flat / area / block"} mode="outlined" />
+                            <AppTextInput setter={setAllValues} name="address2" allValues={allValues} label={`landmark / state`} mode="outlined" />
+                            <AppTextInput setter={setAllValues} name="pinCode" allValues={allValues} label={"Pin Code"} keyboardType="number-pad" maxLength={6} mode="outlined" />
+                            <AppTextInput setter={setAllValues} name="city" allValues={allValues} label={"City"} mode="outlined" />
+                            <AppTextInput setter={setAllValues} name="country" allValues={allValues} label={"Country"} mode="outlined" />
+                            <AppTextInput setter={setAllValues} style={{ height: 200 }} multiline name="description" allValues={allValues} label={"Vehicle Description"} mode="outlined" />
+                            <View style={{ flexDirection: 'row', width: '100%' }}>
+                                <AppButton icon={'arrow-left'} outlined onPress={() => setCurrStep(currStep - 1)} style={{ marginTop: 20, marginRight: 10, width: Device_Width / 2 - 20, borderWidth: 1, borderColor: appstyle.tri }}>
+                                    Previous
+                                </AppButton>
+                                <AppButton icon={'check'} onPress={() => addUpdateVehicle()} loading={isLoading} style={{ marginTop: 20, width: Device_Width / 2 - 20 }}>
+                                    Submit
+                                </AppButton>
+                            </View>
+                        </>
+                    )}
+                    {currStep == 2 && (
+                        <>
+                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+                                {images?.map((imgs, index) => (
+                                    <AddPictures data={images} setter={setImages} index={index} onPress={(newData) => { }} uri={imgs?.uri} />
+                                ))}
+                            </View>
+                            <View style={{ flexDirection: 'row', width: '100%' }}>
+                                <AppButton icon={'arrow-left'} outlined onPress={() => setCurrStep(currStep - 1)} style={{ marginTop: 20, marginRight: 10, width: Device_Width / 2 - 20, borderWidth: 1, borderColor: appstyle.tri }}>
+                                    Previous
+                                </AppButton>
+                                <AppButton onPress={() => setCurrStep(currStep + 1)} style={{ marginTop: 20, width: Device_Width / 2 - 20 }}>
+                                    Next
+                                </AppButton>
+                            </View>
+                        </>
+                    )}
+
+                    {currStep == 1 && (
+                        <>
+                            <AppTextInput setter={setAllValues} name="name" allValues={allValues} label={"Vehicle Name"} mode="outlined" />
+                            <AppDropDown
+                                setter={setAllValues}
+                                name="vehicleCategory"
+                                allValues={allValues}
+                                data={categoryList}
+                                labelField={'name'}
+                                valueField={'name'}
+                                label={"Vehicle Category"}
+                            />
+                            <View>
+                                <AppText style={{ fontWeight: 'bold', paddingVertical: 10, marginTop: 10 }}>Fuel Type</AppText>
+                                <View style={{ flexWrap: 'wrap', flexDirection: 'row' }}>
+                                    <CustomChip
+                                        keyValue={'fuelType'}
+                                        name={"petrol"}
+                                        style={{ marginLeft: 4 }}
+                                        onPress={(val) => handleChange("fuelType", val)}
+                                        allValues={allValues}>Petrol</CustomChip>
+                                    <CustomChip
+                                        keyValue={'fuelType'}
+                                        style={{ marginLeft: 10 }}
+                                        onPress={(val) => handleChange("fuelType", val)}
+                                        name={"diesel"}
+                                        allValues={allValues}>Diesel</CustomChip>
+                                    <CustomChip
+                                        keyValue={'fuelType'}
+                                        style={{ marginLeft: 10 }}
+                                        onPress={(val) => handleChange("fuelType", val)}
+                                        name={"electric"}
+                                        allValues={allValues}>Electric</CustomChip>
+                                    <CustomChip
+                                        keyValue={'fuelType'}
+                                        style={{ marginLeft: 10 }}
+                                        onPress={(val) => handleChange("fuelType", val)}
+                                        name={"CNG"}
+                                        allValues={allValues}>CNG</CustomChip>
+                                </View>
+                            </View>
+                            <AppTextInput setter={setAllValues} name="vehicleNo" allValues={allValues} label={"Vehicle No"} mode="outlined" />
+
+                            <View>
+                                <AppText style={{ fontWeight: 'bold', paddingVertical: 10, marginTop: 10 }}>Transmission</AppText>
+                                <View style={{ flexWrap: 'wrap', flexDirection: 'row' }}>
+                                    <CustomChip
+                                        icon={'fuel'}
+                                        style={{ marginLeft: 4 }}
+                                        keyValue={'transmission'}
+                                        name={"manual"}
+                                        onPress={(val) => handleChange("transmission", val)}
+                                        allValues={allValues}>Manual</CustomChip>
+                                    <CustomChip
+                                        keyValue={'transmission'}
+                                        style={{ marginLeft: 10 }}
+                                        onPress={(val) => handleChange("transmission", val)}
+                                        name={"automatic"}
+                                        allValues={allValues}>Automatic</CustomChip>
+                                </View>
+                            </View>
+                            <AppTextInput setter={setAllValues} name="cost" allValues={allValues} label={`Cost "Per hour"`} inputMode="numeric" mode="outlined" />
+                            <AppButton onPress={() => setCurrStep(currStep + 1)} style={{ marginTop: 20 }}>
                                 Next
                             </AppButton>
-                        </View>
-                    </>
-                )}
+                        </>
+                    )}
+                </ScrollView>
 
-                {currStep == 1 && (
-                    <>
-                        <AppTextInput setter={setAllValues} name="name" allValues={allValues} label={"Vehicle Name"} mode="outlined" />
-                        <AppDropDown
-                            setter={setAllValues}
-                            name="vehicleCategory"
-                            allValues={allValues}
-                            data={categoryList}
-                            labelField={'name'}
-                            valueField={'name'}
-                            label={"Vehicle Category"}
-                        />
-                        <View>
-                            <AppText style={{ fontWeight: 'bold', paddingVertical: 10, marginTop: 10 }}>Fuel Type</AppText>
-                            <View style={{ flexWrap: 'wrap', flexDirection: 'row' }}>
-                                <CustomChip
-                                    keyValue={'fuelType'}
-                                    name={"petrol"}
-                                    style={{ marginLeft: 4 }}
-                                    onPress={(val) => handleChange("fuelType", val)}
-                                    allValues={allValues}>Petrol</CustomChip>
-                                <CustomChip
-                                    keyValue={'fuelType'}
-                                    style={{ marginLeft: 10 }}
-                                    onPress={(val) => handleChange("fuelType", val)}
-                                    name={"diesel"}
-                                    allValues={allValues}>Diesel</CustomChip>
-                                <CustomChip
-                                    keyValue={'fuelType'}
-                                    style={{ marginLeft: 10 }}
-                                    onPress={(val) => handleChange("fuelType", val)}
-                                    name={"electric"}
-                                    allValues={allValues}>Electric</CustomChip>
-                                <CustomChip
-                                    keyValue={'fuelType'}
-                                    style={{ marginLeft: 10 }}
-                                    onPress={(val) => handleChange("fuelType", val)}
-                                    name={"CNG"}
-                                    allValues={allValues}>CNG</CustomChip>
-                            </View>
-                        </View>
-                        <AppTextInput setter={setAllValues} name="vehicleNo" allValues={allValues} label={"Vehicle No"} mode="outlined" />
-
-                        <View>
-                            <AppText style={{ fontWeight: 'bold', paddingVertical: 10, marginTop: 10 }}>Transmission</AppText>
-                            <View style={{ flexWrap: 'wrap', flexDirection: 'row' }}>
-                                <CustomChip
-                                    icon={'fuel'}
-                                    style={{ marginLeft: 4 }}
-                                    keyValue={'transmission'}
-                                    name={"manual"}
-                                    onPress={(val) => handleChange("transmission", val)}
-                                    allValues={allValues}>Manual</CustomChip>
-                                <CustomChip
-                                    keyValue={'transmission'}
-                                    style={{ marginLeft: 10 }}
-                                    onPress={(val) => handleChange("transmission", val)}
-                                    name={"automatic"}
-                                    allValues={allValues}>Automatic</CustomChip>
-                            </View>
-                        </View>
-                        <AppTextInput setter={setAllValues} name="cost" allValues={allValues} label={`Cost "Per hour"`} inputMode="numeric" mode="outlined" />
-                        <AppButton onPress={() => setCurrStep(currStep + 1)} style={{ marginTop: 20 }}>
-                            Next
-                        </AppButton>
-                    </>
-                )}
-            </ScrollView>
-
-        </View>
+            </View>
         </>
     )
 }

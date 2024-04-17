@@ -1,9 +1,11 @@
+import Geolocation from '@react-native-community/geolocation';
 import axios from 'axios';
+import { PermissionsAndroid } from 'react-native';
 
 
 
 export function baseURL() {
-  return "http://192.168.1.7:5000/" // Local
+  return "http://192.168.1.5:5000/" // Local
   // return "https://wheelrents-api.onrender.com/" // Live
 }
 
@@ -69,7 +71,29 @@ const getCoordinates = async (locationString) => {
   }
 };
 
-const calculateDistance = (coords1, coords2) => {
+
+export const getDetailsByLatLong = async (lat, long) => {
+  try {
+    const response = await axios.get(
+      `https://nominatim.openstreetmap.org/reverse.php?lat=${lat}&lon=${long}&zoom=18&format=jsonv2`
+    );
+
+    if (response.data) {
+      const { lat, lon } = response.data;
+      return { ...response.data };
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error('Error fetching coordinates:', error);
+    return null;
+  }
+};
+
+export const calculateDistance = (coords1, coords2) => {
+  if(!coords1.latitude && !coords2.latitude){
+    return 0
+  }
   const R = 6371; // Earth radius in kilometers
   const dLat = (coords2.latitude - coords1.latitude) * (Math.PI / 180);
   const dLon = (coords2.longitude - coords1.longitude) * (Math.PI / 180);
@@ -84,7 +108,7 @@ const calculateDistance = (coords1, coords2) => {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
   const distance = R * c;
-  return distance;
+  return distance.toFixed(1);
 };
 
 
@@ -102,3 +126,20 @@ export const fetchAndCalculateDistance = async (location1, location2) => {
   }
 };
 
+
+
+export async function requestLocationPermission() {
+  try {
+    let res = {}
+      const granted = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+
+      if (granted) {
+        return true
+      }else {
+        console.warn("Cannot get location")
+        return false
+      }
+    }catch (e) {
+      return false
+    }
+  }

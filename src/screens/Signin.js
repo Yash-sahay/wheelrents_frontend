@@ -13,7 +13,7 @@ import Icon from 'react-native-vector-icons/FontAwesome6'
 import { appstyle } from '../styles/appstyle'
 
 const Signin = () => {
-  const [allValues, setAllValues] = useState({ email: 'yash@gmail.com', password: 'radhekrishna', secureTextEntry: true })
+  const [allValues, setAllValues] = useState({ email: '', phoneNo: '', password: 'radhekrishna', secureTextEntry: true })
   const navigation = useNavigation()
 
   const dispatch = useDispatch()
@@ -51,10 +51,19 @@ const Signin = () => {
             allValues={allValues}
           />
           <AppTextInput
-            right={<TextInput.Icon icon={'account'} />}
+            right={<TextInput.Icon icon={'email'} />}
             mode="outlined"
             label="Email"
             name={'email'}
+            setter={setAllValues}
+            allValues={allValues}
+          />
+          <AppTextInput
+            right={<TextInput.Icon icon={'phone'} />}
+            mode="outlined"
+            label="Phone Number"
+            keyboardType="phone-pad"
+            name={'phoneNo'}
             setter={setAllValues}
             allValues={allValues}
           />

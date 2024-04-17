@@ -18,6 +18,17 @@ export function vehicleAdd({ data }) {
     });
 };
 
+// Add Vehicle By User
+export function updateVehicle({ data }) {
+    console.warn(data)
+    return axiosInstance.post(url + 'update', data, {
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+};
+
 
 // Get All Vehicle List 
 export function getAllVehicleListings({data}) {

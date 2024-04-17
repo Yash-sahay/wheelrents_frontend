@@ -4,7 +4,7 @@ import { Button, Text, Card, TextInput, Icon } from 'react-native-paper'
 import { useDispatch, useSelector } from 'react-redux'
 import { updateUserDetails } from '../redux/reducer/userReducer'
 import { getAllVehicleListings, toggleWishListForUser } from '../axios/axios_services/vehicleService'
-import { amountFormatter, baseURL } from '../../common'
+import { amountFormatter, baseURL, calculateDistance } from '../../common'
 import AppHeader from '../components/AppHeader'
 import AppText from '../components/AppText'
 import { get_vehicle_categories } from '../axios/axios_services/homeService'
@@ -26,7 +26,7 @@ const Device_Width = Dimensions.get('window').width - 50
 const Home = () => {
   const navigation = useNavigation()
   const dispatch = useDispatch();
-  const { role, username } = useSelector(state => state.userReducer);
+  const { role, username, lat, long } = useSelector(state => state.userReducer);
   const [dataList, setDataList] = useState([])
 
 
@@ -122,7 +122,7 @@ const Home = () => {
             data={dataList}
             loop
             firstItem={0}
-            renderItem={({ item, index }) => <CardComponent item={item} key={index} handleAddToWishlist={handleAddToWishlist} navigation={navigation} getAllVehicle={getAllVehicle} />}
+            renderItem={({ item, index }) => <CardComponent latitude={lat} longitude={long} item={item} key={index} handleAddToWishlist={handleAddToWishlist} navigation={navigation} getAllVehicle={getAllVehicle} />}
             sliderWidth={Device_Width + 50}
             itemWidth={Device_Width - 50}
             onSnapToItem={(index) => setActiveSlide(index)}
@@ -211,7 +211,7 @@ const CategoryList = () => {
 
 
 
-function CardComponent ({ item, navigation, handleAddToWishlist }) {
+function CardComponent ({ item, navigation, handleAddToWishlist, latitude, longitude }) {
   const dispatch = useDispatch();
   const styles = {
     card: {
@@ -277,7 +277,8 @@ function CardComponent ({ item, navigation, handleAddToWishlist }) {
     }
   };
 
-  
+  const distance = JSON.stringify(parseInt(item?.latitude)) != "null" ? calculateDistance({latitude, longitude}, {latitude: item?.latitude, longitude: item?.longitude}) + " Km" : "N/A"
+
   return (
     <Card style={styles.card}>
       <Pressable onPress={() => handleAddToWishlist(item)} style={styles.addToWishlistBtn}>
@@ -309,9 +310,9 @@ function CardComponent ({ item, navigation, handleAddToWishlist }) {
         <Text variant="titleLarge" style={styles.cost}>
           ₹{amountFormatter(item?.cost)}/hr
         </Text>
-        {/* <Text variant="bodyMedium" style={styles.title}>
-          {item?.name}
-        </Text> */}
+        <Text variant="bodyMedium" style={{fontWeight: 'bold', color: 'grey'}}>
+            {distance}
+          </Text>
       </Card.Content>
       <Card.Actions style={styles.actions}>
         <AppButton buttonColor={appstyle.priBack} outlined icon={'eye'} onPress={() => navigation.navigate('VehicleDetails', { ...item })}>

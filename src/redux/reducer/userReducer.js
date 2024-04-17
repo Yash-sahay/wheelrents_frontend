@@ -10,6 +10,8 @@ const initalState = {
     pageCounter: 0,
     isOpenDrawer: false,
     notificationCount: 0,
+    lat: null,
+    long: null,
     role: null,
     bookingStartDate: new Date(),
     searchString: "",

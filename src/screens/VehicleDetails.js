@@ -1,4 +1,4 @@
-import { View, Text, FlatList, Dimensions, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native'
+import { View, Text, FlatList, Dimensions, Image, TouchableOpacity, StyleSheet, ScrollView, Linking } from 'react-native'
 import React, { useRef, useState } from 'react'
 import AppHeader from '../components/AppHeader';
 import { Card, Divider } from 'react-native-paper';
@@ -15,6 +15,7 @@ import AppBottomSheet from '../components/AppBottomSheet';
 import AppDatePicker from '../components/AppDatePicker';
 import { createBooking } from '../axios/axios_services/bookingService';
 import { updateLoaderReducer } from '../redux/reducer/loaderReducer';
+import AppMap from '../components/AppMap';
 
 const Device_Width = Dimensions.get('window').width
 const Device_Height = Dimensions.get('window').height
@@ -54,6 +55,22 @@ const VehicleDetails = ({ route }) => {
 
         return Math.round(hoursDifference * data.cost);
     }
+
+
+    function openGps() {
+        var url = `geo:${data?.latitude},${data?.longitude}`
+        openExternalApp(url)
+      }
+      
+      function openExternalApp(url) {
+        Linking.canOpenURL(url).then(supported => {
+          if (supported) {
+            Linking.openURL(url);
+          } else {
+            console.log('Don\'t know how to open URI: ' + url);
+          }
+        });
+      }
 
 
     return (
@@ -121,16 +138,24 @@ const VehicleDetails = ({ route }) => {
                                     <AppText style={{ fontWeight: '900' }}><AntDesign name="swap" size={20} color={appstyle.textBlack} /> </AppText>
                                     <AppText style={{ color: appstyle.textBlack, fontWeight: 'bold' }}>{dateSimplify(bookingEndDate) || "N/A"}</AppText>
                                 </View>
-                                <AppButton style={{ width: 100, marginTop: 10 }} icon={"calendar"} onPress={() => setBottomSheet(true)}>Change</AppButton>
+                                <AppButton style={{ width: 110, marginTop: 10, borderWidth: 1, borderColor: 'grey' }} outlined icon={"calendar"} onPress={() => setBottomSheet(true)}>Change</AppButton>
                             </CustomTile>
-                            <CustomTile>
+                            <CustomTile 
+                            onPress={() => {}}
+                            // onPress={openGps}
+                            >
 
                                 <AppText style={{ fontWeight: 'bold', fontSize: 18, color: appstyle.textBlack }}><FontAwesome size={18} name="map-pin" /> Address</AppText>
-                                <AppText style={{ color: appstyle.textBlack }} >{data.address1 || "N/A"}, {data.address2 || "N/A"}</AppText>
+                                {/* <AppMap
+                                lat={data?.latitude}
+                                long={data?.longitude}
+                                /> */}
+                                <AppText style={{ color: appstyle.textBlack }} >{data?.address1 || "N/A"}, {data?.address2 || "N/A"}, {data?.city || "N/A"}, {data?.country || "N/A"}</AppText>
+                                <AppButton style={{ width: 140, marginTop: 10, borderWidth: 1, borderColor: 'grey' }} outlined icon={"map"} onPress={openGps} >Open in map</AppButton>
                             </CustomTile>
                             <CustomTile>
                                 <AppText style={{ fontWeight: 'bold', fontSize: 18, color: appstyle.textBlack }}><FontAwesome size={18} name="briefcase" /> Desription</AppText>
-                                <AppText style={{ color: appstyle.textBlack }} >{data.description || "N/A"}</AppText>
+                                <AppText style={{ color: appstyle.textBlack }}  >{data?.description || "N/A"}</AppText>
                             </CustomTile>
                         </View>
                     </View>
@@ -150,8 +175,8 @@ const VehicleDetails = ({ route }) => {
 
 
 
-const CustomTile = ({ children, mode = null }) => {
-    return <View style={{ borderWidth: 1, borderColor: '#f4f4f2', elevation: 0, marginBottom: 10, shadowColor: appstyle.shadowColor, backgroundColor: appstyle.pri, padding: 10, borderRadius: 20 }}>
+const CustomTile = ({ children, mode = null, onPress }) => {
+    return <View onTouchEnd={onPress} style={{ borderWidth: 1, borderColor: '#f4f4f2', elevation: 0, marginBottom: 10, shadowColor: appstyle.shadowColor, backgroundColor: appstyle.pri, padding: 10, borderRadius: 20 }}>
         {children}
     </View>
 }

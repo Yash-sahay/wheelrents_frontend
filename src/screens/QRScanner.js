@@ -6,9 +6,12 @@ import AppHeader from '../components/AppHeader';
 import { appstyle } from '../styles/appstyle';
 import { booking_status_change } from '../axios/axios_services/bookingService';
 import AppButton from '../components/AppButton';
+import { useNavigation } from '@react-navigation/native';
 
-const QRScanner = ({ navigation }) => {
+
+const QRScanner = ({  }) => {
   const cameraRef = useRef(null);
+  const navigation = useNavigation()
 
   // useEffect(() => {
   //   const startScanning = async () => {
@@ -110,8 +113,8 @@ const QRScanner = ({ navigation }) => {
               style={{ width: '100%', height: 500,marginTop: -100, }}
               source={require('../../assets/images/success.gif')}
             />
-            <View style={{paddingHorizontal: 30, width: '100%', marginTop: -60,}}> 
-              <AppButton icon={'book-play'} onPress={() => navigation.navigate("Booking")}>View Bookings</AppButton>
+            <View onTouchEnd={() => navigation.navigate("Booking")} style={{paddingHorizontal: 30, width: '100%', marginTop: -60, zIndex: 100}}> 
+              <AppButton icon={'book-play'} >View Bookings</AppButton>
               <AppText style={{marginTop: -30, textAlign: 'center', fontWeight: "600", fontSize: 16, padding: 40, color: appstyle.textSec }}>We wish you a safe and enjoyable journey!</AppText>
             </View>
           </>

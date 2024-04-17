@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, Pressable, Dimensions, StyleSheet, StatusBar, TouchableOpacity } from 'react-native';
+import { View, FlatList, Pressable, Dimensions, StyleSheet, StatusBar, TouchableOpacity, PermissionsAndroid } from 'react-native';
 import { Searchbar } from 'react-native-paper'; // Import Searchbar from react-native-paper
 import { appstyle } from '../styles/appstyle';
 import { searchApi } from '../axios/axios_services/homeService';
@@ -8,7 +8,7 @@ import Fontisto from 'react-native-vector-icons/Fontisto'
 import { Text, Card } from 'react-native-paper'
 import AppHeader from '../components/AppHeader'
 import AppText from '../components/AppText'
-import { amountFormatter, baseURL } from '../../common';
+import { amountFormatter, baseURL, calculateDistance, requestLocationPermission } from '../../common';
 import AppButton from '../components/AppButton';
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import { toggleWishListForUser } from '../axios/axios_services/vehicleService';
@@ -16,12 +16,13 @@ import { updateLoaderReducer } from '../redux/reducer/loaderReducer';
 import { useDispatch, useSelector } from 'react-redux'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import FontAwesome from 'react-native-vector-icons/FontAwesome6';
+import Geolocation from '@react-native-community/geolocation';
 
 
 
 const SearchResultScreen = ({ navigation, route }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const { bookingStartDate, bookingEndDate } = useSelector(state => state.userReducer);
+  const { bookingStartDate, bookingEndDate, lat, long } = useSelector(state => state.userReducer);
 
   const [searchResults, setSearchResults] = useState([]);
 
@@ -44,6 +45,7 @@ const SearchResultScreen = ({ navigation, route }) => {
     }
   }
 
+
   useEffect(() => {
     searchDatabase()
   }, [route?.params?.searchString])
@@ -62,6 +64,8 @@ const SearchResultScreen = ({ navigation, route }) => {
       console.error(error)
     }
   };
+
+
 
 
 
@@ -98,11 +102,13 @@ const SearchResultScreen = ({ navigation, route }) => {
       {/* <AppText style={{ fontWeight: 'bold', paddingHorizontal: 20, fontSize: 20, marginBottom: 30, marginBottom: 5, color: appstyle.textSec }}><Icon name="search" size={20} />  Showing result for "{route?.params?.searchString}"</AppText> */}
       <FlatList
         data={searchResults}
-        style={{flex:1}}
-        contentContainerStyle={{paddingBottom: 100}}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
         keyExtractor={item => item?._id?.toString()} // Assuming each item has a unique id
         renderItem={({ item }) => (
           <CardComponent
+            latitude={lat}
+            longitude={long}
             item={item}
             navigation={navigation}
             handleAddToWishlist={handleAddToWishlist} // Ensure this function is defined and passed correctly
@@ -156,7 +162,7 @@ const styles = StyleSheet.create({
 
 
 
-export function CardComponent({ item, navigation, handleAddToWishlist }) {
+export function CardComponent({ item, navigation, handleAddToWishlist, latitude, longitude }) {
   // const dispatch = useDispatch();
   const styles = {
     card: {
@@ -226,6 +232,7 @@ export function CardComponent({ item, navigation, handleAddToWishlist }) {
     }
   };
 
+  const distance = JSON.stringify(parseInt(item?.latitude)) != "null" ? calculateDistance({latitude, longitude}, {latitude: item?.latitude, longitude: item?.longitude}) + " Km" : "N/A"
 
   return (
     <Card elevation={20} style={styles.card}>
@@ -260,11 +267,11 @@ export function CardComponent({ item, navigation, handleAddToWishlist }) {
           {item?.name}
         </Text>
         <Text variant="titleLarge" style={styles.cost}>
-          ₹{amountFormatter(item?.cost)}/hr
+          ₹{amountFormatter(item?.cost)}/hr 
         </Text>
-        {/* <Text variant="bodyMedium" style={styles.title}>
-            {item?.name}
-          </Text> */}
+        <Text variant="bodyMedium" style={{fontWeight: 'bold'}}>
+            {distance}
+          </Text>
       </Card.Content>
       <Card.Actions style={styles.actions}>
         <AppButton buttonColor={appstyle.tri} icon={'eye'} onPress={() => navigation.navigate('VehicleDetails', { ...item })}>

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, Image, ProgressBarAndroid, StyleSheet, FlatList, Pressable, PermissionsAndroid } from 'react-native';
+import { View, Text, TouchableOpacity, Image, ProgressBarAndroid, StyleSheet, FlatList, Pressable, PermissionsAndroid, Linking } from 'react-native';
 import { appstyle } from '../styles/appstyle';
 import AppBottomBar from '../components/AppBottomBar';
 import AppHeader from '../components/AppHeader';
@@ -8,8 +8,9 @@ import AppButton from '../components/AppButton';
 import { MD3Colors, ProgressBar } from 'react-native-paper';
 import Animated from 'react-native-reanimated';
 import { booking_payment, booking_status_change, delete_booking_by_id, getBookingsForHost } from '../axios/axios_services/bookingService';
-import { amountFormatter, baseURL, calculateTimePercentage, dateSimplify, timeSimplify } from '../../common';
+import { amountFormatter, baseURL, calculateDistance, calculateTimePercentage, dateSimplify, timeSimplify } from '../../common';
 import AntDesign from 'react-native-vector-icons/AntDesign'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
 import {
   useSharedValue,
@@ -55,7 +56,7 @@ const Booking = ({ navigation }) => {
 
 
   const [selectedBookingId, setSelectedBookingId] = useState(null);
-  const { role } = useSelector(state => state.userReducer)
+  const { role, lat, long } = useSelector(state => state.userReducer)
 
   const clientRole = role?.includes("client") ? true : false
 
@@ -67,10 +68,10 @@ const Booking = ({ navigation }) => {
     try {
       setLoader(true)
       let res = null
-      if(isAccept){
+      if (isAccept) {
         const payload1 = { bookingId: id, payment: "pending" }
         res = await booking_status_change(payload1)
-      }else {
+      } else {
         const payload2 = { bookingId: id }
         res = await booking_payment(payload2)
       }
@@ -139,26 +140,65 @@ const Booking = ({ navigation }) => {
 
   // console.log(`Remaining time: ${remainingTime.hours} hours, ${remainingTime.minutes} minutes, ${remainingTime.seconds} seconds`);
 
+  function openGps(data) {
+    var url = `geo:${data?.latitude},${data?.longitude}`
+    openExternalApp(url)
+  }
+  function openPhone(phoneNumber) {
+    var url = `tel:${phoneNumber}`
+    openExternalApp(url)
+  }
 
+  function openExternalApp(url) {
+    Linking.canOpenURL(url).then(supported => {
+      if (supported) {
+        Linking.openURL(url);
+      } else {
+        console.log('Don\'t know how to open URI: ' + url);
+      }
+    });
+  }
 
 
   const renderBookingItem = ({ item }) => {
     // Example usage:
     const endTime = new Date(item?.endDate).getTime(); // Example end time
     const remainingTime = calculateRemainingTime(endTime);
+    const distance = JSON.stringify(parseInt(item?.latitude)) != "null" ? calculateDistance({ latitude: lat, longitude: long }, { latitude: item?.latitude, longitude: item?.longitude }) + " Km" : "N/A"
+
     return (
       <Animated.View style={styles.bookingCard} onTouchEnd={() => handleCardPress(item._id)}>
         <View style={{ width: '100%' }}>
-          <View style={{ width: '100%', flexDirection: 'row', padding: 15 }}>
+          <View style={{ width: '100%', flexDirection: 'row', padding: 15, borderBottomWidth: 1, paddingBottom: 10, borderColor: '#f4f4f2', justifyContent: 'flex-start' }}>
+          <View>
             <Image source={{ uri: baseURL() + "public/vehicle/" + item?.images?.[0]?.fileName }} style={styles.carImage} />
+          </View>
+
             <View style={styles.bookingInfo}>
+          <AppText style={{borderWidth: 1, borderStyle: 'dashed', color: appstyle.textSec, borderColor: 'grey', paddingHorizontal: 2, backgroundColor: '#f4f4f2', borderRadius: 5, fontWeight: '700'}}> {item?.vehicleNo} </AppText>
               <AppText style={styles.carDescription}>{item?.name}</AppText>
+              {clientRole ? <AppText style={{ fontWeight: 'bold', color: appstyle.textSec, fontSize: 12, marginBottom: 5 }}>Hosted By <AppText style={{ color: appstyle.textSec, textTransform: 'capitalize' }}>{item?.hostName}</AppText></AppText> : (
               <AppText style={{ fontWeight: 'bold', color: appstyle.textSec, fontSize: 12, marginBottom: 5 }}>Booked By <AppText style={{ color: appstyle.textSec, textTransform: 'capitalize' }}>{item?.clientName}</AppText></AppText>
+              )}
 
               <AppText variant="titleLarge" style={{ color: '#008542', fontWeight: '900', fontSize: 25 }}>₹{amountFormatter(item?.totalPrice)}</AppText>
             </View>
           </View>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15 }}>
+          {clientRole && (
+            <>
+              {item?.bookingStatus != "pending" && (
+                <TouchableOpacity onPress={() => openPhone(item?.hostNumber)} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15, marginTop: 10, borderBottomWidth: 1, paddingBottom: 10, borderColor: '#f4f4f2' }}>
+                  <AppText style={{ color: appstyle.textBlack, fontWeight: '900', fontSize: 16 }}><MaterialCommunityIcons name="phone-dial" size={18} color={appstyle.textBlack} />  {item?.hostNumber}</AppText>
+                  <MaterialCommunityIcons name="chevron-right" size={20} color={appstyle.textBlack} />
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity onPress={() => openGps(item)} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15, paddingTop: 10, borderBottomWidth: 1, paddingBottom: 10, borderColor: '#f4f4f2' }}>
+                <AppText style={{ color: appstyle.textBlack, fontWeight: '900', fontSize: 16 }}><MaterialCommunityIcons name="map-marker-distance" size={20} color={appstyle.textBlack} />  {distance}</AppText>
+                <MaterialCommunityIcons name="chevron-right" size={20} color={appstyle.textBlack} />
+              </TouchableOpacity>
+            </>
+          )}
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15, paddingTop: 10 }}>
             <AppText style={{ fontWeight: 'bold', fontSize: 14, color: appstyle.textSec }}>Pick Up</AppText>
             <AppText style={{ fontWeight: 'bold', fontSize: 14, color: appstyle.textSec }}>Drop Off</AppText>
           </View>
@@ -183,7 +223,7 @@ const Booking = ({ navigation }) => {
                 <View style={{ flexDirection: 'row', justifyContent: 'flex-end', padding: 10, borderTopWidth: 1, borderColor: '#f4f4f2' }}>
                   <AppButton icon="close" style={{ paddingHorizontal: 10 }} textColor={'tomato'} buttonColor={'white'} onPress={() => setModalValue(values => ({ ...values, bookingId: item?._id, name: item?.name, visible: true }))} outlined>Reject</AppButton>
                   {item?.payment == "pending" ? (
-                    <AppButton icon="check" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={'grey'}  loading={true}>Awaiting user payment</AppButton>
+                    <AppButton icon="check" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={'grey'} loading={true}>Awaiting user payment</AppButton>
                   ) : (
                     <AppButton icon="check" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={'green'} onPress={() => handleApprove(item?._id, true)}>Accept</AppButton>
                   )}
@@ -218,7 +258,7 @@ const Booking = ({ navigation }) => {
                   ) : (
                     <AppText style={{ fontWeight: '600', color: 'hsl(43,85%,33%)', fontSize: 12, }}>● Waiting for the vehicle owner to accept the request...</AppText>
                   )}
-                  
+
                   {/* <AppButton icon="check" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={'#00a400'} onPress={() => handleApprove(item?._id)}>Accept</AppButton> */}
                 </View>
               )}
@@ -302,7 +342,7 @@ const Tab = ({ title, onPress, icon, isActive }) => {
   );
 };
 
-export function BookingTabs ({ children, onChange = () => { }, tabs }) {
+export function BookingTabs({ children, onChange = () => { }, tabs }) {
   let newTab = tabs || TABS
   const [activeTab, setActiveTab] = useState(newTab[0].id);
   const translateX = useSharedValue(0);
@@ -389,6 +429,8 @@ const styles = StyleSheet.create({
   },
   bookingInfo: {
     flex: 1,
+    display: 'flex',
+    alignItems: 'flex-start'
   },
   carDescription: {
     fontSize: 16,
