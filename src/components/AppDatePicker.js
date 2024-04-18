@@ -27,27 +27,27 @@ export default AppDatePicker = (props) => {
 
     const [value, setValue] = React.useState('startDate');
     const [tabValue, setTabValue] = useState(TABS[0]);
-
-    // Add 5 hours to the current date
-    let currentDate = new Date(new Date().getTime() + (5 * 60 * 60 * 1000));
-
-    console.log(currentDate);
-    const [loacalDates, setLocalDates] = useState({ bookingEndDate: new Date(), bookingStartDate: currentDate })
-
+    
     const onDateChange = (date, type) => {
         if (type === 'END_DATE') {
             dispatch(updateUserDetails({ bookingEndDate: date }))
-            setLocalDates({ bookingEndDate: date })
         } else {
+            console.warn("start-date-->",date)
             dispatch(updateUserDetails({ bookingStartDate: date }))
-            setLocalDates({ bookingStartDate: date })
         }
     }
 
 
-    // Add 5 hours to the current date
-    const startDate = bookingStartDate ? new Date(bookingStartDate) : new Date();
-    const endDate = bookingEndDate ? new Date(bookingEndDate) : new Date(new Date().getTime() + 5 * 60 * 60 * 1000);
+    const minimumStartDate = new Date(new Date().getTime() + 5 * 60 * 60 * 1000);
+    const minimubEndDate = new Date(new Date().getTime() + 10 * 60 * 60 * 1000);
+
+
+    const properDate = (date, fallBackDate) => {
+        if (Object.prototype.toString.call(date) === '[object Date]') {
+            return date;
+        }
+        return fallBackDate;
+    }
 
     return (
             <BookingTabs tabs={TABS} onChange={(tabVal) => setTabValue(prev => ({ ...tabVal }))}>
@@ -57,14 +57,14 @@ export default AppDatePicker = (props) => {
                 <>
                     <AppText style={styles.text}>Select pick-up date</AppText>
                     <View style={styles.date}>
-                        <DatePicker androidVariant="nativeAndroid" date={loacalDates.bookingStartDate} onDateChange={(date) => onDateChange(date, 'START_DATE')} />
+                        <DatePicker minimumDate={minimumStartDate} date={properDate(bookingStartDate, minimumStartDate)} onDateChange={(date) => onDateChange(date, 'START_DATE')} />
                     </View>
                 </>
             ) : (
                 <>
                     <AppText style={styles.text}>Select drop-off date</AppText>
                     <View style={styles.date}>
-                        <DatePicker androidVariant="nativeAndroid" date={loacalDates.bookingEndDate} onDateChange={(date) => onDateChange(date, 'END_DATE')} />
+                        <DatePicker minimumDate={minimubEndDate} date={properDate(bookingEndDate, minimubEndDate)} onDateChange={(date) => onDateChange(date, 'END_DATE')} />
                     </View>
                 </>
             )}

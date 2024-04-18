@@ -23,6 +23,8 @@ import SearchResultScreen from '../screens/Result';
 import Withdraw from '../screens/host/Withdraw';
 import { updateUserDetails } from '../redux/reducer/userReducer';
 import Geolocation from '@react-native-community/geolocation';
+import { requestLocationPermission } from '../../common';
+import { updateLocationReducer } from '../redux/reducer/locationReducer';
 
 const Stack = createStackNavigator();
 const { width } = Dimensions.get("window")
@@ -32,8 +34,21 @@ const Navigation = () => {
 
   // const navigation = useNavigation()
   const { isLoggedIn } = useSelector(state => state?.userReducer);
-  const { role } = useSelector(state => state.userReducer)
-  const dispatch = useDispatch()
+  const { role, bookingStartDate, bookingEndDate } = useSelector(state => state.userReducer)
+  const dispatch = useDispatch() 
+  
+  useEffect(() => {
+    const startDate = new Date(new Date().getTime() + 5 * 60 * 60 * 1000);
+    const endDate = new Date(new Date().getTime() + 10 * 60 * 60 * 1000);
+    dispatch(updateUserDetails({bookingEndDate: endDate, bookingStartDate: startDate }))
+    
+    requestLocationPermission(updateLocationDetails)
+  }, [])
+
+  const updateLocationDetails =(locationObj) => {
+    dispatch(updateLocationReducer({...locationObj}))
+  }
+  
 
   useEffect(() => {
     async function requestLocationPermission() {

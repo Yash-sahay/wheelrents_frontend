@@ -39,17 +39,18 @@ const Booking = ({ navigation }) => {
   const [tabValue, setTabValue] = useState(TABS[0]);
   const [modalValue, setModalValue] = useState({});
   const [loader, setLoader] = useState(false)
+  const [hourCount, setHourCount] = useState(0)
   // ref
   const bottomSheetRef = useRef(null);
   const [bottomSheet, setBottomSheet] = useState(false);
-  const [qrValues, setQrValues] = useState({})
+  const [bottomModal, setBottomModal] = useState({})
 
   const handleClosePress = () => {
     setBottomSheet(false);
     bottomSheetRef.current?.close();
   };
-  const handleOpenPress = (item) => {
-    setQrValues(item)
+  const handleOpenPress = (item, tripExtend) => {
+    setBottomModal({ ...item, tripExtend: tripExtend ? true : false })
     setBottomSheet(true);
     bottomSheetRef.current?.open();
   };
@@ -169,22 +170,22 @@ const Booking = ({ navigation }) => {
     return (
       <Animated.View style={styles.bookingCard} onTouchEnd={() => handleCardPress(item._id)}>
         <View style={{ width: '100%' }}>
-          <View style={{ width: '100%', flexDirection: 'row', padding: 15, borderBottomWidth: 1, paddingBottom: 10, borderColor: '#f4f4f2', justifyContent: 'flex-start' }}>
-          <View>
-            <Image source={{ uri: baseURL() + "public/vehicle/" + item?.images?.[0]?.fileName }} style={styles.carImage} />
-          </View>
+          <View style={{ width: '100%', flexDirection: 'row', padding: 15, borderBottomWidth: selectedBookingId === item?._id ? 1 : 0, paddingBottom: 10, borderColor: '#f4f4f2', justifyContent: 'flex-start' }}>
+            <View>
+              <Image source={{ uri: baseURL() + "public/vehicle/" + item?.images?.[0]?.fileName }} style={styles.carImage} />
+            </View>
 
             <View style={styles.bookingInfo}>
-          <AppText style={{borderWidth: 1, borderStyle: 'dashed', color: appstyle.textSec, borderColor: 'grey', paddingHorizontal: 2, backgroundColor: '#f4f4f2', borderRadius: 5, fontWeight: '700'}}> {item?.vehicleNo} </AppText>
+              <AppText style={{ borderWidth: 1, borderStyle: 'dashed', color: appstyle.textSec, borderColor: 'grey', paddingHorizontal: 2, backgroundColor: '#f4f4f2', borderRadius: 5, fontWeight: '700' }}> {item?.vehicleNo} </AppText>
               <AppText style={styles.carDescription}>{item?.name}</AppText>
               {clientRole ? <AppText style={{ fontWeight: 'bold', color: appstyle.textSec, fontSize: 12, marginBottom: 5 }}>Hosted By <AppText style={{ color: appstyle.textSec, textTransform: 'capitalize' }}>{item?.hostName}</AppText></AppText> : (
-              <AppText style={{ fontWeight: 'bold', color: appstyle.textSec, fontSize: 12, marginBottom: 5 }}>Booked By <AppText style={{ color: appstyle.textSec, textTransform: 'capitalize' }}>{item?.clientName}</AppText></AppText>
+                <AppText style={{ fontWeight: 'bold', color: appstyle.textSec, fontSize: 12, marginBottom: 5 }}>Booked By <AppText style={{ color: appstyle.textSec, textTransform: 'capitalize' }}>{item?.clientName}</AppText></AppText>
               )}
 
               <AppText variant="titleLarge" style={{ color: '#008542', fontWeight: '900', fontSize: 25 }}>₹{amountFormatter(item?.totalPrice)}</AppText>
             </View>
           </View>
-          {clientRole && (
+          {(clientRole && selectedBookingId === item?._id) && (
             <>
               {item?.bookingStatus != "pending" && (
                 <TouchableOpacity onPress={() => openPhone(item?.hostNumber)} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15, marginTop: 10, borderBottomWidth: 1, paddingBottom: 10, borderColor: '#f4f4f2' }}>
@@ -214,7 +215,8 @@ const Booking = ({ navigation }) => {
 
           <View style={{ paddingHorizontal: 20, paddingVertical: 10 }}>
             {item?.bookingStatus == "started" && <ProgressBar
-              style={styles.progressBar}
+
+              style={[styles.progressBar, remainingTime.hours < 5 && { backgroundColor: 'tomato' }]}
               progress={calculateTimePercentage(new Date(item?.startDate), new Date(item?.endDate))} color={'black'} />}
           </View>
           {(!clientRole && selectedBookingId === item?._id && tabValue.title != "Completed") && (
@@ -262,10 +264,16 @@ const Booking = ({ navigation }) => {
                   {/* <AppButton icon="check" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={'#00a400'} onPress={() => handleApprove(item?._id)}>Accept</AppButton> */}
                 </View>
               )}
+              {remainingTime?.hours < 5 && (
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', padding: 10, borderTopWidth: 1, borderColor: '#f4f4f2' }}>
+                  <View>
+                    <AppButton icon="chevron-triple-right" style={{ paddingHorizontal: 10 }} textColor={'white'} onPress={() => { handleOpenPress(item, 'tripExtend') }}>Extend your trip</AppButton>
+                  </View>
+                </View>
+              )}
               {item?.bookingStatus == "started" && (
                 <View style={{ flexDirection: 'row', justifyContent: 'center', padding: 10, borderTopWidth: 1, borderColor: '#f4f4f2' }}>
-                  <AppText style={{ fontWeight: '800', fontSize: 12, color: appstyle.textSec, textAlign: 'center' }}>{`Trip ending in ${remainingTime.days} days, ${remainingTime.hours} hours, and ${remainingTime.minutes} minutes. `}</AppText>
-                  {/* <AppButton icon="check" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={'#00a400'} onPress={() => handleApprove(item?._id)}>Accept</AppButton> */}
+                  <AppText style={{ fontWeight: '800', fontSize: 12, color: appstyle.textSec, textAlign: 'center' }}>{`Trip ending in ${remainingTime?.days} days, ${remainingTime?.hours} hours, and ${remainingTime?.minutes} minutes. `}</AppText>
                 </View>
               )}
             </>
@@ -277,19 +285,41 @@ const Booking = ({ navigation }) => {
     )
   };
 
+
   return (
     <>
       <AppBottomSheet bottomSheetRef={bottomSheetRef} snapPoints={['1%', '60%']} bottomSheet={bottomSheet} setBottomSheet={setBottomSheet}>
         <View style={{ flex: 1, alignItems: 'center', padding: 20, paddingTop: 20 }}>
-          <AppText style={{ textAlign: 'center', fontWeight: "700", fontSize: 20, marginBottom: 20, color: appstyle.textBlack, textTransform: 'capitalize' }}><AppText style={{ textTransform: 'none' }}>Scan for</AppText> "{qrValues?.name}"</AppText>
-          <QRCode
-            value={qrValues?._id}
-            logo={{ uri: baseURL() + "public/vehicle/" + qrValues?.images?.[0]?.fileName }}
-            logoSize={20}
-            size={200}
-            logoBackgroundColor={appstyle.priBack}
-          />
-          <AppText style={{ textAlign: 'center', fontWeight: "600", fontSize: 16, padding: 40, paddingTop: 20, color: appstyle.textSec }}>Please scan the QR code from your phone to initiate the trip.</AppText>
+          {bottomModal?.tripExtend ? (
+            <View style={{ width: '100%', alignItems: 'center'}}>
+            <AppText style={{ textAlign: 'center', fontWeight: "700", fontSize: 25, marginBottom: 20, color: appstyle.textBlack, textTransform: 'capitalize' }}>Select extension duration</AppText>
+            <View style={{flexDirection:'row', justifyContent: 'space-around', alignItems: 'center', width: '100%'}}>
+                <TouchableOpacity disabled={hourCount <= 0} onPress={() => setHourCount(hourCount <= 0 ? 0 : hourCount - 1)} style={{backgroundColor: hourCount <= 0 ? appstyle.pri : appstyle.tri, borderWidth: 1, borderColor: "#f4f4f2", borderRadius: 10, marginHorizontal: 20}}>
+                  <MaterialCommunityIcons size={50} color={hourCount <= 0 ? appstyle.textSec : appstyle.pri} name="minus" />
+                </TouchableOpacity>
+                <View style={{backgroundColor: "#f4f4f2", width: 100, height: 100, borderRadius: 20, alignItems: 'center', justifyContent: 'center'}}>
+                  <AppText style={{fontSize: 50}}>{hourCount}</AppText>
+                </View>
+                <TouchableOpacity disabled={hourCount >= 5} onPress={() => setHourCount(hourCount >= 5 ? 5 : hourCount + 1)} style={{backgroundColor: hourCount >= 5 ? appstyle.pri : appstyle.tri, borderWidth: 1, borderColor: "#f4f4f2", borderRadius: 10, marginHorizontal: 20}}>
+                  <MaterialCommunityIcons size={50} color={hourCount >= 5 ? appstyle.textSec : appstyle.pri} name="plus" />
+                </TouchableOpacity>
+            </View>
+            <AppButton icon="chevron-triple-right" style={{ padding: 10, borderWidth: 1, borderColor: "#f4f4f2", marginTop: 40, width: '90%', borderRadius: 30 }} disabled={hourCount < 1} textColor={'white'} onPress={() => { handleOpenPress(item, 'tripExtend') }}>Extend trip to {hourCount}hrs</AppButton>
+            <AppText style={{ textAlign: 'center', fontWeight: "600", fontSize: 10, marginTop: 5, color: appstyle.textSec, }}>Note: Additional charges apply for extended hours.</AppText>
+            </View>
+          ) : (
+            <>
+              <AppText style={{ textAlign: 'center', fontWeight: "700", fontSize: 20, marginBottom: 20, color: appstyle.textBlack, textTransform: 'capitalize' }}><AppText style={{ textTransform: 'none' }}>Scan for</AppText> "{bottomModal?.name}"</AppText>
+              <QRCode
+                value={bottomModal?._id}
+                logo={{ uri: baseURL() + "public/vehicle/" + bottomModal?.images?.[0]?.fileName }}
+                logoSize={20}
+                size={200}
+                logoBackgroundColor={appstyle.priBack}
+              />
+              <AppText style={{ textAlign: 'center', fontWeight: "600", fontSize: 16, padding: 40, paddingTop: 20, color: appstyle.textSec }}>Please scan the QR code from your phone to initiate the trip.</AppText>
+            </>
+          )}
         </View>
       </AppBottomSheet>
       <AppDialog visible={modalValue.visible}

@@ -10,7 +10,16 @@ export function baseURL() {
 }
 
 export function dateSimplify(date) {
-  if (date) return new Date(date).toDateString()
+  if (date) {
+    const newdate = new Date(date);
+    const day = newdate.toLocaleString('en-US', { weekday: 'short' });
+    const dayOfMonth = newdate.getDate();
+    const month = newdate.toLocaleString('en-US', { month: 'short' });
+    const year = newdate.getFullYear();
+
+    return `${day} ${dayOfMonth}, ${month}, ${year}`;
+  }
+
   return ''
 }
 
@@ -21,15 +30,15 @@ export function amountFormatter(number) {
 export function timeSimplify(currentDate) {
   if (currentDate) {
     var hours = new Date(currentDate).getHours();
-    
+
     // Initialize variables for AM or PM
     var ampm = hours >= 12 ? 'PM' : 'AM';
-    
+
     // Convert to 12-hour format
     hours = hours % 12;
     hours = hours ? hours : 12; // Handle midnight (0 hours)
-    
-    
+
+
     // Get the minutes and seconds
     const minutes = JSON.stringify(new Date(currentDate).getMinutes()).length < 2 ? "0" + JSON.stringify(new Date(currentDate).getMinutes()) : JSON.stringify(new Date(currentDate).getMinutes())
     // Format the time
@@ -91,7 +100,7 @@ export const getDetailsByLatLong = async (lat, long) => {
 };
 
 export const calculateDistance = (coords1, coords2) => {
-  if(!coords1.latitude && !coords2.latitude){
+  if (!coords1.latitude && !coords2.latitude) {
     return 0
   }
   const R = 6371; // Earth radius in kilometers
@@ -128,18 +137,35 @@ export const fetchAndCalculateDistance = async (location1, location2) => {
 
 
 
-export async function requestLocationPermission() {
+export async function requestLocationPermission(setter) {
   try {
-    let res = {}
-      const granted = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+    const granted = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
 
-      if (granted) {
-        return true
-      }else {
-        console.warn("Cannot get location")
-        return false
-      }
-    }catch (e) {
-      return false
+    if (granted) {
+      console.log("You can use the ACCESS_FINE_LOCATION")
+
+      Geolocation.getCurrentPosition(
+        //Will give you the current location
+        async (position) => {
+          //getting the Longitude from the location json
+          const currentLongitude = JSON.stringify(position.coords.longitude);
+
+          //getting the Latitude from the location json
+          const currentLatitude = JSON.stringify(position.coords.latitude);
+
+          const detailLocation = await getDetailsByLatLong(currentLatitude, currentLongitude)
+          const address = detailLocation?.address
+          setter && setter(address)
+
+        }, (error) => alert(error.message), {
+        enableHighAccuracy: true, timeout: 20000, maximumAge: 1000
+      });
     }
+    else {
+      alert("Locatin access denied!")
+      console.log("ACCESS_FINE_LOCATION permission denied")
+    }
+  } catch (err) {
+    console.warn(err)
   }
+}

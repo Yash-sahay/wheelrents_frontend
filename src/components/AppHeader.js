@@ -11,9 +11,11 @@ import AppText from './AppText';
 import Animated, { ReduceMotion, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import BottomSheet from '@gorhom/bottom-sheet';
 import AppDatePicker from './AppDatePicker';
+import AppCalender from './AppCalender';
 import AppBottomSheet from './AppBottomSheet';
 import { appstyle } from '../styles/appstyle';
 import { updateUserDetails } from '../redux/reducer/userReducer';
+import StateSelection from './StateSelection';
 
 const Device_Width = Dimensions.get('window').width - 20;
 
@@ -113,7 +115,9 @@ const AppHeader = ({ mode = "light", ui2, name, isExtended, filterPress, filters
     const [bottomSheet, setBottomSheet] = useState(false);
 
     const { currRoute, role, searchString, recentSearches, username, email } = useSelector(state => state.userReducer)
+    const { city, state, country } = useSelector(state => state.locationReducer)
     const searchRef = useRef(null)
+
 
     const height = useSharedValue(0);
     const filterHeight = useSharedValue(0);
@@ -179,8 +183,11 @@ const AppHeader = ({ mode = "light", ui2, name, isExtended, filterPress, filters
     if (!ui2) {
         return (
             <>
-                <AppBottomSheet bottomSheetRef={bottomSheetRef} snapPoints={['1%', '60%']} bottomSheet={bottomSheet} setBottomSheet={setBottomSheet}>
-                    <AppDatePicker />
+                <AppBottomSheet bottomSheetRef={bottomSheetRef} snapPoints={['1%', '95%']} bottomSheet={bottomSheet} setBottomSheet={setBottomSheet}>
+                    {/* <AppCalender/> */}
+                    {/* <AppDatePicker /> */}
+                    <StateSelection/>
+                    
                 </AppBottomSheet>
                 <StatusBar animated backgroundColor={'transparent'} barStyle={(route.name == "Search" || mode == "dark") ? "light-content" : 'dark-content'} translucent showHideTransition={'fade'} />
                 <View style={[styles.container, (route.name == "Search" || mode == "dark" ) && {backgroundColor: appstyle.tri}, !isExtended && { elevation: 5, borderBottomWidth: 2, borderColor: '#f4f4f2' }]}>
@@ -188,7 +195,7 @@ const AppHeader = ({ mode = "light", ui2, name, isExtended, filterPress, filters
                         <TouchableOpacity onPress={handleOpenPress}>
                             <AppText style={{...styles.locationText, color: mode == "dark" ? '#ddd' : appstyle.tri}}>Location</AppText>
                             <AppText style={{...styles.locationInfo, color: mode == "dark" ? '#ddd' : appstyle.tri}}>
-                                <FontAwesome name="map-pin" /> New Delhi, India  <FontAwesome color={mode == "dark" ? appstyle.pri : appstyle.tri} name="chevron-down" />
+                                <FontAwesome name="map-pin" /> {city || "City"}, {country || "Country"}  <FontAwesome color={mode == "dark" ? appstyle.pri : appstyle.tri} name="chevron-down" />
                             </AppText>
                         </TouchableOpacity>
                         <View style={{ flexDirection: 'row' }}>

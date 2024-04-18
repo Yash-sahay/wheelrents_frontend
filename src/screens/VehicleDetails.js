@@ -2,7 +2,7 @@ import { View, Text, FlatList, Dimensions, Image, TouchableOpacity, StyleSheet, 
 import React, { useRef, useState } from 'react'
 import AppHeader from '../components/AppHeader';
 import { Card, Divider } from 'react-native-paper';
-import { amountFormatter, baseURL, dateSimplify } from '../../common';
+import { amountFormatter, baseURL, dateSimplify, timeSimplify } from '../../common';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import AppText from '../components/AppText';
 import AppButton from '../components/AppButton';
@@ -60,17 +60,17 @@ const VehicleDetails = ({ route }) => {
     function openGps() {
         var url = `geo:${data?.latitude},${data?.longitude}`
         openExternalApp(url)
-      }
-      
-      function openExternalApp(url) {
+    }
+
+    function openExternalApp(url) {
         Linking.canOpenURL(url).then(supported => {
-          if (supported) {
-            Linking.openURL(url);
-          } else {
-            console.log('Don\'t know how to open URI: ' + url);
-          }
+            if (supported) {
+                Linking.openURL(url);
+            } else {
+                console.log('Don\'t know how to open URI: ' + url);
+            }
         });
-      }
+    }
 
 
     return (
@@ -112,21 +112,21 @@ const VehicleDetails = ({ route }) => {
                         <View style={{ borderTopLeftRadius: 10, marginTop: -10, borderTopRightRadius: 10, backgroundColor: appstyle.pri, height: 10 }}></View>
 
                         <View style={{ width: '100', padding: 10, paddingBottom: 0 }}>
-                        <AppText style={{ fontWeight: 'bold', fontSize: 20, color: appstyle.textBlack, textTransform: "capitalize" }}>Overview</AppText>
+                            <AppText style={{ fontWeight: 'bold', fontSize: 20, color: appstyle.textBlack, textTransform: "capitalize" }}>Overview</AppText>
                         </View>
                         <View style={{ width: '100%', flexDirection: 'row', paddingTop: 10 }}>
                             <View style={{ height: 100, width: 120, padding: 10, marginLeft: 10, backgroundColor: appstyle.tri, borderRadius: 15, elevation: 10, shadowColor: appstyle.shadowColor }}>
                                 <MaterialCommunityIcons size={30} color={appstyle.pri} name="car-shift-pattern" />
-                                <AppText style={{  fontSize: 12, color: '#eee', marginTop: 10 }}>Transmission</AppText>
-                                <AppText style={{ color: appstyle.pri, fontWeight: 'bold', textTransform: "capitalize"}} >{data?.transmission || "N/A"}</AppText>
+                                <AppText style={{ fontSize: 12, color: '#eee', marginTop: 10 }}>Transmission</AppText>
+                                <AppText style={{ color: appstyle.pri, fontWeight: 'bold', textTransform: "capitalize" }} >{data?.transmission || "N/A"}</AppText>
                             </View>
                             <View style={{ height: 100, width: 120, padding: 10, marginLeft: 10, backgroundColor: appstyle.tri, borderRadius: 15, elevation: 10, shadowColor: appstyle.shadowColor }}>
                                 <MaterialCommunityIcons size={30} color={appstyle.pri} name="fuel" />
-                                <AppText style={{ fontSize: 12, color: '#eee', marginTop: 10  }}>Power Source</AppText>
-                                <AppText style={{fontWeight: 'bold', color: appstyle.pri, textTransform: "capitalize" }} >{data?.fuelType || "N/A"}</AppText>
+                                <AppText style={{ fontSize: 12, color: '#eee', marginTop: 10 }}>Power Source</AppText>
+                                <AppText style={{ fontWeight: 'bold', color: appstyle.pri, textTransform: "capitalize" }} >{data?.fuelType || "N/A"}</AppText>
                             </View>
                         </View>
-                       
+
                         <View style={{ width: '100', marginTop: 20, padding: 10 }}>
                             <CustomTile mode="elevated">
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -138,10 +138,14 @@ const VehicleDetails = ({ route }) => {
                                     <AppText style={{ fontWeight: '900' }}><AntDesign name="swap" size={20} color={appstyle.textBlack} /> </AppText>
                                     <AppText style={{ color: appstyle.textBlack, fontWeight: 'bold' }}>{dateSimplify(bookingEndDate) || "N/A"}</AppText>
                                 </View>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                    <AppText style={{ color: appstyle.textBlack, fontWeight: 'bold' }}>{timeSimplify(bookingStartDate)}</AppText>
+                                    <AppText style={{ color: appstyle.textBlack, fontWeight: 'bold' }}>{timeSimplify(bookingEndDate)}</AppText>
+                                </View>
                                 <AppButton style={{ width: 110, marginTop: 10, borderWidth: 1, borderColor: 'grey' }} outlined icon={"calendar"} onPress={() => setBottomSheet(true)}>Change</AppButton>
                             </CustomTile>
-                            <CustomTile 
-                            onPress={() => {}}
+                            <CustomTile
+                                onPress={() => { }}
                             // onPress={openGps}
                             >
 
