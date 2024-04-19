@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, Image, ProgressBarAndroid, StyleSheet, FlatList, Pressable, PermissionsAndroid, Linking } from 'react-native';
+import { View, Text, TouchableOpacity, Image, ProgressBarAndroid, StyleSheet, FlatList, Pressable, PermissionsAndroid, Linking, ScrollView } from 'react-native';
 import { appstyle } from '../styles/appstyle';
 import AppBottomBar from '../components/AppBottomBar';
 import AppHeader from '../components/AppHeader';
@@ -7,7 +7,7 @@ import AppText from '../components/AppText';
 import AppButton from '../components/AppButton';
 import { MD3Colors, ProgressBar } from 'react-native-paper';
 import Animated from 'react-native-reanimated';
-import { booking_payment, booking_status_change, delete_booking_by_id, getBookingsForHost } from '../axios/axios_services/bookingService';
+import { booking_payment, booking_status_change, delete_booking_by_id, extend_trip, finish_trip, getBookingsForHost } from '../axios/axios_services/bookingService';
 import { amountFormatter, baseURL, calculateDistance, calculateTimePercentage, dateSimplify, timeSimplify } from '../../common';
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -23,6 +23,7 @@ import AppDialog from '../components/AppDialog';
 import AppBottomSheet from '../components/AppBottomSheet';
 import QRCode from 'react-native-qrcode-svg';
 import { useSelector } from 'react-redux';
+import PaymentOverView from './PaymentOverView';
 
 
 
@@ -42,7 +43,10 @@ const Booking = ({ navigation }) => {
   const [hourCount, setHourCount] = useState(0)
   // ref
   const bottomSheetRef = useRef(null);
+  const endTripSheetRef = useRef(null);
   const [bottomSheet, setBottomSheet] = useState(false);
+  const [endTripSheet, setEndTripSheet] = useState(false);
+  const [endTripModalValues, setEndTripModalValues] = useState({});
   const [bottomModal, setBottomModal] = useState({})
 
   const handleClosePress = () => {
@@ -108,11 +112,30 @@ const Booking = ({ navigation }) => {
     try {
       const bookings = await getBookingsForHost({ isClient: clientRole, bookingStatus: tabValue?.id })
 
-      setBookings(bookings?.data)
       setSelectedBookingId(bookings?.data?.[0]?._id);
+      setBookings(bookings?.data)
     } catch (error) {
       console.error("err", error)
     }
+  }
+
+  const extendTripApi = async (extendedHours) => {
+    try {
+      const extend = await extend_trip({ "bookingId": bottomModal?._id, "extendedHours": extendedHours })
+      setSelectedBookingId(extend?._id);
+      getBookings()
+      handleClosePress()
+    } catch (error) {
+      console.error("err", error)
+    }
+  }
+
+
+  const handleEndTrip = (itemdata) => {
+    endTripSheetRef.current?.open()
+    setEndTripSheet(true)
+    navigation.navigate("PaymentOverView", { endTripModalValues: itemdata })
+    setEndTripModalValues(itemdata)
   }
 
 
@@ -121,9 +144,13 @@ const Booking = ({ navigation }) => {
   }, [tabValue?.id])
 
 
-  function calculateRemainingTime(endTime) {
-    const currentTime = new Date().getTime();
-    const remainingTime = endTime - currentTime;
+  function calculateRemainingTime(currTime, endTime, extendedHours) {
+    const currentTime = currTime ? new Date(currTime).getTime() : new Date().getTime();
+    let remainingTime = endTime - currentTime;
+
+    if (extendedHours > 0) {
+      remainingTime = remainingTime + (extendedHours * 60 * 60 * 1000)
+    }
 
     // Convert remaining time from milliseconds to days, hours, and minutes
     const days = Math.floor(remainingTime / (1000 * 60 * 60 * 24));
@@ -164,7 +191,9 @@ const Booking = ({ navigation }) => {
   const renderBookingItem = ({ item }) => {
     // Example usage:
     const endTime = new Date(item?.endDate).getTime(); // Example end time
-    const remainingTime = calculateRemainingTime(endTime);
+    const remainingTime = calculateRemainingTime(false, endTime, parseInt(item?.extendedHours));
+    const newEndTime = new Date().getTime() - (parseInt(item?.extendedHours) * 60 * 60 * 1000)
+    const editionalTime = calculateRemainingTime(endTime, newEndTime);
     const distance = JSON.stringify(parseInt(item?.latitude)) != "null" ? calculateDistance({ latitude: lat, longitude: long }, { latitude: item?.latitude, longitude: item?.longitude }) + " Km" : "N/A"
 
     return (
@@ -199,6 +228,12 @@ const Booking = ({ navigation }) => {
               </TouchableOpacity>
             </>
           )}
+          {(!clientRole && selectedBookingId === item?._id && item?.bookingStatus != "pending") && (
+                <TouchableOpacity onPress={() => openPhone(item?.clientNumber)} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15, marginTop: 10, borderBottomWidth: 1, paddingBottom: 10, borderColor: '#f4f4f2' }}>
+                  <AppText style={{ color: appstyle.textBlack, fontWeight: '900', fontSize: 16 }}><MaterialCommunityIcons name="phone-dial" size={18} color={appstyle.textBlack} />  {item?.clientNumber}</AppText>
+                  <MaterialCommunityIcons name="chevron-right" size={20} color={appstyle.textBlack} />
+                </TouchableOpacity>
+              )}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15, paddingTop: 10 }}>
             <AppText style={{ fontWeight: 'bold', fontSize: 14, color: appstyle.textSec }}>Pick Up</AppText>
             <AppText style={{ fontWeight: 'bold', fontSize: 14, color: appstyle.textSec }}>Drop Off</AppText>
@@ -206,18 +241,19 @@ const Booking = ({ navigation }) => {
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15 }}>
             <AppText style={{ color: appstyle.textBlack, fontWeight: 'bold' }}>{dateSimplify(item?.startDate) || "N/A"}</AppText>
             <AppText style={{ fontWeight: '900' }}><AntDesign name="swap" size={20} color={appstyle.textBlack} /> </AppText>
-            <AppText style={{ color: appstyle.textBlack, fontWeight: 'bold' }}>{dateSimplify(item?.endDate) || "N/A"}</AppText>
+            <AppText style={{ color: appstyle.textBlack, fontWeight: 'bold' }}>{dateSimplify(item?.endDate, item?.extendedHours) || "N/A"}</AppText>
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15 }}>
             <AppText style={{ color: appstyle.textBlack, fontWeight: 'bold' }}>{timeSimplify(item?.startDate)}</AppText>
-            <AppText style={{ color: appstyle.textBlack, fontWeight: 'bold' }}>{timeSimplify(item?.endDate)}</AppText>
+            <AppText style={{ color: appstyle.textBlack, fontWeight: 'bold' }}>{timeSimplify(item?.endDate, item?.extendedHours)}</AppText>
           </View>
 
           <View style={{ paddingHorizontal: 20, paddingVertical: 10 }}>
             {item?.bookingStatus == "started" && <ProgressBar
-
-              style={[styles.progressBar, remainingTime.hours < 5 && { backgroundColor: 'tomato' }]}
-              progress={calculateTimePercentage(new Date(item?.startDate), new Date(item?.endDate))} color={'black'} />}
+              style={[styles.progressBar, (remainingTime?.hours < 2) && { backgroundColor: 'tomato' }]}
+              progress={calculateTimePercentage(new Date(item?.startDate), new Date(item?.endDate), parseInt(item?.extendedHours))}
+              color={calculateTimePercentage(new Date(item?.startDate), new Date(item?.endDate), parseInt(item?.extendedHours)) > 1 ? 'tomato' : 'black'}
+            />}
           </View>
           {(!clientRole && selectedBookingId === item?._id && tabValue.title != "Completed") && (
             <>
@@ -237,10 +273,16 @@ const Booking = ({ navigation }) => {
                   <AppButton icon="qrcode" style={{}} textColor={'white'} buttonColor={appstyle.tri} onPress={() => handleOpenPress(item)}>Open QR</AppButton>
                 </View>
               )}
+              <View style={{ flexDirection: 'row', justifyContent: 'flex-end', padding: 10, borderTopWidth: 1, borderColor: '#f4f4f2' }}>
+                <AppButton icon="view-sequential" style={{ paddingHorizontal: 10, marginLeft: 10 }} textColor={'white'} onPress={() => { handleEndTrip({ ...item, editionalTime }) }}>Payment Overview</AppButton>
+              </View>
               {item?.bookingStatus == "started" && (
                 <View style={{ flexDirection: 'row', justifyContent: 'center', padding: 10, borderTopWidth: 1, borderColor: '#f4f4f2' }}>
-                  <AppText style={{ fontWeight: '800', fontSize: 12, color: appstyle.textSec, textAlign: 'center' }}>{`Trip ending in ${remainingTime?.days} days, ${remainingTime?.hours} hours, and ${remainingTime?.minutes} minutes. `}</AppText>
-                  {/* <AppButton icon="check" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={'#00a400'} onPress={() => handleApprove(item?._id)}>Accept</AppButton> */}
+                  {remainingTime?.minutes < 0 ? (
+                    <AppText style={{ fontWeight: '800', fontSize: 12, color: 'tomato', textAlign: 'center' }}>{`Running late by ${Math.abs(editionalTime?.days)} days, ${Math.abs(editionalTime?.hours)} hours, and ${Math.abs(editionalTime?.minutes)} minutes. `}</AppText>
+                  ) : (
+                    <AppText style={{ fontWeight: '800', fontSize: 12, color: appstyle.textSec, textAlign: 'center' }}>{`Trip ending in ${remainingTime?.days} days, ${remainingTime?.hours} hours, and ${remainingTime?.minutes} minutes. `}</AppText>
+                  )}
                 </View>
               )}
             </>
@@ -264,16 +306,23 @@ const Booking = ({ navigation }) => {
                   {/* <AppButton icon="check" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={'#00a400'} onPress={() => handleApprove(item?._id)}>Accept</AppButton> */}
                 </View>
               )}
-              {remainingTime?.hours < 5 && (
+              {(remainingTime?.hours < 5) && (
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', padding: 10, borderTopWidth: 1, borderColor: '#f4f4f2' }}>
+                  {!(remainingTime?.days < 0 && remainingTime?.hours < 0 && remainingTime?.minutes < 0) && <View>
+                    <AppButton icon="chevron-triple-right" style={{ paddingHorizontal: 10, display: parseInt(item?.extendedHours) > 0 ? 'none' : 'flex' }} textColor={'white'} onPress={() => { handleOpenPress(item, 'tripExtend') }}>Extend trip</AppButton>
+                  </View>}
                   <View>
-                    <AppButton icon="chevron-triple-right" style={{ paddingHorizontal: 10 }} textColor={'white'} onPress={() => { handleOpenPress(item, 'tripExtend') }}>Extend your trip</AppButton>
+                    <AppButton icon="clock-end" style={{ paddingHorizontal: 10, marginLeft: 10 }} buttonColor={'tomato'} textColor={'white'} onPress={() => { handleEndTrip({ ...item, editionalTime }) }}>End trip</AppButton>
                   </View>
                 </View>
               )}
               {item?.bookingStatus == "started" && (
                 <View style={{ flexDirection: 'row', justifyContent: 'center', padding: 10, borderTopWidth: 1, borderColor: '#f4f4f2' }}>
-                  <AppText style={{ fontWeight: '800', fontSize: 12, color: appstyle.textSec, textAlign: 'center' }}>{`Trip ending in ${remainingTime?.days} days, ${remainingTime?.hours} hours, and ${remainingTime?.minutes} minutes. `}</AppText>
+                  {remainingTime?.minutes < 0 ? (
+                    <AppText style={{ fontWeight: '800', fontSize: 12, color: 'tomato', textAlign: 'center' }}>{`Your trip is getting extending by \n ${Math.abs(editionalTime?.days)} days, ${Math.abs(editionalTime?.hours)} hours, and ${Math.abs(editionalTime?.minutes)} minutes. `}</AppText>
+                  ) : (
+                    <AppText style={{ fontWeight: '800', fontSize: 12, color: appstyle.textSec, textAlign: 'center' }}>{`Trip ending in ${remainingTime?.days} days, ${remainingTime?.hours} hours, and ${remainingTime?.minutes} minutes. `}</AppText>
+                  )}
                 </View>
               )}
             </>
@@ -289,23 +338,24 @@ const Booking = ({ navigation }) => {
   return (
     <>
       <AppBottomSheet bottomSheetRef={bottomSheetRef} snapPoints={['1%', '60%']} bottomSheet={bottomSheet} setBottomSheet={setBottomSheet}>
+
         <View style={{ flex: 1, alignItems: 'center', padding: 20, paddingTop: 20 }}>
           {bottomModal?.tripExtend ? (
-            <View style={{ width: '100%', alignItems: 'center'}}>
-            <AppText style={{ textAlign: 'center', fontWeight: "700", fontSize: 25, marginBottom: 20, color: appstyle.textBlack, textTransform: 'capitalize' }}>Select extension duration</AppText>
-            <View style={{flexDirection:'row', justifyContent: 'space-around', alignItems: 'center', width: '100%'}}>
-                <TouchableOpacity disabled={hourCount <= 0} onPress={() => setHourCount(hourCount <= 0 ? 0 : hourCount - 1)} style={{backgroundColor: hourCount <= 0 ? appstyle.pri : appstyle.tri, borderWidth: 1, borderColor: "#f4f4f2", borderRadius: 10, marginHorizontal: 20}}>
+            <View style={{ width: '100%', alignItems: 'center' }}>
+              <AppText style={{ textAlign: 'center', fontWeight: "700", fontSize: 25, marginBottom: 20, color: appstyle.textBlack, textTransform: 'capitalize' }}>Select extension duration</AppText>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', width: '100%' }}>
+                <TouchableOpacity disabled={hourCount <= 0} onPress={() => setHourCount(hourCount <= 0 ? 0 : hourCount - 1)} style={{ backgroundColor: hourCount <= 0 ? appstyle.pri : appstyle.tri, borderWidth: 1, borderColor: "#f4f4f2", borderRadius: 10, marginHorizontal: 20 }}>
                   <MaterialCommunityIcons size={50} color={hourCount <= 0 ? appstyle.textSec : appstyle.pri} name="minus" />
                 </TouchableOpacity>
-                <View style={{backgroundColor: "#f4f4f2", width: 100, height: 100, borderRadius: 20, alignItems: 'center', justifyContent: 'center'}}>
-                  <AppText style={{fontSize: 50}}>{hourCount}</AppText>
+                <View style={{ backgroundColor: "#f4f4f2", width: 100, height: 100, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}>
+                  <AppText style={{ fontSize: 50 }}>{hourCount}</AppText>
                 </View>
-                <TouchableOpacity disabled={hourCount >= 5} onPress={() => setHourCount(hourCount >= 5 ? 5 : hourCount + 1)} style={{backgroundColor: hourCount >= 5 ? appstyle.pri : appstyle.tri, borderWidth: 1, borderColor: "#f4f4f2", borderRadius: 10, marginHorizontal: 20}}>
+                <TouchableOpacity disabled={hourCount >= 5} onPress={() => setHourCount(hourCount >= 5 ? 5 : hourCount + 1)} style={{ backgroundColor: hourCount >= 5 ? appstyle.pri : appstyle.tri, borderWidth: 1, borderColor: "#f4f4f2", borderRadius: 10, marginHorizontal: 20 }}>
                   <MaterialCommunityIcons size={50} color={hourCount >= 5 ? appstyle.textSec : appstyle.pri} name="plus" />
                 </TouchableOpacity>
-            </View>
-            <AppButton icon="chevron-triple-right" style={{ padding: 10, borderWidth: 1, borderColor: "#f4f4f2", marginTop: 40, width: '90%', borderRadius: 30 }} disabled={hourCount < 1} textColor={'white'} onPress={() => { handleOpenPress(item, 'tripExtend') }}>Extend trip to {hourCount}hrs</AppButton>
-            <AppText style={{ textAlign: 'center', fontWeight: "600", fontSize: 10, marginTop: 5, color: appstyle.textSec, }}>Note: Additional charges apply for extended hours.</AppText>
+              </View>
+              <AppButton icon="chevron-triple-right" style={{ padding: 10, borderWidth: 1, borderColor: "#f4f4f2", marginTop: 40, width: '90%', borderRadius: 30 }} disabled={hourCount < 1} textColor={'white'} onPress={() => { extendTripApi(hourCount) }}>Extend trip to {hourCount}hrs</AppButton>
+              <AppText style={{ textAlign: 'center', fontWeight: "600", fontSize: 10, marginTop: 5, color: appstyle.textSec, }}>Note: Additional charges apply for extended hours.</AppText>
             </View>
           ) : (
             <>
@@ -411,7 +461,6 @@ export function BookingTabs({ children, onChange = () => { }, tabs }) {
     </View>
   );
 };
-
 
 
 

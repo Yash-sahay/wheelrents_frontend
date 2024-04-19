@@ -38,6 +38,7 @@ const AppBottomSheet = ({children, snapPoints, bottomSheet, setBottomSheet, bott
             containerStyle={{ backgroundColor: 'rgba(0,0,0,0.7)' }}
             ref={bottomSheetRef}
             index={1}
+            enableContentPanningGesture={false}
             snapPoints={snapPointsMemo}
             onChange={handleSheetChanges}
           >

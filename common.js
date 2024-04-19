@@ -9,9 +9,12 @@ export function baseURL() {
   // return "https://wheelrents-api.onrender.com/" // Live
 }
 
-export function dateSimplify(date) {
+export function dateSimplify(date, extendedHours) {
   if (date) {
-    const newdate = new Date(date);
+    let newdate = new Date(date);
+    if(extendedHours > 0){
+      newdate = new Date(newdate.getTime() + (extendedHours * 60 * 60 * 1000))
+    }
     const day = newdate.toLocaleString('en-US', { weekday: 'short' });
     const dayOfMonth = newdate.getDate();
     const month = newdate.toLocaleString('en-US', { month: 'short' });
@@ -27,9 +30,14 @@ export function amountFormatter(number) {
   return number?.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-export function timeSimplify(currentDate) {
+export function timeSimplify(currentDate, extendedHours) {
   if (currentDate) {
-    var hours = new Date(currentDate).getHours();
+    let currTimeInmill = new Date(currentDate)?.getTime()
+    let hours = new Date(currentDate).getHours();
+    if(extendedHours){
+      hours = new Date(currTimeInmill + (extendedHours * 60 * 60 * 1000)).getHours()
+      currTimeInmill = currTimeInmill + (extendedHours * 60 * 60 * 1000)
+    }
 
     // Initialize variables for AM or PM
     var ampm = hours >= 12 ? 'PM' : 'AM';
@@ -40,7 +48,7 @@ export function timeSimplify(currentDate) {
 
 
     // Get the minutes and seconds
-    const minutes = JSON.stringify(new Date(currentDate).getMinutes()).length < 2 ? "0" + JSON.stringify(new Date(currentDate).getMinutes()) : JSON.stringify(new Date(currentDate).getMinutes())
+    const minutes = JSON.stringify(new Date(currTimeInmill).getMinutes()).length < 2 ? "0" + JSON.stringify(new Date(currTimeInmill).getMinutes()) : JSON.stringify(new Date(currTimeInmill).getMinutes())
     // Format the time
     var timeString = hours + ':' + minutes + ' ' + ampm;
     return timeString
@@ -48,11 +56,13 @@ export function timeSimplify(currentDate) {
   return ''
 }
 
-export function calculateTimePercentage(startTime, endTime) {
+export function calculateTimePercentage(startTime, endTime, extendedTime) {
   const currentTime = new Date().getTime();
-  const totalTime = endTime - startTime;
+  let totalTime = endTime - startTime;
   const elapsedTime = currentTime - startTime;
-
+  if(extendedTime > 0){
+    totalTime = totalTime + (extendedTime * 60 * 60 * 1000)
+  }
   // Calculate percentage
   const percentage = (elapsedTime / totalTime) * 100;
 

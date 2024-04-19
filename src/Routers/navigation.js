@@ -25,6 +25,7 @@ import { updateUserDetails } from '../redux/reducer/userReducer';
 import Geolocation from '@react-native-community/geolocation';
 import { requestLocationPermission } from '../../common';
 import { updateLocationReducer } from '../redux/reducer/locationReducer';
+import PaymentOverView from '../screens/PaymentOverView';
 
 const Stack = createStackNavigator();
 const { width } = Dimensions.get("window")
@@ -110,6 +111,7 @@ const Navigation = () => {
               <Stack.Screen options={{ animationEnabled: false }} name="Booking" component={Booking} />
               <Stack.Screen options={{}} name="QRScanner" component={QRScanner} />
               <Stack.Screen options={{}} name="Result" component={SearchResultScreen} />
+              <Stack.Screen name="PaymentOverView" component={PaymentOverView} />
             </>
           )}
         </Stack.Navigator>
