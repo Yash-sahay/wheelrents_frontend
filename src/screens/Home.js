@@ -7,7 +7,7 @@ import { getAllVehicleListings, toggleWishListForUser } from '../axios/axios_ser
 import { amountFormatter, baseURL, calculateDistance } from '../../common'
 import AppHeader from '../components/AppHeader'
 import AppText from '../components/AppText'
-import { get_vehicle_categories } from '../axios/axios_services/homeService'
+import { get_banner_images, get_vehicle_categories } from '../axios/axios_services/homeService'
 import AppButton from '../components/AppButton'
 import AppBottomBar from '../components/AppBottomBar'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
@@ -33,6 +33,7 @@ const Home = () => {
   const [isExtended, setIsExtended] = React.useState(true);
   const [activeSlide, setActiveSlide] = React.useState(0);
 
+  const [bannerList, setBannerListList] = useState([])
 
   const { bookingStartDate, bookingEndDate } = useSelector(state => state.userReducer);
 
@@ -62,6 +63,22 @@ const Home = () => {
       // dispatch(updateLoaderReducer({ loading: false }))
     }
   }
+
+
+  const getAllBanners = async () => {
+    try {
+      const res = await get_banner_images();
+      if (res.data) {
+        setBannerListList(res.data.allBanners);
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  useEffect(() => {
+    getAllBanners()
+  }, [])
 
 
 
@@ -100,22 +117,55 @@ const Home = () => {
       <View style={{ backgroundColor: appstyle.pri, flex: 1 }}>
         <AppHeader isExtended={isExtended} />
         <ScrollView nestedScrollEnabled onScroll={onScroll} >
-          <View style={{ paddingHorizontal: 20 }}>
-            <AppText style={{ fontSize: 20, marginTop: 20, fontWeight: '900' }}>Category</AppText>
+          <Carousel
+            data={bannerList}
+            loop
+            autoplayInterval={10000}
+            autoplay={true}
+            firstItem={0}
+            renderItem={({ item, index }) => (
+              <View style={{ width: '100%', height: 200, marginVertical: 20, backgroundColor: 'lightgrey', overflow: 'hidden', borderRadius: 20, }}>
+                <Card.Cover
+                  resizeMode="cover"
+                  style={{
+                    width: '100%',
+                    borderRadius: 0,
+                    height: 200,
+                  }}
+                  source={{ uri: baseURL() + 'public/category/' + item?.image }}
+                />
+              </View>
+            )}
+            sliderWidth={Device_Width + 50}
+            itemWidth={Device_Width - 0}
+            onSnapToItem={(index) => setActiveSlide(index)}
+          />
+          <View style={{ marginTop: -30 }}>
+            <Pagination
+              dotsLength={bannerList.length}
+              activeDotIndex={activeSlide}
+              dotStyle={{
+                width: 10,
+                height: 10,
+                borderRadius: 5,
+                marginHorizontal: 8,
+                // backgroundColor: 'rgba(255, 255, 255, 0.92)'
+              }}
+              inactiveDotStyle={{
+                // Define styles for inactive dots here
+              }}
+              inactiveDotOpacity={0.4}
+              inactiveDotScale={0.6}
+            />
           </View>
-          <CategoryList />
-          {/* <VirtualizedList
-        onScroll={onScroll}
-        nestedScrollEnabled
-        contentContainerStyle={{ }}
-        data={dataList}
-        initialNumToRender={10}
-        renderItem={({ item, index }) => <CardComponent item={item} key={index} navigation={navigation} />}
-        keyExtractor={item => item.id}
-        getItemCount={() => dataList.length}
-        getItem={getItem}
-      /> */}
-          <View style={{ paddingHorizontal: 20 }}>
+          <View style={{ backgroundColor: 'rgba(0,0,0,0.03)', padding: 20 }}>
+
+            <AppText style={{ fontSize: 20, fontWeight: '900' }}>Category</AppText>
+
+            <CategoryList />
+          </View>
+
+          <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
             <AppText style={{ fontSize: 20, marginTop: 20, fontWeight: '900' }}>Most Relevent</AppText>
           </View>
           <Carousel
@@ -148,14 +198,14 @@ const Home = () => {
 
           </View>
           <Image resizeMode={'cover'} source={require("../../assets/images/black_wave.png")} />
-          <View style={{ width: '100%', height: 1000, backgroundColor: appstyle.tri }}>
+          <View style={{ width: '100%', height: 1000, marginTop: -30, backgroundColor: appstyle.tri }}>
 
 
-          <Marque
-          style={{ fontSize: 50, marginTop: -30, color: appstyle.pri, opacity: 0.4, fontWeight: 'bold' }}
-        >
-           ● Car Trips ● Bike Trips ● Personal Rides ●
-        </Marque>
+            <Marque
+              style={{ fontSize: 50, color: appstyle.pri, opacity: 0.4, fontWeight: 'bold' }}
+            >
+              ● Car Trips ● Bike Trips ● Personal Rides ●
+            </Marque>
           </View>
         </ScrollView>
         {/* <AppDatePicker /> */}
@@ -192,15 +242,15 @@ const CategoryList = () => {
         data={categoryList}
         renderItem={({ item, index }) => {
           return (
-            <View key={index} style={{ justifyContent: 'center', alignItems: 'center', marginTop: 10, marginRight: 15, marginLeft: index > 0 ? 0 : 20 }}>
-              <View style={{ height: 70, minWidth: 120, backgroundColor: '#f4f4f2', elevation: 2, shadowColor: appstyle.shadowColor, borderRadius: 20, borderWidth: 1, borderColor: '#f4f4f2', flexDirection: 'row', justifyContent: 'center', alignItems: "center" }}>
+            <View key={index} style={{ justifyContent: 'center', alignItems: 'center', marginTop: 10, marginBottom: 5, marginRight: 15, marginLeft: index > 0 ? 0 : 3 }}>
+              <View style={{ height: 70, minWidth: 120, backgroundColor: appstyle.pri, elevation: 2, shadowColor: appstyle.shadowColor, borderRadius: 20, borderWidth: 1, borderColor: appstyle.pri, flexDirection: 'row', justifyContent: 'center', alignItems: "center" }}>
                 <Image resizeMode={'cover'} style={{ width: 40, height: 40 }} source={{ uri: baseURL() + "public/category/" + item?.image }} />
                 <View style={{}}>
-                <AppText style={{ fontWeight: '700',  fontSize: 16, marginLeft: 10 }} >{item?.name?.toUpperCase()}</AppText>
-                <AppText style={{ fontWeight: '700', marginTop: -5, fontSize: 10, color: appstyle.textSec, marginLeft: 10 }} >{'View all'}</AppText>
+                  <AppText style={{ fontWeight: '700', fontSize: 16, marginLeft: 10 }} >{item?.name?.toUpperCase()}</AppText>
+                  <AppText style={{ fontWeight: '700', marginTop: -5, fontSize: 10, color: appstyle.textSec, marginLeft: 10 }} >{'View all'}</AppText>
                 </View>
               </View>
-             
+
             </View>
           )
         }}
@@ -211,7 +261,7 @@ const CategoryList = () => {
 
 
 
-function CardComponent ({ item, navigation, handleAddToWishlist, latitude, longitude }) {
+function CardComponent({ item, navigation, handleAddToWishlist, latitude, longitude }) {
   const dispatch = useDispatch();
   const styles = {
     card: {
@@ -277,7 +327,7 @@ function CardComponent ({ item, navigation, handleAddToWishlist, latitude, longi
     }
   };
 
-  const distance = JSON.stringify(parseInt(item?.latitude)) != "null" ? calculateDistance({latitude, longitude}, {latitude: item?.latitude, longitude: item?.longitude}) + " Km" : "N/A"
+  const distance = JSON.stringify(parseInt(item?.latitude)) != "null" ? calculateDistance({ latitude, longitude }, { latitude: item?.latitude, longitude: item?.longitude }) + " Km" : "N/A"
 
   return (
     <Card style={styles.card}>
@@ -310,9 +360,9 @@ function CardComponent ({ item, navigation, handleAddToWishlist, latitude, longi
         <Text variant="titleLarge" style={styles.cost}>
           ₹{amountFormatter(item?.cost)}/hr
         </Text>
-        <Text variant="bodyMedium" style={{fontWeight: 'bold', color: 'grey'}}>
-            {distance}
-          </Text>
+        <Text variant="bodyMedium" style={{ fontWeight: 'bold', color: 'grey' }}>
+          {distance}
+        </Text>
       </Card.Content>
       <Card.Actions style={styles.actions}>
         <AppButton buttonColor={appstyle.priBack} outlined icon={'eye'} onPress={() => navigation.navigate('VehicleDetails', { ...item })}>

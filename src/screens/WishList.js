@@ -8,9 +8,10 @@ import AppText from '../components/AppText';
 import { appstyle } from '../styles/appstyle';
 import { deleteWishListData, get_wishlist_by_user, toggleWishListForUser } from '../axios/axios_services/vehicleService';
 import { updateLoaderReducer } from '../redux/reducer/loaderReducer';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { baseURL, dateSimplify } from '../../common';
 import FontAwesome from 'react-native-vector-icons/FontAwesome6'
+import { CardComponent } from './Result';
 
 const Wishlist = ({navigation}) => {
   const dispatch = useDispatch()
@@ -20,6 +21,7 @@ const Wishlist = ({navigation}) => {
     // { id: '3', title: 'Product 3', description: 'Description for Product 3', image: 'https://placekitten.com/200/302' },
     // Add more wishlist items as needed
   ]);
+  const { bookingStartDate, bookingEndDate } = useSelector(state => state.userReducer);
 
   const removeFromWishlist = (itemId) => {
     // Remove the item from the wishlist based on its id
@@ -34,12 +36,13 @@ const Wishlist = ({navigation}) => {
 
   const getWishList = async () => {
     try {
-      dispatch(updateLoaderReducer({ loading: true }))
-      const res = await get_wishlist_by_user();
+      const data = {
+        startDate: bookingStartDate,
+        endDate: bookingEndDate
+      }
+      const res = await get_wishlist_by_user({data});
       setWishlistItems(res.data)
-      dispatch(updateLoaderReducer({ loading: false }))
     } catch (error) {
-      dispatch(updateLoaderReducer({ loading: false }))
     }
   }
 
@@ -56,35 +59,19 @@ const Wishlist = ({navigation}) => {
   const renderWishlistItem = ({ item }) => {
 
 
-    const handleAddToWishlist = async () => {
+    const handleAddToWishlist = async (item) => {
       try {
-        dispatch(updateLoaderReducer({ loading: true }))
         const data = {
-          vehicleId: item.vehicleId
+          vehicleId: item._id
         }
-        const res = await deleteWishListData({ data })
-        console.warn(res.data?.message)
-        dispatch(updateLoaderReducer({ loading: false }))
+        await toggleWishListForUser({ data })
         getWishList()
       } catch (error) {
-        dispatch(updateLoaderReducer({ loading: false }))
         console.error(error)
       }
     };
     return (
-      <Card style={styles.cardContainer} onPress={() => navigation.navigate('VehicleDetails', { ...item })}>
-        <Card.Cover source={{ uri: baseURL() + "public/vehicle/" + item?.files?.[0]?.fileName }} />
-        <Card.Content>
-          <AppText style={{ color: appstyle.textSec, fontWeight: '900', marginTop: 10, }}><Chip style={{ backgroundColor: appstyle.sec }} textStyle={{ color: 'black' }} ><FontAwesome name="user-gear" size={12} />  {item?.transmission}</Chip>    <Chip style={{ backgroundColor: appstyle.sec }} ><FontAwesome name="gas-pump" size={12} />  {item?.fuelType}</Chip></AppText>
-          <AppText variant="bodyMedium" style={{ fontWeight: '900', marginTop: 10, textTransform: "capitalize" }}>{item?.name}</AppText>
-          {/* <AppText variant="bodyMedium" style={{ fontWeight: '900', marginTop: 10 }}>{item?.available ? "Available" : "Booked"}</AppText> */}
-          <AppText variant="titleLarge" style={{ color: 'darkgreen', fontWeight: '900', fontSize: 25 }}>{item?.cost}₹/hr</AppText>
-          <AppText variant="bodyMedium" style={{ color: appstyle.textSec, fontWeight: '900', marginTop: 10 }}>Added on {dateSimplify(item?.date)}</AppText>
-        </Card.Content>
-        <Card.Actions>
-          <IconButton style={{borderColor: appstyle.sec}} icon="delete" iconColor="tomato" onPress={() => handleAddToWishlist()} />
-        </Card.Actions>
-      </Card>
+      <CardComponent item={item} navigation={navigation} handleAddToWishlist={handleAddToWishlist}/>
     )
   };
 
@@ -92,13 +79,14 @@ const Wishlist = ({navigation}) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <AppHeader name={"Wish List"} ui2 />
+      <AppHeader name={"WishList"} ui2  />
       <AppBottomBar />
       <View style={styles.container}>
         {wishlistItems?.length === 0 ? (
           <AppText style={styles.emptyMessage}>Your wishlist is empty.</AppText>
         ) : (
           <VirtualizedList
+            contentContainerStyle={{paddingBottom: 100}}
             showsVerticalScrollIndicator={false}
             data={wishlistItems}
             getItemCount={getItemCount}
@@ -116,7 +104,6 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: appstyle.pri,
     flex: 1,
-    padding: 20,
   },
   title: {
     fontSize: 24,

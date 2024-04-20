@@ -273,9 +273,9 @@ const Booking = ({ navigation }) => {
                   <AppButton icon="qrcode" style={{}} textColor={'white'} buttonColor={appstyle.tri} onPress={() => handleOpenPress(item)}>Open QR</AppButton>
                 </View>
               )}
-              <View style={{ flexDirection: 'row', justifyContent: 'flex-end', padding: 10, borderTopWidth: 1, borderColor: '#f4f4f2' }}>
+              {item?.bookingStatus == "started" && (<View style={{ flexDirection: 'row', justifyContent: 'flex-end', padding: 10, borderTopWidth: 1, borderColor: '#f4f4f2' }}>
                 <AppButton icon="view-sequential" style={{ paddingHorizontal: 10, marginLeft: 10 }} textColor={'white'} onPress={() => { handleEndTrip({ ...item, editionalTime }) }}>Payment Overview</AppButton>
-              </View>
+              </View>)}
               {item?.bookingStatus == "started" && (
                 <View style={{ flexDirection: 'row', justifyContent: 'center', padding: 10, borderTopWidth: 1, borderColor: '#f4f4f2' }}>
                   {remainingTime?.minutes < 0 ? (
@@ -306,7 +306,7 @@ const Booking = ({ navigation }) => {
                   {/* <AppButton icon="check" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={'#00a400'} onPress={() => handleApprove(item?._id)}>Accept</AppButton> */}
                 </View>
               )}
-              {(remainingTime?.hours < 5) && (
+              {(remainingTime?.hours < 5 && item?.bookingStatus == "started") && (
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', padding: 10, borderTopWidth: 1, borderColor: '#f4f4f2' }}>
                   {!(remainingTime?.days < 0 && remainingTime?.hours < 0 && remainingTime?.minutes < 0) && <View>
                     <AppButton icon="chevron-triple-right" style={{ paddingHorizontal: 10, display: parseInt(item?.extendedHours) > 0 ? 'none' : 'flex' }} textColor={'white'} onPress={() => { handleOpenPress(item, 'tripExtend') }}>Extend trip</AppButton>
@@ -337,7 +337,7 @@ const Booking = ({ navigation }) => {
 
   return (
     <>
-      <AppBottomSheet bottomSheetRef={bottomSheetRef} snapPoints={['1%', '60%']} bottomSheet={bottomSheet} setBottomSheet={setBottomSheet}>
+      <AppBottomSheet bottomSheetRef={bottomSheetRef} snapPoints={['60%']} bottomSheet={bottomSheet} setBottomSheet={setBottomSheet}>
 
         <View style={{ flex: 1, alignItems: 'center', padding: 20, paddingTop: 20 }}>
           {bottomModal?.tripExtend ? (

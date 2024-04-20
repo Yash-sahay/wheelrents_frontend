@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     },
     locationInfo: {
         fontWeight: 'bold',
-        
+
     },
     searchBarContainer: {
         flexDirection: 'row',
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     },
 });
 
-const AppHeader = ({ mode = "light", ui2, name, isExtended, filterPress, filtersData, accent, scrollPosition, search = false }) => {
+const AppHeader = ({ mode = "light", ui2, name, isExtended, filterPress, filtersData, accent, scrollPosition, search = false, renderRight }) => {
     const route = useRoute();
     const dispatch = useDispatch();
     const navigation = useNavigation();
@@ -175,7 +175,7 @@ const AppHeader = ({ mode = "light", ui2, name, isExtended, filterPress, filters
     const onChangeSearch = query => dispatch(updateUserDetails({ searchString: query }));
 
     const submitEdit = () => {
-        navigation.navigate("Result", {searchString})
+        navigation.navigate("Result", { searchString })
         dispatch(updateUserDetails({ recentSearches: recentSearches?.length > 0 ? [...recentSearches, searchString] : [searchString] }))
     }
 
@@ -183,19 +183,19 @@ const AppHeader = ({ mode = "light", ui2, name, isExtended, filterPress, filters
     if (!ui2) {
         return (
             <>
-                <AppBottomSheet bottomSheetRef={bottomSheetRef} snapPoints={['1%', '95%']} bottomSheet={bottomSheet} setBottomSheet={setBottomSheet}>
+                <AppBottomSheet bottomSheetRef={bottomSheetRef} snapPoints={['95%']} bottomSheet={bottomSheet} setBottomSheet={setBottomSheet}>
                     {/* <AppCalender/> */}
                     {/* <AppDatePicker /> */}
-                    <StateSelection/>
-                    
+                    <StateSelection />
+
                 </AppBottomSheet>
                 <StatusBar animated backgroundColor={'transparent'} barStyle={(route.name == "Search" || mode == "dark") ? "light-content" : 'dark-content'} translucent showHideTransition={'fade'} />
-                <View style={[styles.container, (route.name == "Search" || mode == "dark" ) && {backgroundColor: appstyle.tri}, !isExtended && { elevation: 5, borderBottomWidth: 2, borderColor: '#f4f4f2' }]}>
+                <View style={[styles.container, (route.name == "Search" || mode == "dark") && { backgroundColor: appstyle.tri }, !isExtended && { elevation: 5, borderBottomWidth: 2, borderColor: '#f4f4f2' }]}>
                     <Animated.View style={[styles.headerContainer, styleHeader]}>
                         <TouchableOpacity onPress={handleOpenPress}>
-                            <AppText style={{...styles.locationText, color: mode == "dark" ? '#ddd' : appstyle.tri}}>Location</AppText>
-                            <AppText style={{...styles.locationInfo, color: mode == "dark" ? '#ddd' : appstyle.tri}}>
-                                <FontAwesome name="map-pin" /> {city || "City"}, {country || "Country"}  <FontAwesome color={mode == "dark" ? appstyle.pri : appstyle.tri} name="chevron-down" />
+                            <AppText style={{ ...styles.locationText, color: mode == "dark" ? '#ddd' : appstyle.tri }}>Location</AppText>
+                            <AppText style={{ ...styles.locationInfo, color: mode == "dark" ? '#ddd' : appstyle.tri }}>
+                                <FontAwesome name="map-pin" /> {state || "City"}, {country || "Country"}  <FontAwesome color={mode == "dark" ? appstyle.pri : appstyle.tri} name="chevron-down" />
                             </AppText>
                         </TouchableOpacity>
                         <View style={{ flexDirection: 'row' }}>
@@ -207,12 +207,12 @@ const AppHeader = ({ mode = "light", ui2, name, isExtended, filterPress, filters
                         {focus && <View style={[styles.filterButtonContainer]}>
                             <TouchableOpacity
                                 onPress={() => navigation.goBack()}
-                                style={[styles.filterButton, {backgroundColor: appstyle.tri}]}>
+                                style={[styles.filterButton, { backgroundColor: appstyle.tri }]}>
 
-                                <FontAwesome5 style={[styles.filterIcon, {color: appstyle.pri}]} size={20} name="chevron-left" />
+                                <FontAwesome5 style={[styles.filterIcon, { color: appstyle.pri }]} size={20} name="chevron-left" />
                             </TouchableOpacity>
                         </View>}
-                        
+
                         <Searchbar
                             onFocus={() => setFocus(true)}
                             // onBlur={() => setFocus(false)}
@@ -245,9 +245,9 @@ const AppHeader = ({ mode = "light", ui2, name, isExtended, filterPress, filters
                                         //     return !status;
                                         // })
                                     }
-                                    style={[styles.filterButton, {backgroundColor: mode == "dark" ? appstyle.tri : appstyle.pri}]}>
-                                    {mode == "dark" && <Entypo style={[styles.filterIcon, {color: mode == "dark" ? appstyle.pri : appstyle.tri}]} size={30} name="add-to-list" /> }
-                                    {mode != "dark" && <FontAwesome5 style={[styles.filterIcon, {color: mode == "dark" ? appstyle.pri : appstyle.tri}]} size={30} name="search" />}
+                                    style={[styles.filterButton, { backgroundColor: mode == "dark" ? appstyle.tri : appstyle.pri }]}>
+                                    {mode == "dark" && <Entypo style={[styles.filterIcon, { color: mode == "dark" ? appstyle.pri : appstyle.tri }]} size={30} name="add-to-list" />}
+                                    {mode != "dark" && <FontAwesome5 style={[styles.filterIcon, { color: mode == "dark" ? appstyle.pri : appstyle.tri }]} size={30} name="search" />}
                                     {mode == "dark" && <AppText style={{ fontWeight: 'bold', fontSize: 16, color: mode == "dark" ? appstyle.pri : appstyle.tri }}>New</AppText>}
                                 </TouchableOpacity>
                             </View>
@@ -278,12 +278,16 @@ const AppHeader = ({ mode = "light", ui2, name, isExtended, filterPress, filters
     return (
         <View style={{ backgroundColor: appstyle.tri, paddingTop: 35 }}>
             <StatusBar animated backgroundColor={appstyle.tri} barStyle={'light-content'} showHideTransition={'fade'} />
-            <View mode="center-aligned" style={{ flexDirection: 'row', alignItems: 'center', padding: 10, paddingVertical: 20, justifyContent: 'space-between' }}>
-                <TouchableOpacity style={{ borderRadius: 100, elevation: 0, backgroundColor: appstyle.tri, padding: 10 }} onPress={() => navigation.goBack()}>
-                    <Icon name="chevron-back" size={20} color={appstyle.pri} />
-                </TouchableOpacity>
-                <AppText style={{ fontSize: 25, fontWeight: 'bold', color: appstyle.priBack, textTransform: 'capitalize' }}>{name || route.name}</AppText>
-                <AppText style={{ fontSize: 25, fontWeight: 'bold', color: appstyle.pri }}>     </AppText>
+            <View style={{ flexDirection: 'row', alignItems: 'center', padding: 10, paddingVertical: 20, justifyContent: 'space-between' }}>
+                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <TouchableOpacity style={{ borderRadius: 100, elevation: 0, backgroundColor: appstyle.tri, padding: 10 }} onPress={() => navigation.goBack()}>
+                        <Icon name="chevron-back" size={30} color={appstyle.pri} />
+                    </TouchableOpacity>
+                    <AppText style={{ fontSize: 25, fontWeight: 'bold', color: appstyle.priBack, textTransform: 'capitalize' }}>{name || route.name}</AppText>
+                </View>
+               {renderRight && <View>
+                    {renderRight}
+                </View>}
             </View>
             {accent != 'opp' && <View style={{ width: '100%', backgroundColor: appstyle.pri, borderTopRightRadius: 10, borderTopLeftRadius: 10, padding: 10 }}></View>}
         </View>

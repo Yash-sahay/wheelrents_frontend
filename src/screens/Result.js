@@ -232,7 +232,7 @@ export function CardComponent({ item, navigation, handleAddToWishlist, latitude,
     }
   };
 
-  const distance = JSON.stringify(parseInt(item?.latitude)) != "null" ? calculateDistance({latitude, longitude}, {latitude: item?.latitude, longitude: item?.longitude}) + " Km" : "N/A"
+  const distance = JSON.stringify(parseInt(item?.latitude)) != "null" ? calculateDistance({latitude, longitude}, {latitude: item?.latitude, longitude: item?.longitude}) + " Km" : ""
 
   return (
     <Card elevation={20} style={styles.card}>
@@ -260,7 +260,7 @@ export function CardComponent({ item, navigation, handleAddToWishlist, latitude,
 
       <Card.Content style={styles.content}>
         <AppText style={styles.infoText}>
-          <FontAwesome name="user-gear" size={12} /> {item?.transmission}{'   '}
+          <FontAwesome name="user-gear" size={12} /> {item?.transmission}{'   '} {item?.isWishList}
           <FontAwesome name="gas-pump" size={12} /> {item?.fuelType}
         </AppText>
         <Text variant="bodyMedium" style={styles.title}>
@@ -274,7 +274,7 @@ export function CardComponent({ item, navigation, handleAddToWishlist, latitude,
           </Text>
       </Card.Content>
       <Card.Actions style={styles.actions}>
-        <AppButton buttonColor={appstyle.tri} icon={'eye'} onPress={() => navigation.navigate('VehicleDetails', { ...item })}>
+        <AppButton disabled={!item?.available} buttonColor={appstyle.tri} icon={'eye'} onPress={() => navigation.navigate('VehicleDetails', { ...item })}>
           View Details
         </AppButton>
       </Card.Actions>

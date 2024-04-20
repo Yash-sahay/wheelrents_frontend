@@ -5,6 +5,7 @@ import { ScrollView, StatusBar, View } from 'react-native'
 import AppText from '../components/AppText'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import Icon from 'react-native-vector-icons/Ionicons'
 import AppButton from '../components/AppButton'
 import AppHeader from '../components/AppHeader'
 import { finish_trip } from '../axios/axios_services/bookingService'
@@ -14,14 +15,14 @@ const PaymentOverView = ({ route, navigation }) => {
     const endTripModalValues = route.params?.endTripModalValues;
     const { role } = useSelector(state => state.userReducer)
 
-    const extendChargeAmt = (endTripModalValues?.cost * (endTripModalValues?.extendedHours || 0)) * 1.5
-    const nonInformedExtendedChargeAmt = (endTripModalValues?.cost * (endTripModalValues?.editionalTime?.hours || 0)) * 2
+    const extendChargeAmt = endTripModalValues?.extendedHours > 0 ? (endTripModalValues?.cost * (endTripModalValues?.extendedHours)) * 1.5 : 0
+    const nonInformedExtendedChargeAmt = endTripModalValues?.editionalTime?.hours > 0 ? (endTripModalValues?.cost * (endTripModalValues?.editionalTime?.hours)) * 2 : 0
 
     const finishTripApi = async () => {
         try {
             const payload = {
                 "bookingId": endTripModalValues._id,
-                "finalExtendedHours": parseInt(endTripModalValues?.extendedHours || 0) + parseInt(endTripModalValues?.editionalTime?.hours || 0),
+                "finalExtendedHours": extendChargeAmt + nonInformedExtendedChargeAmt,
                 "extendedPrice": extendChargeAmt,
                 "nonInformedExtendedPrice": nonInformedExtendedChargeAmt
             }
@@ -35,11 +36,8 @@ const PaymentOverView = ({ route, navigation }) => {
 
     return (
         <>
-            <StatusBar animated barStyle={"dark-content"} backgroundColor={appstyle.pri} />
-            <View style={{ backgroundColor: appstyle.pri, paddingTop: 50, flexDirection: 'row', alignItems: 'center' }}>
-                <MaterialCommunityIcons onPress={() => navigation.goBack()} name="chevron-left" color={appstyle.tri} size={40} />
-                <AppText style={{ fontWeight: "700", fontSize: 25, color: appstyle.textBlack, textTransform: 'capitalize' }}>Payment Overview</AppText>
-            </View>
+            <StatusBar animated barStyle={"light-content"} backgroundColor={appstyle.tri} />
+            <AppHeader ui2  name={"Payment Overview"}/>
             <ScrollView style={{ backgroundColor: appstyle.pri }} contentContainerStyle={{ paddingBottom: 100 }}>
                 <View style={{ flex: 1, padding: 20, paddingTop: 20 }}>
                     <CustomTile style={{ backgroundColor: '#f4f4f2' }}>

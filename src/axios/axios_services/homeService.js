@@ -12,3 +12,7 @@ export function get_vehicle_categories() {
 export function searchApi(string, data) {
     return axiosInstance.post(url + 'search/' + string, data);
 };
+// Get Banner Images
+export function get_banner_images() {
+    return axiosInstance.get(url + 'get_banner_images');
+};

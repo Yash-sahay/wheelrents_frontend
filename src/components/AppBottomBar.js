@@ -9,13 +9,22 @@ import Animated, { ReduceMotion, useAnimatedStyle, useSharedValue, withSpring, w
 // import { BlurView } from '@react-native-community/blur';
 import LinearGradient from 'react-native-linear-gradient';
 import AppText from "./AppText"
+import { trigger } from "react-native-haptic-feedback";
+
+// Optional configuration
+const options = {
+    enableVibrateFallback: true,
+    ignoreAndroidSystemSettings: false,
+    enableVibrateFallback: true
+};
+
 
 
 const AppBottomBar = () => {
-    const { currRoute, role } = useSelector(state => state.userReducer)
+    const { currRoute, role, bottomSheetOpen } = useSelector(state => state.userReducer)
     const navigation = useNavigation()
-    
-    
+
+
     const navigationClient = [
         { routeName: role.includes("host") ? 'HostDashboard' : 'Home', icon: 'home', tilename: 'Home' },
         { routeName: 'WishList', icon: 'heart', tilename: 'Wishlist' },
@@ -45,19 +54,30 @@ const AppBottomBar = () => {
 
 
     useEffect(() => {
-        translateY.value = 0
         if (routsVerify(currRoute)) {
         }
-        return () => {
+
+        if (bottomSheetOpen) {
             translateY.value = 100
+        } else {
+            translateY.value = 0
         }
-    }, [currRoute])
+        // return () => {
+        //     translateY.value = 100
+        // }
+    }, [currRoute, bottomSheetOpen])
 
     const IconsTile = ({ icon, active, routeName, tilename, type }) => {
         const Icon = type
         return (
-            <Pressable onPress={() => navigation.navigate(routeName)} style={[style.tileBtn]}>
-               {Icon ? <Icon name={!active ? icon + "-outline" : icon} color={appstyle.accent} size={20} /> : <FontAwesome6 name={!active ? icon + "-outline" : icon} color={appstyle.accent} size={20} />}
+            <Pressable
+                onPress={() => {
+                    navigation.navigate(routeName);
+                    // Trigger haptic feedback
+                    trigger("impactLight", options);
+                }}
+                style={[style.tileBtn]}>
+                {Icon ? <Icon name={!active ? icon + "-outline" : icon} color={appstyle.accent} size={20} /> : <FontAwesome6 name={!active ? icon + "-outline" : icon} color={appstyle.accent} size={20} />}
                 {/* {active && <AppText style={{color: appstyle.pri, fontSize: 10}}>{tilename}</AppText>} */}
             </Pressable>
         )

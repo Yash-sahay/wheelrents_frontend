@@ -37,8 +37,8 @@ export function getAllVehicleListings({data}) {
 
 
 // Get Wishlist by user 
-export function get_wishlist_by_user() {
-    return axiosInstance.get(url + 'wishlist');
+export function get_wishlist_by_user({data}) {
+    return axiosInstance.post(url + 'wishlist_get', data);
 };
 
 // Get Wishlist by user 

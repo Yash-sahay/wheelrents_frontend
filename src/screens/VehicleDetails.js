@@ -67,7 +67,7 @@ const VehicleDetails = ({ route }) => {
             if (supported) {
                 Linking.openURL(url);
             } else {
-                console.log('Don\'t know how to open URI: ' + url);
+                alert('Don\'t know how to open URI: ' + url);
             }
         });
     }
@@ -75,7 +75,7 @@ const VehicleDetails = ({ route }) => {
 
     return (
         <>
-            <AppBottomSheet bottomSheetRef={bottomSheetRef} snapPoints={['1%', '60%', '97%']} bottomSheet={bottomSheet} setBottomSheet={setBottomSheet}>
+            <AppBottomSheet bottomSheetRef={bottomSheetRef} snapPoints={['60%', '97%']} bottomSheet={bottomSheet} setBottomSheet={setBottomSheet}>
                 <AppDatePicker />
             </AppBottomSheet>
             <View style={[StyleSheet.absoluteFill, { backgroundColor: appstyle.pri, }]}>
