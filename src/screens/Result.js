@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, Pressable, Dimensions, StyleSheet, StatusBar, TouchableOpacity, PermissionsAndroid } from 'react-native';
+import { View, FlatList, Pressable, Dimensions, StyleSheet, StatusBar, TouchableOpacity, PermissionsAndroid, BackHandler, VirtualizedList } from 'react-native';
 import { Searchbar } from 'react-native-paper'; // Import Searchbar from react-native-paper
 import { appstyle } from '../styles/appstyle';
 import { searchApi } from '../axios/axios_services/homeService';
@@ -17,6 +17,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import FontAwesome from 'react-native-vector-icons/FontAwesome6';
 import Geolocation from '@react-native-community/geolocation';
+import Animated from 'react-native-reanimated';
+import AppShimmer from '../components/AppShimmer';
 
 
 
@@ -24,7 +26,8 @@ const SearchResultScreen = ({ navigation, route }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const { bookingStartDate, bookingEndDate, lat, long } = useSelector(state => state.userReducer);
 
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState([null, null, null, null]);
+  const [isLoading, setisLoading] = useState(false)
 
   const onChangeSearch = query => {
     setSearchQuery(query);
@@ -34,12 +37,14 @@ const SearchResultScreen = ({ navigation, route }) => {
 
   const searchDatabase = async () => {
     try {
+      setisLoading(true)
       const data = {
         startDate: bookingStartDate,
         endDate: bookingEndDate
       }
       const res = await searchApi(route?.params?.searchString, data)
       setSearchResults(res.data)
+      setisLoading(false)
     } catch (error) {
       console.error(error)
     }
@@ -65,7 +70,23 @@ const SearchResultScreen = ({ navigation, route }) => {
     }
   };
 
+  // useEffect(() => {
+  //   const backAction = () => {
+  //     navigation.navigate("Home")
+  //     return true;
+  //   };
 
+  //   const backHandler = BackHandler.addEventListener(
+  //     'hardwareBackPress',
+  //     backAction,
+  //   );
+
+  //   return () => backHandler.remove();
+  // }, []);
+
+  const getItemCount = () => searchResults?.length;
+
+  const getItem = (data, index) => searchResults?.[index];
 
 
 
@@ -100,13 +121,19 @@ const SearchResultScreen = ({ navigation, route }) => {
         </View>
       </View>
       {/* <AppText style={{ fontWeight: 'bold', paddingHorizontal: 20, fontSize: 20, marginBottom: 30, marginBottom: 5, color: appstyle.textSec }}><Icon name="search" size={20} />  Showing result for "{route?.params?.searchString}"</AppText> */}
-      <FlatList
-        data={searchResults}
+      <VirtualizedList
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: 100 }}
+        data={searchResults}
+        getItemCount={getItemCount}
+        getItem={getItem}
+        maxToRenderPerBatch={50}
+        onRefresh={searchDatabase}
+        refreshing={isLoading}
         keyExtractor={item => item?._id?.toString()} // Assuming each item has a unique id
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
           <CardComponent
+            keyId={index}
             latitude={lat}
             longitude={long}
             item={item}
@@ -162,7 +189,7 @@ const styles = StyleSheet.create({
 
 
 
-export function CardComponent({ item, navigation, handleAddToWishlist, latitude, longitude }) {
+export function CardComponent({ item, navigation, handleAddToWishlist, latitude, longitude, keyId }) {
   // const dispatch = useDispatch();
   const styles = {
     card: {
@@ -232,51 +259,55 @@ export function CardComponent({ item, navigation, handleAddToWishlist, latitude,
     }
   };
 
-  const distance = JSON.stringify(parseInt(item?.latitude)) != "null" ? calculateDistance({latitude, longitude}, {latitude: item?.latitude, longitude: item?.longitude}) + " Km" : ""
+  const distance = JSON.stringify(parseInt(item?.latitude)) != "null" ? calculateDistance({ latitude, longitude }, { latitude: item?.latitude, longitude: item?.longitude }) + " Km" : ""
 
   return (
-    <Card elevation={20} style={styles.card}>
+    <Card key={keyId} style={styles.card}>
       <Pressable onPress={() => handleAddToWishlist(item)} style={styles.addToWishlistBtn}>
-        <Fontisto name={"heart"} style={{ elevation: 30 }} color={item?.isWishList ? '#ff3b30' : '#ddd'} size={20} />
+        <AppShimmer style={{ height: 20, width: 20, borderRadius: 20, }} visible={item == null ? false : true}>
+          <Fontisto name={"heart"} style={{ elevation: 30 }} color={item?.isWishList ? '#ff3b30' : '#ddd'} size={20} />
+        </AppShimmer>
       </Pressable>
-      <AppText style={styles.availabilityText}>
+      {item && <AppText style={styles.availabilityText}>
         {item?.available ? 'Available' : 'Booked at selected time period!'}
-      </AppText>
-      <FlatList
-        style={styles.imageList}
-        data={item?.files}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        renderItem={(imgs) => (
-          <Card.Cover
+      </AppText>}
 
-            resizeMode="cover"
-            style={styles.image}
-            source={{ uri: baseURL() + 'public/vehicle/' + imgs?.item?.fileName }}
-          />
-        )}
-      />
-
+      <AppShimmer style={styles.image} visible={item == null ? false : true}>
+        <Animated.Image
+          resizeMode="cover"
+          style={styles.image}
+          source={{ uri: baseURL() + 'public/vehicle/' + item?.files?.[0]?.fileName }}
+        />
+      </AppShimmer>
       <Card.Content style={styles.content}>
-        <AppText style={styles.infoText}>
-          <FontAwesome name="user-gear" size={12} /> {item?.transmission}{'   '} {item?.isWishList}
-          <FontAwesome name="gas-pump" size={12} /> {item?.fuelType}
-        </AppText>
-        <Text variant="bodyMedium" style={styles.title}>
-          {item?.name}
-        </Text>
-        <Text variant="titleLarge" style={styles.cost}>
-          ₹{amountFormatter(item?.cost)}/hr 
-        </Text>
-        <Text variant="bodyMedium" style={{fontWeight: 'bold'}}>
+        <AppShimmer style={{ ...styles.infoText, borderRadius: 20 }} visible={item == null ? false : true}>
+          <AppText style={styles.infoText}>
+            <FontAwesome name="user-gear" size={12} /> {item?.transmission}{'   '}
+            <FontAwesome name="gas-pump" size={12} /> {item?.fuelType}
+          </AppText>
+        </AppShimmer>
+        <AppShimmer style={{ ...styles.title, width: 60, borderRadius: 20 }} visible={item == null ? false : true}>
+          <Text variant="bodyMedium" style={styles.title}>
+            {item?.name}
+          </Text>
+        </AppShimmer>
+        <AppShimmer style={{ ...styles.cost, width: 50, marginTop: 10, borderRadius: 20 }} visible={item == null ? false : true}>
+          <Text variant="titleLarge" style={styles.cost}>
+            ₹{amountFormatter(item?.cost)}/hr
+          </Text>
+        </AppShimmer>
+        <AppShimmer style={{ ...styles.title, width: 30, borderRadius: 20 }} visible={item == null ? false : true}>
+          <Text variant="bodyMedium" style={{ fontWeight: 'bold', color: 'grey' }}>
             {distance}
           </Text>
+        </AppShimmer>
       </Card.Content>
       <Card.Actions style={styles.actions}>
-        <AppButton disabled={!item?.available} buttonColor={appstyle.tri} icon={'eye'} onPress={() => navigation.navigate('VehicleDetails', { ...item })}>
-          View Details
-        </AppButton>
+        <AppShimmer style={{ ...styles.title, marginTop: 0, width: 130, height: 40, borderRadius: 20 }} visible={item == null ? false : true}>
+          <AppButton buttonColor={appstyle.tri} icon={'eye'} onPress={() => navigation.navigate('VehicleDetails', { ...item, })}>
+            View Details
+          </AppButton>
+        </AppShimmer>
       </Card.Actions>
     </Card>
   );

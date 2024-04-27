@@ -61,7 +61,7 @@ const Search = ({navigation}) => {
             <AppText style={{ fontWeight: 'bold', fontSize: 20, marginVertical: 30, marginBottom: 5, color: appstyle.textSec }}><Icon name="search" size={20} />  Searching for "{searchString}"</AppText>
             <View style={{ display: searchList.length > 0 ? 'flex' : 'none', borderRadius: 20, backgroundColor: appstyle.pri, elevation: 2, shadowColor: appstyle.shadowColor, borderWidth: 1, borderColor: "#f4f4f2", justifyContent: 'space-between', marginTop: 10, width: '100%', padding: 10 }}>
               {searchList?.map((string, index) => (
-                <TouchableOpacity onPress={() => navigation.navigate("Result", {searchString: string?.name})} style={[styles.recentItems,{paddingVertical: 15}, index == searchList.length - 1 && {borderBottomWidth: 0, paddingBottom: 5}, index == 0 && {paddingTop: 5}]}>
+                <TouchableOpacity onPress={() =>  navigation.navigate("Result", {searchString: string?.name})} style={[styles.recentItems,{paddingVertical: 15}, index == searchList.length - 1 && {borderBottomWidth: 0, paddingBottom: 5}, index == 0 && {paddingTop: 5}]}>
                   <View style={styles.recentItemsContent}>
                     <MaterialIcons name="search" color={appstyle.textBlack} size={20} />
                     <AppText style={{ paddingHorizontal: 10, fontSize: 16, fontWeight: "700" }}>{string?.name}</AppText>
@@ -100,7 +100,7 @@ const Search = ({navigation}) => {
             <FlatList
               data={categoryList}
               renderItem={({ item, index }) => (
-                <TouchableOpacity onPress={() => navigation.navigate("Result", {searchString: item?.name})} style={[{ flexDirection: 'row', alignItems: 'center', marginVertical: 5, paddingBottom: 10, borderBottomWidth: 2, borderColor: '#f4f4f2' }, index == categoryList.length - 1 && {borderBottomWidth: 0, paddingBottom: 0}]}>
+                <TouchableOpacity onPress={() => navigation.replace("Result", {searchString: item?.name})} style={[{ flexDirection: 'row', alignItems: 'center', marginVertical: 5, paddingBottom: 10, borderBottomWidth: 2, borderColor: '#f4f4f2' }, index == categoryList.length - 1 && {borderBottomWidth: 0, paddingBottom: 0}]}>
                   <View style={{ backgroundColor: appstyle.pri, padding: 5, borderRadius: 10 }}>
                     <Image resizeMode={'cover'} style={{ width: 40, height: 40 }} source={{ uri: baseURL() + "public/category/" + item?.image }} />
                   </View>

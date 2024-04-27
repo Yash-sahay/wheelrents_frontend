@@ -179,3 +179,9 @@ export async function requestLocationPermission(setter) {
     console.warn(err)
   }
 }
+
+
+
+
+
+

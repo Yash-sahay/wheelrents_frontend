@@ -3,6 +3,8 @@ import React, {  useCallback, useEffect, useMemo, useRef, useState } from 'react
 import BottomSheet, { useBottomSheetSpringConfigs } from '@gorhom/bottom-sheet';
 import { useDispatch } from 'react-redux';
 import { updateUserDetails } from '../redux/reducer/userReducer';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import Animated from 'react-native-reanimated';
 
 const AppBottomSheet = ({children, snapPoints, bottomSheet, setBottomSheet, bottomSheetRef}) => {
       const dispatch = useDispatch()
@@ -44,6 +46,7 @@ const AppBottomSheet = ({children, snapPoints, bottomSheet, setBottomSheet, bott
     <>
       {bottomSheet && (
         <View style={{ position: 'absolute', height: '100%', width: '100%', bottom: 0, left: 0, zIndex: 10 }} >
+          <GestureHandlerRootView>
           <BottomSheet
             enablePanDownToClose={true}
             onClose={handleClosePress}
@@ -56,6 +59,7 @@ const AppBottomSheet = ({children, snapPoints, bottomSheet, setBottomSheet, bott
           >
             {children}
           </BottomSheet>
+        </GestureHandlerRootView>
         </View>
       )}
     </>

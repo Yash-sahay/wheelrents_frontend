@@ -16,6 +16,7 @@ import AppDatePicker from '../components/AppDatePicker';
 import { createBooking } from '../axios/axios_services/bookingService';
 import { updateLoaderReducer } from '../redux/reducer/loaderReducer';
 import AppMap from '../components/AppMap';
+import Animated from 'react-native-reanimated';
 
 const Device_Width = Dimensions.get('window').width
 const Device_Height = Dimensions.get('window').height
@@ -85,29 +86,12 @@ const VehicleDetails = ({ route }) => {
                         <View style={{ width: '100%', alignItems: 'center', paddingBottom: 40, backgroundColor: appstyle.tri }}>
                             <Carousel
                                 data={data?.files}
-                                renderItem={({ item, index }) => <Card.Cover resizeMode="cover" style={{ width: '100%', borderRadius: 10 }} source={{ uri: baseURL() + "public/vehicle/" + item?.fileName }} />}
+                                renderItem={({ item, index }) => <Animated.Image sharedTransitionTag={data?.tag + index}
+                                resizeMode="cover" style={{ width: '100%', borderRadius: 10, height: 200 }} source={{ uri: baseURL() + "public/vehicle/" + item?.fileName }} />}
                                 sliderWidth={Device_Width}
                                 itemWidth={Device_Width - 50}
                                 onSnapToItem={(index) => setCurrentIndex(index)}
                             />
-                            {/* <View style={{ width: '100%', marginTop: 10, alignItems: 'center' }}>
-                                <FlatList
-                                    horizontal
-                                    data={data.files}
-                                    style={{ borderRadius: 10, backgroundColor: appstyle.pri, }}
-                                    contentContainerStyle={{ paddingVertical: 3 }}
-                                    renderItem={({ item, index }) => {
-                                        return (
-                                            <TouchableOpacity
-                                                disabled
-                                                onPress={() => setCurrentIndex(index)}
-                                                style={[{ backgroundColor: appstyle.pri, borderRadius: 10, overflow: 'hidden', marginHorizontal: 3, borderWidth: 1, borderColor: "transparent", transform: [{ scale: .8 }], }, (currentIndex == index) && { borderWidth: 2, borderColor: appstyle.tri, borderStyle: 'dotted', transform: [{ scale: 1.2 }], }]}>
-                                                <Image resizeMode='cover' source={{ uri: baseURL() + "public/vehicle/" + item?.fileName }} height={20} width={20} />
-                                            </TouchableOpacity>
-                                        )
-                                    }}
-                                />
-                            </View> */}
                         </View>
                         <View style={{ borderTopLeftRadius: 10, marginTop: -10, borderTopRightRadius: 10, backgroundColor: appstyle.pri, height: 10 }}></View>
 

@@ -22,6 +22,8 @@ import { Provider } from 'react-redux';
 import { store } from './src/redux/store';
 import 'react-native-gesture-handler'
 import { appstyle } from './src/styles/appstyle';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
 
 
 type SectionProps = PropsWithChildren<{
@@ -50,7 +52,9 @@ function App(): React.JSX.Element {
           rippleEffectEnabled: true
         }}
         theme={theme}>
-        <Navigation />
+        <GestureHandlerRootView>
+          <Navigation />
+        </GestureHandlerRootView>
       </PaperProvider>
     </Provider>
   );

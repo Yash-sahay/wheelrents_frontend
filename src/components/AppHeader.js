@@ -183,7 +183,7 @@ const AppHeader = ({ mode = "light", ui2, name, isExtended, filterPress, filters
     if (!ui2) {
         return (
             <>
-                <AppBottomSheet bottomSheetRef={bottomSheetRef} snapPoints={['95%']} bottomSheet={bottomSheet} setBottomSheet={setBottomSheet}>
+                <AppBottomSheet bottomSheetRef={bottomSheetRef} visible={true} snapPoints={['95%']} bottomSheet={bottomSheet} setBottomSheet={setBottomSheet}>
                     {/* <AppCalender/> */}
                     {/* <AppDatePicker /> */}
                     <StateSelection />

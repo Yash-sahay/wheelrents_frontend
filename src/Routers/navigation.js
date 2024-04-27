@@ -1,8 +1,8 @@
 import { Dimensions, PermissionsAndroid, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
+// import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import React from 'react';
 
-import { createStackNavigator } from '@react-navigation/stack';
+// import { createStackNavigator } from '@react-navigation/stack';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Home from '../screens/Home';
@@ -26,8 +26,12 @@ import Geolocation from '@react-native-community/geolocation';
 import { requestLocationPermission } from '../../common';
 import { updateLocationReducer } from '../redux/reducer/locationReducer';
 import PaymentOverView from '../screens/PaymentOverView';
+import BannerOpenView from '../screens/BannerOpenView';
 
-const Stack = createStackNavigator();
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+const Stack = createNativeStackNavigator();
 const { width } = Dimensions.get("window")
 
 const Navigation = () => {
@@ -81,7 +85,7 @@ const Navigation = () => {
     <>
       <AppLoader />
       {/* <AppBottomBar/> */}
-      <NavigationContainer>
+      <NavigationContainer initialRouteName="Home">
         <Stack.Navigator
           screenOptions={{ headerShown: false }}>
           {!isLoggedIn ? (
@@ -95,21 +99,22 @@ const Navigation = () => {
                 <>
                   <Stack.Screen options={{ animationEnabled: false }} name="HostDashboard" component={HostDashboard} />
                   <Stack.Screen name="AddVehicle" component={AddVehicle} />
-                  <Stack.Screen name="Withdraw" options={{ animationEnabled: false }} component={Withdraw} />
+                  <Stack.Screen name="Withdraw" options={{ animationEnabled: false, animation: "none" }} component={Withdraw} />
                 </>
               )}
               {role?.includes('client') && (
                 <>
-                  <Stack.Screen options={{ animationEnabled: false }} name="Home" component={Home} />
+                  <Stack.Screen options={{ animationEnabled: false, animation: "none" }} name="Home" component={Home} />
                   <Stack.Screen name="VehicleDetails" component={VehicleDetails} />
-                  <Stack.Screen options={{ animationEnabled: false }} name="WishList" component={Wishlist} />
+                  <Stack.Screen options={{ animationEnabled: false, animation: "none" }} name="WishList" component={Wishlist} />
+                  <Stack.Screen name="BannerOpenView" component={BannerOpenView} />
                 </>
               )}
-              <Stack.Screen options={{ animationEnabled: false }} name="User" component={User} />
+              <Stack.Screen options={{ animationEnabled: false, animation: "none" }} name="User" component={User} />
               <Stack.Screen name="Search" component={Search} />
               <Stack.Screen name="Notification" component={Notification} />
-              <Stack.Screen options={{ animationEnabled: false }} name="Booking" component={Booking} />
-              <Stack.Screen options={{}} name="QRScanner" component={QRScanner} />
+              <Stack.Screen options={{ animationEnabled: false, animation: "none" }} name="Booking" component={Booking} />
+              <Stack.Screen options={{ animation: "slide_from_bottom" }} name="QRScanner" component={QRScanner} />
               <Stack.Screen options={{}} name="Result" component={SearchResultScreen} />
               <Stack.Screen name="PaymentOverView" component={PaymentOverView} />
             </>

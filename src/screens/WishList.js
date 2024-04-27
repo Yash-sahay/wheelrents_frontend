@@ -56,7 +56,7 @@ const Wishlist = ({navigation}) => {
 
 
 
-  const renderWishlistItem = ({ item }) => {
+  const renderWishlistItem = ({ item, index }) => {
 
 
     const handleAddToWishlist = async (item) => {
@@ -71,7 +71,7 @@ const Wishlist = ({navigation}) => {
       }
     };
     return (
-      <CardComponent item={item} navigation={navigation} handleAddToWishlist={handleAddToWishlist}/>
+      <CardComponent item={item} keyId={index} navigation={navigation} handleAddToWishlist={handleAddToWishlist}/>
     )
   };
 
