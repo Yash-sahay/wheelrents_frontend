@@ -11,7 +11,7 @@ import { TouchableOpacity } from '@gorhom/bottom-sheet'
 import AppBottomBar from '../../components/AppBottomBar'
 
 
-const User = () => {
+const User = ({navigation}) => {
   const dispatch = useDispatch()
   const { username, email } = useSelector(state => state.userReducer)
   return (
@@ -28,7 +28,7 @@ const User = () => {
         <View style={{ borderRadius: 20, backgroundColor: appstyle.pri, height: 300, elevation: 2, shadowColor: appstyle.shadowColor, borderWidth: 1, borderColor: '#f4f4f2', justifyContent: 'space-between', marginTop: 10, width: '100%', padding: 10 }}>
           <View>
             <TileBtn icon={'user'} text={"KYC"} />
-            <TileBtn />
+            <TileBtn icon={"phone"} text={"Need any help?"} onPress={() => navigation.navigate("ChatScreen")} />
           </View>
           <AppButton style={{backgroundColor: '#ff3b302e'}} textColor="#ff3b30" onPress={() => { dispatch(updateUserDetails({ isLoggedIn: false })) }}  icon={'logout-variant'}>Logout</AppButton>
         </View>
@@ -45,7 +45,7 @@ const TileBtn = ({ onPress, text, icon }) => {
         {icon && (
           <FontAwesome6 color={appstyle.textBlack} name={icon} size={17} />
         )}
-        <AppText style={{ fontSize: 17, fontWeight: '700', color: appstyle.textBlack }}>  {text}</AppText>
+        <AppText style={{ fontSize: 16, fontWeight: '500', color: appstyle.textSec }}>  {text}</AppText>
       </View>
       <FontAwesome6 name={'arrow-right'} color={appstyle.textBlack} size={20} />
     </Pressable>

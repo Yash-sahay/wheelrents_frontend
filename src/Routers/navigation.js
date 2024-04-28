@@ -30,6 +30,7 @@ import BannerOpenView from '../screens/BannerOpenView';
 
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import ChatScreen from '../screens/Commons/ChatScreen';
 
 const Stack = createNativeStackNavigator();
 const { width } = Dimensions.get("window")
@@ -115,6 +116,7 @@ const Navigation = () => {
               <Stack.Screen name="Notification" component={Notification} />
               <Stack.Screen options={{ animationEnabled: false, animation: "none" }} name="Booking" component={Booking} />
               <Stack.Screen options={{ animation: "slide_from_bottom" }} name="QRScanner" component={QRScanner} />
+              <Stack.Screen options={{ animation: "slide_from_bottom" }} name="ChatScreen" component={ChatScreen} />
               <Stack.Screen options={{}} name="Result" component={SearchResultScreen} />
               <Stack.Screen name="PaymentOverView" component={PaymentOverView} />
             </>

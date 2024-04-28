@@ -129,7 +129,7 @@ const Home = () => {
             firstItem={0}
             renderItem={({ item, index }) => (
               <AppShimmer style={{ width: '100%', height: 200, marginVertical: 20, overflow: 'hidden', borderRadius: 20, }} visible={item == null ? false : true}>
-                <View style={{ width: '100%', height: 200, overflow: 'hidden', borderRadius: 20, marginVertical: 20}}>
+                <View style={{ width: '100%', height: 200, overflow: 'hidden', borderRadius: 20, marginVertical: 20 }}>
                   <Pressable onPress={() => navigation.navigate("BannerOpenView", { uri: baseURL() + 'public/category/' + item?.image, tag: 'Img' + index })}>
                     <Animated.Image
                       sharedTransitionTag={'Img' + index}
@@ -178,43 +178,46 @@ const Home = () => {
               <AppText style={{ fontSize: 20, fontWeight: '900' }}>Category</AppText>
               <CategoryList />
             </View>
+            <View style={{backgroundColor: '#f7f7f7', zIndex: 2, paddingTop: 20}}>
+            <View style={{ paddingHorizontal: 20 }}>
+              <AppText style={{ fontSize: 20, marginTop: 20, fontWeight: '900' }}>Most Relevent</AppText>
+            </View>
+            <Carousel
+              data={dataList}
+              loop
+              firstItem={0}
+              renderItem={({ item, index }) => <CardComponent latitude={lat} longitude={long} item={item} keyId={index} handleAddToWishlist={handleAddToWishlist} getAllVehicle={getAllVehicle} />}
+              sliderWidth={Device_Width + 50}
+              itemWidth={Device_Width - 50}
+              onSnapToItem={(index) => setActiveSlide(index)}
+            />
+            <View>
+              <Pagination
+                dotsLength={dataList.length}
+                activeDotIndex={activeSlide}
+                dotStyle={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: 5,
+                  marginHorizontal: 8,
+                  // backgroundColor: 'rgba(255, 255, 255, 0.92)'
+                }}
+                inactiveDotStyle={{
+                  // Define styles for inactive dots here
+                }}
+                inactiveDotOpacity={0.4}
+                inactiveDotScale={0.6}
+              />
+
+
+            </View>
+            </View>
             <View>
               <Image resizeMode={'contain'} style={{ width: '100%', height: 100, marginTop: -8 }} source={require("../../assets/images/greyWave.png")} />
             </View>
           </View>
 
-          <View style={{ paddingHorizontal: 20, marginTop: -10 }}>
-            <AppText style={{ fontSize: 20, marginTop: 20, fontWeight: '900' }}>Most Relevent</AppText>
-          </View>
-          <Carousel
-            data={dataList}
-            loop
-            firstItem={0}
-            renderItem={({ item, index }) => <CardComponent latitude={lat} longitude={long} item={item} keyId={index} handleAddToWishlist={handleAddToWishlist} getAllVehicle={getAllVehicle} />}
-            sliderWidth={Device_Width + 50}
-            itemWidth={Device_Width - 50}
-            onSnapToItem={(index) => setActiveSlide(index)}
-          />
-          <View>
-            <Pagination
-              dotsLength={dataList.length}
-              activeDotIndex={activeSlide}
-              dotStyle={{
-                width: 10,
-                height: 10,
-                borderRadius: 5,
-                marginHorizontal: 8,
-                // backgroundColor: 'rgba(255, 255, 255, 0.92)'
-              }}
-              inactiveDotStyle={{
-                // Define styles for inactive dots here
-              }}
-              inactiveDotOpacity={0.4}
-              inactiveDotScale={0.6}
-            />
 
-
-          </View>
           <Image resizeMode={'cover'} source={require("../../assets/images/black_wave.png")} />
           <View style={{ width: '100%', height: 1000, marginTop: -30, backgroundColor: appstyle.tri }}>
             <Marquee spacing={20} speed={1}>
@@ -262,13 +265,13 @@ const CategoryList = () => {
             <View key={index} style={{ justifyContent: 'center', alignItems: 'center', marginTop: 10, marginBottom: 5, marginRight: 15, marginLeft: index > 0 ? 0 : 3 }}>
               <AppShimmer style={{ height: 80, width: 120, borderRadius: 20, elevation: 2, shadowColor: appstyle.shadowColor }} visible={item == null ? false : true}>
               </AppShimmer>
-                {item && <View style={{ height: 80, minWidth: 120, backgroundColor: appstyle.pri, elevation: 2, shadowColor: appstyle.shadowColor, borderRadius: 20, borderWidth: 1, borderColor: appstyle.pri, flexDirection: 'row', justifyContent: 'center', alignItems: "center" }}>
-                  <Image resizeMode={'cover'} style={{ width: 40, height: 40 }} source={{ uri: baseURL() + "public/category/" + item?.image }} />
-                  <View style={{}}>
-                    <AppText style={{ fontWeight: '700', fontSize: 16, marginLeft: 10 }} >{item?.name?.toUpperCase()}</AppText>
-                    <AppText style={{ fontWeight: '700', marginTop: -5, fontSize: 10, color: appstyle.textSec, marginLeft: 10 }} >{'View all'}</AppText>
-                  </View>
-                </View>}
+              {item && <View style={{ height: 80, minWidth: 120, backgroundColor: appstyle.pri, elevation: 2, shadowColor: appstyle.shadowColor, borderRadius: 20, borderWidth: 1, borderColor: appstyle.pri, flexDirection: 'row', justifyContent: 'center', alignItems: "center" }}>
+                <Image resizeMode={'cover'} style={{ width: 40, height: 40 }} source={{ uri: baseURL() + "public/category/" + item?.image }} />
+                <View style={{}}>
+                  <AppText style={{ fontWeight: '700', fontSize: 16, marginLeft: 10 }} >{item?.name?.toUpperCase()}</AppText>
+                  <AppText style={{ fontWeight: '700', marginTop: -5, fontSize: 10, color: appstyle.textSec, marginLeft: 10 }} >{'View all'}</AppText>
+                </View>
+              </View>}
             </View>
           )
         }}
@@ -355,9 +358,9 @@ function CardComponent({ item, handleAddToWishlist, latitude, keyId, longitude }
           <Fontisto name={"heart"} style={{ elevation: 30 }} color={item?.isWishList ? '#ff3b30' : '#ddd'} size={20} />
         </AppShimmer>
       </Pressable>
-          {item && <AppText style={styles.availabilityText}>
-          {item?.available ? 'Available' : 'Booked at selected time period!'}
-        </AppText>}
+      {item && <AppText style={styles.availabilityText}>
+        {item?.available ? 'Available' : 'Booked at selected time period!'}
+      </AppText>}
       <FlatList
         style={styles.imageList}
         data={item?.files || [null]}
@@ -373,33 +376,33 @@ function CardComponent({ item, handleAddToWishlist, latitude, keyId, longitude }
         )}
       />
       <Card.Content style={styles.content}>
-      <AppShimmer style={{...styles.infoText, borderRadius: 20}} visible={item == null ? false : true}>
-        <AppText style={styles.infoText}>
-          <FontAwesome name="user-gear" size={12} /> {item?.transmission}{'   '}
-          <FontAwesome name="gas-pump" size={12} /> {item?.fuelType}
-        </AppText>
-      </AppShimmer>
-      <AppShimmer style={{...styles.title, width: 60, borderRadius: 20}} visible={item == null ? false : true}>
-        <Text variant="bodyMedium" style={styles.title}>
-          {item?.name}
-        </Text>
+        <AppShimmer style={{ ...styles.infoText, borderRadius: 20 }} visible={item == null ? false : true}>
+          <AppText style={styles.infoText}>
+            <FontAwesome name="user-gear" size={12} /> {item?.transmission}{'   '}
+            <FontAwesome name="gas-pump" size={12} /> {item?.fuelType}
+          </AppText>
         </AppShimmer>
-        <AppShimmer style={{...styles.cost, width: 50, marginTop: 10, borderRadius: 20}} visible={item == null ? false : true}>
-        <Text variant="titleLarge" style={styles.cost}>
-          ₹{amountFormatter(item?.cost)}/hr
-        </Text>
+        <AppShimmer style={{ ...styles.title, width: 60, borderRadius: 20 }} visible={item == null ? false : true}>
+          <Text variant="bodyMedium" style={styles.title}>
+            {item?.name}
+          </Text>
         </AppShimmer>
-        <AppShimmer style={{...styles.title, width: 30, borderRadius: 20}} visible={item == null ? false : true}>
-        <Text variant="bodyMedium" style={{ fontWeight: 'bold', color: 'grey' }}>
-          {distance}
-        </Text>
+        <AppShimmer style={{ ...styles.cost, width: 50, marginTop: 10, borderRadius: 20 }} visible={item == null ? false : true}>
+          <Text variant="titleLarge" style={styles.cost}>
+            ₹{amountFormatter(item?.cost)}/hr
+          </Text>
+        </AppShimmer>
+        <AppShimmer style={{ ...styles.title, width: 30, borderRadius: 20 }} visible={item == null ? false : true}>
+          <Text variant="bodyMedium" style={{ fontWeight: 'bold', color: 'grey' }}>
+            {distance}
+          </Text>
         </AppShimmer>
       </Card.Content>
       <Card.Actions style={styles.actions}>
-      <AppShimmer style={{...styles.title, marginTop: 0,  width: 130, height: 40, borderRadius: 20}} visible={item == null ? false : true}>
-        <AppButton buttonColor={appstyle.priBack} outlined icon={'eye'} onPress={() => navigation.navigate('VehicleDetails', { ...item, tag: "carData" + keyId })}>
-          View Details
-        </AppButton>
+        <AppShimmer style={{ ...styles.title, marginTop: 0, width: 130, height: 40, borderRadius: 20 }} visible={item == null ? false : true}>
+          <AppButton buttonColor={appstyle.priBack} outlined icon={'eye'} onPress={() => navigation.navigate('VehicleDetails', { ...item, tag: "carData" + keyId })}>
+            View Details
+          </AppButton>
         </AppShimmer>
       </Card.Actions>
     </Card>

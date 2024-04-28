@@ -15,12 +15,7 @@ import { CardComponent } from './Result';
 
 const Wishlist = ({navigation}) => {
   const dispatch = useDispatch()
-  const [wishlistItems, setWishlistItems] = useState([
-    // { id: '1', title: 'Product 1', description: 'Description for Product 1', image: 'https://placekitten.com/200/300' },
-    // { id: '2', title: 'Product 2', description: 'Description for Product 2', image: 'https://placekitten.com/200/301' },
-    // { id: '3', title: 'Product 3', description: 'Description for Product 3', image: 'https://placekitten.com/200/302' },
-    // Add more wishlist items as needed
-  ]);
+  const [wishlistItems, setWishlistItems] = useState([null, null, null, null]);
   const { bookingStartDate, bookingEndDate } = useSelector(state => state.userReducer);
 
   const removeFromWishlist = (itemId) => {
@@ -92,7 +87,7 @@ const Wishlist = ({navigation}) => {
             getItemCount={getItemCount}
             getItem={getItem}
             renderItem={renderWishlistItem}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => item?.id}
           />
         )}
       </View>
