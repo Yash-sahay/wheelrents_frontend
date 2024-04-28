@@ -24,6 +24,7 @@ import AppBottomSheet from '../components/AppBottomSheet';
 import QRCode from 'react-native-qrcode-svg';
 import { useSelector } from 'react-redux';
 import PaymentOverView from './PaymentOverView';
+import { MotiView } from 'moti';
 
 
 
@@ -77,11 +78,9 @@ const Booking = ({ navigation }) => {
         const payload1 = { bookingId: id, payment: "pending" }
         res = await booking_status_change(payload1)
       } else {
-        const payload2 = { bookingId: id }
-        res = await booking_payment(payload2)
+        res = await booking_status_change({ bookingId: id, bookingStatus: "active", payment: "done" })
       }
       getBookings()
-      alert(JSON.stringify(res?.data))
       setLoader(false)
     } catch (error) {
       setLoader(false)
@@ -408,12 +407,17 @@ const Booking = ({ navigation }) => {
 
 const Tab = ({ title, onPress, icon, isActive }) => {
   return (
+  
     <TouchableOpacity
       style={[styles.tab, isActive && styles.activeTab]}
       onPress={onPress}
     >
       {icon && (
-        <AntDesign color={isActive ? appstyle.priBack : appstyle.textSec} style={{ marginRight: 8 }} name={icon} size={16} />
+        <MotiView  
+        transition={{ delay: 5, damping: 12, mass: 1 }}
+        animate={{ opacity: isActive ? 1 : 0, translateY: isActive ? 0 : 100 }}>
+          <AntDesign color={isActive ? appstyle.priBack : appstyle.textSec} style={{ marginRight: 8 }} name={icon} size={16} />
+        </MotiView>
       )}
       <Text style={[styles.tabText, isActive && styles.activeTabText]}>
         {title}

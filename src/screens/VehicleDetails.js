@@ -18,24 +18,26 @@ import { updateLoaderReducer } from '../redux/reducer/loaderReducer';
 import AppMap from '../components/AppMap';
 import Animated from 'react-native-reanimated';
 import { updateUserDetails } from '../redux/reducer/userReducer';
+import { MotiImage, MotiView } from 'moti';
 
 const Device_Width = Dimensions.get('window').width
 const Device_Height = Dimensions.get('window').height
 
-const VehicleDetails = ({ route }) => {
+const VehicleDetails = ({ route, navigation }) => {
     const data = route.params
     const [currentIndex, setCurrentIndex] = useState(0)
     const { bookingStartDate, bookingEndDate } = useSelector(state => state.userReducer)
     const dispatch = useDispatch()
     const [bottomSheet, setBottomSheet] = useState(false)
+    const [bookingDetails, setBookingDetails] = useState({})
     const bottomSheetRef = useRef(null);
 
     useEffect(() => {
         const minimumStartDate = new Date(new Date().getTime() + 5 * 60 * 60 * 1000);
         const minimubEndDate = new Date(new Date().getTime() + 10 * 60 * 60 * 1000);
-        dispatch(updateUserDetails({bookingEndDate: minimubEndDate, bookingStartDate: minimumStartDate }))
+        dispatch(updateUserDetails({ bookingEndDate: minimubEndDate, bookingStartDate: minimumStartDate }))
 
-      }, [])
+    }, [])
 
     const handleBooking = async () => {
         try {
@@ -43,7 +45,8 @@ const VehicleDetails = ({ route }) => {
             dispatch(updateLoaderReducer({ loading: true }))
             const payload = { vehicleId: data._id, startDate: new Date(bookingStartDate), endDate: new Date(bookingEndDate), totalPrice: getTotalCost }
             const res = await createBooking({ data: payload });
-            alert(JSON.stringify(res))
+            setBookingDetails({ id: data._id })
+            setBottomSheet(true)
             dispatch(updateLoaderReducer({ loading: false }))
         } catch (error) {
             dispatch(updateLoaderReducer({ loading: false }))
@@ -72,19 +75,77 @@ const VehicleDetails = ({ route }) => {
     }
 
     function openExternalApp(url) {
-            try {
-                Linking.openURL(url);
-            } catch (error) {
-                
-                alert('Don\'t know how to open URI: ' + url);
-            }
+        try {
+            Linking.openURL(url);
+        } catch (error) {
+
+            alert('Don\'t know how to open URI: ' + url);
+        }
     }
 
 
     return (
         <>
             <AppBottomSheet bottomSheetRef={bottomSheetRef} snapPoints={['60%', '97%']} bottomSheet={bottomSheet} setBottomSheet={setBottomSheet}>
-                <AppDatePicker />
+                {bookingDetails?.id ? (
+                    <View style={{ width: "100%", height: '60%', alignItems: 'center', justifyContent: 'space-between', padding: 20 }}>
+                        <MotiView
+                            transition={{ delay: 100, damping: 15, mass: 1 }}
+                            from={{
+                                opacity: 0,
+                                translateY: 100,
+                            }}
+                            animate={{
+                                opacity: 1,
+                                translateY: 0,
+                            }}
+                            exit={{
+                                opacity: 0,
+                                translateY: 100,
+                            }}
+                        >
+                            <AppText style={{ fontSize: 25, fontWeight: 'bold' }}>Booking Success!</AppText>
+                        </MotiView>
+                        <MotiView
+                            transition={{ delay: 200, damping: 15, mass: 1 }}
+                            from={{
+                                opacity: 0,
+                                translateY: 100,
+                            }}
+                            animate={{
+                                opacity: 1,
+                                translateY: 0,
+                            }}
+                            exit={{
+                                opacity: 0,
+                                translateY: 100,
+                            }}
+                        >
+                        <MaterialCommunityIcons color={'#48c681'} name="bookmark-check" size={200} />
+                        </MotiView>
+                        <MotiView
+                            style={{ width: "100%" }}
+                            transition={{ delay: 300, damping: 15, mass: 1 }}
+                            from={{
+                                opacity: 0,
+                                translateY: 100,
+                            }}
+                            animate={{
+                                opacity: 1,
+                                translateY: 0,
+                            }}
+                            exit={{
+                                opacity: 0,
+                                translateY: 100,
+                            }}
+                        >
+                            <AppButton onPress={() => navigation.navigate("Booking")} icon={'bookmark-check'} style={{ padding: 5, width: '100%' }} >View your bookings</AppButton>
+                        </MotiView>
+                    </View>
+                ) : (
+                    <AppDatePicker />
+                )}
+
             </AppBottomSheet>
             <View style={[StyleSheet.absoluteFill, { backgroundColor: appstyle.pri, }]}>
                 <AppHeader name={data?.name} ui2 accent={'opp'} />
@@ -94,7 +155,7 @@ const VehicleDetails = ({ route }) => {
                             <Carousel
                                 data={data?.files}
                                 renderItem={({ item, index }) => <Animated.Image sharedTransitionTag={data?.tag + index}
-                                resizeMode="cover" style={{ width: '100%', borderRadius: 10, height: 200 }} source={{ uri: baseURL() + "public/vehicle/" + item?.fileName }} />}
+                                    resizeMode="cover" style={{ width: '100%', borderRadius: 10, height: 200 }} source={{ uri: baseURL() + "public/vehicle/" + item?.fileName }} />}
                                 sliderWidth={Device_Width}
                                 itemWidth={Device_Width - 50}
                                 onSnapToItem={(index) => setCurrentIndex(index)}
@@ -133,7 +194,7 @@ const VehicleDetails = ({ route }) => {
                                     <AppText style={{ color: appstyle.textBlack, fontWeight: 'bold' }}>{timeSimplify(bookingStartDate)}</AppText>
                                     <AppText style={{ color: appstyle.textBlack, fontWeight: 'bold' }}>{timeSimplify(bookingEndDate)}</AppText>
                                 </View>
-                                <AppButton style={{ width: 110, marginTop: 10, borderWidth: 1, borderColor: 'grey' }} outlined icon={"calendar"} onPress={() => setBottomSheet(true)}>Change</AppButton>
+                                <AppButton style={{ width: 110, marginTop: 10, borderWidth: 1, borderColor: 'grey' }} outlined icon={"calendar"} onPress={() => { setBottomSheet(true); setBookingDetails({}) }}>Change</AppButton>
                             </CustomTile>
                             <CustomTile
                                 onPress={() => { }}

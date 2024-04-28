@@ -10,6 +10,7 @@ import Animated, { ReduceMotion, useAnimatedStyle, useSharedValue, withSpring, w
 import LinearGradient from 'react-native-linear-gradient';
 import AppText from "./AppText"
 import { trigger } from "react-native-haptic-feedback";
+import { MotiView } from 'moti';
 
 // Optional configuration
 const options = {
@@ -77,7 +78,11 @@ const AppBottomBar = () => {
                     trigger("impactLight", options);
                 }}
                 style={[style.tileBtn]}>
-                {Icon ? <Icon name={!active ? icon + "-outline" : icon} color={appstyle.accent} size={20} /> : <FontAwesome6 name={!active ? icon + "-outline" : icon} color={appstyle.accent} size={20} />}
+                <MotiView
+                    transition={{ delay: 200, damping: 10, mass: 1 }}
+                    animate={{ scale: active ? 1.2 : 1 }}>
+                    {Icon ? <Icon name={!active ? icon + "-outline" : icon} color={appstyle.accent} size={20} /> : <FontAwesome6 name={!active ? icon + "-outline" : icon} color={appstyle.accent} size={20} />}
+                </MotiView>
                 {/* {active && <AppText style={{color: appstyle.pri, fontSize: 10}}>{tilename}</AppText>} */}
             </Pressable>
         )

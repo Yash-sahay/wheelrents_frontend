@@ -84,8 +84,8 @@ const QRScanner = ({  }) => {
   const handleApprove = async (id) => {
     try {
       // setLoader(true)
-      const payload = { bookingId: id, bookingStatus: "started" }
-      const res = await booking_status_change(payload)
+      const payload = { bookingId: id }
+      res = await booking_payment(payload)
       setLoader(false)
       setScaning({ id: null })
     } catch (error) {
