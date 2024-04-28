@@ -1,4 +1,4 @@
-import { Image, TouchableOpacity, View } from 'react-native'
+import { Image, StatusBar, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
 import { Divider, TextInput } from 'react-native-paper'
 import { loginUser } from '../axios/axios_services/loginService'
@@ -44,7 +44,8 @@ const Login = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      <View style={{ padding: 10, flex: 1, backgroundColor: appstyle.pri, justifyContent: 'space-between' }}>
+       <StatusBar translucent barStyle={"dark-content"} backgroundColor={"transparent"} />
+      <View style={{ padding: 20, flex: 1, backgroundColor: appstyle.pri, justifyContent: 'flex-end' }}>
         <View>
           <View  style={{width: '100%', alignItems: 'center'}}>
             <Image style={{width: 300, height: 300}} source={require('../../assets/images/login.png')} />

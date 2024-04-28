@@ -1,5 +1,5 @@
 import { View, Text, FlatList, Dimensions, Image, TouchableOpacity, StyleSheet, ScrollView, Linking } from 'react-native'
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import AppHeader from '../components/AppHeader';
 import { Card, Divider } from 'react-native-paper';
 import { amountFormatter, baseURL, dateSimplify, timeSimplify } from '../../common';
@@ -17,6 +17,7 @@ import { createBooking } from '../axios/axios_services/bookingService';
 import { updateLoaderReducer } from '../redux/reducer/loaderReducer';
 import AppMap from '../components/AppMap';
 import Animated from 'react-native-reanimated';
+import { updateUserDetails } from '../redux/reducer/userReducer';
 
 const Device_Width = Dimensions.get('window').width
 const Device_Height = Dimensions.get('window').height
@@ -28,6 +29,13 @@ const VehicleDetails = ({ route }) => {
     const dispatch = useDispatch()
     const [bottomSheet, setBottomSheet] = useState(false)
     const bottomSheetRef = useRef(null);
+
+    useEffect(() => {
+        const minimumStartDate = new Date(new Date().getTime() + 5 * 60 * 60 * 1000);
+        const minimubEndDate = new Date(new Date().getTime() + 10 * 60 * 60 * 1000);
+        dispatch(updateUserDetails({bookingEndDate: minimubEndDate, bookingStartDate: minimumStartDate }))
+
+      }, [])
 
     const handleBooking = async () => {
         try {
@@ -64,13 +72,12 @@ const VehicleDetails = ({ route }) => {
     }
 
     function openExternalApp(url) {
-        Linking.canOpenURL(url).then(supported => {
-            if (supported) {
+            try {
                 Linking.openURL(url);
-            } else {
+            } catch (error) {
+                
                 alert('Don\'t know how to open URI: ' + url);
             }
-        });
     }
 
 

@@ -1,6 +1,6 @@
 import { Dimensions, PermissionsAndroid, StyleSheet, TouchableOpacity, View } from 'react-native';
 // import { NavigationContainer, useNavigation } from '@react-navigation/native';
-import React from 'react';
+import React, { useState } from 'react';
 
 // import { createStackNavigator } from '@react-navigation/stack';
 import { useEffect } from 'react';
@@ -31,6 +31,7 @@ import BannerOpenView from '../screens/BannerOpenView';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ChatScreen from '../screens/Commons/ChatScreen';
+import SplashScreen from '../components/SplashScreen';
 
 const Stack = createNativeStackNavigator();
 const { width } = Dimensions.get("window")
@@ -44,9 +45,9 @@ const Navigation = () => {
   const dispatch = useDispatch() 
   
   useEffect(() => {
-    const startDate = new Date(new Date().getTime() + 5 * 60 * 60 * 1000);
-    const endDate = new Date(new Date().getTime() + 10 * 60 * 60 * 1000);
-    dispatch(updateUserDetails({bookingEndDate: endDate, bookingStartDate: startDate }))
+    const minimumStartDate = new Date(new Date().getTime() + 5 * 60 * 60 * 1000);
+    const minimubEndDate = new Date(new Date().getTime() + 10 * 60 * 60 * 1000);
+    dispatch(updateUserDetails({bookingEndDate: minimubEndDate, bookingStartDate: minimumStartDate }))
     
     requestLocationPermission(updateLocationDetails)
   }, [])
@@ -81,11 +82,19 @@ const Navigation = () => {
 
   }, [])
 
+  const [loaded, setloaded] = useState(false)
+  useEffect(() => {
+    setTimeout(() => {
+      setloaded(true)
+    }, 2000);
+  }, [])
+
 
   return (
     <>
       <AppLoader />
       {/* <AppBottomBar/> */}
+      <SplashScreen {...{loaded, setloaded}}/>
       <NavigationContainer initialRouteName="Home">
         <Stack.Navigator
           screenOptions={{ headerShown: false }}>

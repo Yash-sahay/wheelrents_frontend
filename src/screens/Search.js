@@ -10,13 +10,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { updateUserDetails } from '../redux/reducer/userReducer';
 import { baseURL } from '../../common';
 import { appstyle } from '../styles/appstyle';
+import AppShimmer from '../components/AppShimmer';
 
-const Search = ({navigation}) => {
+const Search = ({ navigation }) => {
   const { searchString, recentSearches } = useSelector(state => state.userReducer)
   const dispatch = useDispatch()
 
 
-  const [categoryList, setCategoryList] = useState([])
+  const [categoryList, setCategoryList] = useState([null, null, null, null, null, null])
   const [searchList, setSearchList] = useState([])
   const getAllCategory = async () => {
     try {
@@ -61,7 +62,7 @@ const Search = ({navigation}) => {
             <AppText style={{ fontWeight: 'bold', fontSize: 20, marginVertical: 30, marginBottom: 5, color: appstyle.textSec }}><Icon name="search" size={20} />  Searching for "{searchString}"</AppText>
             <View style={{ display: searchList.length > 0 ? 'flex' : 'none', borderRadius: 20, backgroundColor: appstyle.pri, elevation: 2, shadowColor: appstyle.shadowColor, borderWidth: 1, borderColor: "#f4f4f2", justifyContent: 'space-between', marginTop: 10, width: '100%', padding: 10 }}>
               {searchList?.map((string, index) => (
-                <TouchableOpacity onPress={() =>  navigation.navigate("Result", {searchString: string?.name})} style={[styles.recentItems,{paddingVertical: 15}, index == searchList.length - 1 && {borderBottomWidth: 0, paddingBottom: 5}, index == 0 && {paddingTop: 5}]}>
+                <TouchableOpacity onPress={() => navigation.navigate("Result", { searchString: string?.name })} style={[styles.recentItems, { paddingVertical: 15 }, index == searchList.length - 1 && { borderBottomWidth: 0, paddingBottom: 5 }, index == 0 && { paddingTop: 5 }]}>
                   <View style={styles.recentItemsContent}>
                     <MaterialIcons name="search" color={appstyle.textBlack} size={20} />
                     <AppText style={{ paddingHorizontal: 10, fontSize: 16, fontWeight: "700" }}>{string?.name}</AppText>
@@ -78,10 +79,10 @@ const Search = ({navigation}) => {
 
 
 
-                <View style={{ borderRadius: 20, backgroundColor: appstyle.pri, elevation: 2, shadowColor: appstyle.shadowColor, borderWidth: 1, borderColor: "#f4f4f2",  justifyContent: 'center', marginTop: 10, width: '100%', padding: 10 }}>
+                <View style={{ borderRadius: 20, backgroundColor: appstyle.pri, elevation: 2, shadowColor: appstyle.shadowColor, borderWidth: 1, borderColor: "#f4f4f2", justifyContent: 'center', marginTop: 10, width: '100%', padding: 10 }}>
                   {recentSearches?.map((string, index) => (
 
-                    <TouchableOpacity onPress={() => navigation.navigate("Result", {searchString: string})} style={[styles.recentItems, index == recentSearches.length - 1 && {borderBottomWidth: 0}]}>
+                    <TouchableOpacity onPress={() => navigation.navigate("Result", { searchString: string })} style={[styles.recentItems, index == recentSearches.length - 1 && { borderBottomWidth: 0 }]}>
                       <View style={styles.recentItemsContent}>
                         <MaterialIcons name="restore" color={appstyle.textBlack} size={20} />
                         <AppText style={{ paddingHorizontal: 10, fontSize: 17, fontWeight: "700" }}>{string}</AppText>
@@ -96,19 +97,23 @@ const Search = ({navigation}) => {
             )}
             <AppText style={{ fontWeight: 'bold', fontSize: 20, marginVertical: 20, marginTop: 30, marginBottom: 15, color: appstyle.textSec }}>Browse Categories</AppText>
             <View style={{ borderRadius: 20, backgroundColor: appstyle.pri, elevation: 2, shadowColor: appstyle.shadowColor, borderWidth: 1, paddingVertical: 10, borderColor: '#f4f4f2', justifyContent: 'space-between', width: '100%', paddingHorizontal: 10 }}>
-           
-            <FlatList
-              data={categoryList}
-              renderItem={({ item, index }) => (
-                <TouchableOpacity onPress={() => navigation.replace("Result", {searchString: item?.name})} style={[{ flexDirection: 'row', alignItems: 'center', marginVertical: 5, paddingBottom: 10, borderBottomWidth: 2, borderColor: '#f4f4f2' }, index == categoryList.length - 1 && {borderBottomWidth: 0, paddingBottom: 0}]}>
-                  <View style={{ backgroundColor: appstyle.pri, padding: 5, borderRadius: 10 }}>
-                    <Image resizeMode={'cover'} style={{ width: 40, height: 40 }} source={{ uri: baseURL() + "public/category/" + item?.image }} />
-                  </View>
-                  <AppText style={{ marginLeft: 20, textTransform: "capitalize", fontSize: 16, fontWeight: "700" }}>{item?.name}</AppText>
-                </TouchableOpacity>
-              )}
-              keyExtractor={(item, index) => index.toString()}
-            />
+
+              <FlatList
+                data={categoryList}
+                renderItem={({ item, index }) => (
+                  <TouchableOpacity onPress={() => navigation.replace("Result", { searchString: item?.name })} style={[{ flexDirection: 'row', alignItems: 'center', marginVertical: 5, paddingBottom: 10, borderBottomWidth: 2, borderColor: '#f4f4f2' }, index == categoryList.length - 1 && { borderBottomWidth: 0, paddingBottom: 0 }]}>
+                    <AppShimmer visible={!item ? false : true} style={{width: 50, height: 50, borderRadius: 20, textTransform: "capitalize", fontSize: 16, fontWeight: "700"}}>
+                      <View style={{ backgroundColor: appstyle.pri, padding: 5, borderRadius: 10 }}>
+                        <Image resizeMode={'cover'} style={{ width: 40, height: 40 }} source={{ uri: baseURL() + "public/category/" + item?.image }} />
+                      </View>
+                    </AppShimmer>
+                    <AppShimmer visible={!item ? false : true} style={{marginLeft: 20, height: 40, width: '75%', borderRadius: 20, textTransform: "capitalize", fontSize: 16, fontWeight: "700"}}>
+                      <AppText style={{ marginLeft: 20, textTransform: "capitalize", fontSize: 16, fontWeight: "700" }}>{item?.name}</AppText>
+                    </AppShimmer>
+                  </TouchableOpacity>
+                )}
+                keyExtractor={(item, index) => index.toString()}
+              />
             </View>
           </>
         )}
@@ -154,13 +159,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
     marginRight: 10,
     borderRadius: 10,
-    
+
   },
   suggestionItem: {
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
-    
+
   },
   resultItem: {
     padding: 10,

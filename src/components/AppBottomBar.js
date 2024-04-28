@@ -39,12 +39,12 @@ const AppBottomBar = () => {
     ]
 
 
-    const translateY = useSharedValue(0);
+    const translateY = useSharedValue(100);
 
     const styleHeader = useAnimatedStyle(() => ({
         transform: [{
             translateY: withSpring(translateY.value, {
-                duration: 500,
+                duration: 1000,
                 // easing: Easing.bezier(0.25, 0.1, 0.25, 1),
                 reduceMotion: ReduceMotion.System,
 
@@ -87,12 +87,12 @@ const AppBottomBar = () => {
 
     return (
         <>
-            <Animated.View style={[style.container, styleHeader]}>
+            <Animated.View style={[style.container]}>
                 <LinearGradient colors={['transparent', '#ffffff94', '#ffffffdb']} style={[style.linearGradient]} >
-                    <View style={style.child}>
+                    <Animated.View style={[style.child, styleHeader]}>
                         {role.includes("host") && navigationHost?.map(items => <IconsTile {...items} active={currRoute == items?.routeName} />)}
                         {role.includes("client") && navigationClient?.map(items => <IconsTile {...items} active={currRoute == items?.routeName} />)}
-                    </View>
+                    </Animated.View>
                 </LinearGradient>
             </Animated.View>
         </>

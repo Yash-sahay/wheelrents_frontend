@@ -5,8 +5,8 @@ import { PermissionsAndroid } from 'react-native';
 
 
 export function baseURL() {
-  return "http://192.168.1.5:5000/" // Local
-  // return "https://wheelrents-api.onrender.com/" // Live
+  // return "http://192.168.1.5:5000/" // Local
+  return "https://wheelrents-api.onrender.com/" // Live
 }
 
 export function dateSimplify(date, extendedHours) {

@@ -17,7 +17,7 @@ const TABS = [
     { id: 'startDate', title: 'Pick-up', content: 'Pending Bookings', icon: 'arrowup' },
     { id: 'endDate', title: 'Drop-off', content: 'Active Bookings', icon: 'arrowdown' },
     // { id: 'completed', title: 'Completed', content: 'Completed Bookings' },
-  ];
+];
 
 export default AppDatePicker = (props) => {
 
@@ -27,19 +27,35 @@ export default AppDatePicker = (props) => {
 
     const [value, setValue] = React.useState('startDate');
     const [tabValue, setTabValue] = useState(TABS[0]);
-    
+
+
     const onDateChange = (date, type) => {
+        const currentDate = new Date(date);
+        const bookingstart = new Date(bookingStartDate); // Assuming state.bookingStartDate contains the start date
+
         if (type === 'END_DATE') {
             dispatch(updateUserDetails({ bookingEndDate: date }))
         } else {
-            console.warn("start-date-->",date)
+            console.warn("start-date-->", date)
+
+            const timeDifference = bookingEndDate.getTime() - new Date(date).getTime();
+            // Convert milliseconds to hours
+            const timeDifferenceInHours = timeDifference / (1000 * 3600);
+            console.warn(timeDifferenceInHours)
+
+            if(timeDifferenceInHours < 5) {
+                dispatch(updateUserDetails({ bookingEndDate: new Date(new Date(date).getTime() + 5 * 60 * 60 * 1000) }))
+            }
+
             dispatch(updateUserDetails({ bookingStartDate: date }))
         }
     }
+ 
 
 
     const minimumStartDate = new Date(new Date().getTime() + 5 * 60 * 60 * 1000);
     const minimubEndDate = new Date(new Date().getTime() + 10 * 60 * 60 * 1000);
+
 
 
     const properDate = (date, fallBackDate) => {
@@ -50,26 +66,26 @@ export default AppDatePicker = (props) => {
     }
 
     return (
-            <BookingTabs tabs={TABS} onChange={(tabVal) => setTabValue(prev => ({ ...tabVal }))}>
-        <View style={styles.container}>
-            
-            {tabValue.id == "startDate" ? (
-                <>
-                    <AppText style={styles.text}>Select pick-up date</AppText>
-                    <View style={styles.date}>
-                        <DatePicker minimumDate={minimumStartDate} date={properDate(bookingStartDate, minimumStartDate)} onDateChange={(date) => onDateChange(date, 'START_DATE')} />
-                    </View>
-                </>
-            ) : (
-                <>
-                    <AppText style={styles.text}>Select drop-off date</AppText>
-                    <View style={styles.date}>
-                        <DatePicker minimumDate={minimubEndDate} date={properDate(bookingEndDate, minimubEndDate)} onDateChange={(date) => onDateChange(date, 'END_DATE')} />
-                    </View>
-                </>
-            )}
-        </View>
-            </BookingTabs>
+        <BookingTabs tabs={TABS} onChange={(tabVal) => setTabValue(prev => ({ ...tabVal }))}>
+            <View style={styles.container}>
+
+                {tabValue.id == "startDate" ? (
+                    <>
+                        <AppText style={styles.text}>Select pick-up date</AppText>
+                        <View style={styles.date}>
+                            <DatePicker minimumDate={minimumStartDate} date={properDate(bookingStartDate, minimumStartDate)} onDateChange={(date) => onDateChange(date, 'START_DATE')} />
+                        </View>
+                    </>
+                ) : (
+                    <>
+                        <AppText style={styles.text}>Select drop-off date</AppText>
+                        <View style={styles.date}>
+                            <DatePicker minimumDate={minimubEndDate} date={properDate(bookingEndDate, minimubEndDate)} onDateChange={(date) => onDateChange(date, 'END_DATE')} />
+                        </View>
+                    </>
+                )}
+            </View>
+        </BookingTabs>
     );
 }
 

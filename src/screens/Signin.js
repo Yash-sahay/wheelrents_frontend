@@ -1,4 +1,4 @@
-import { TouchableOpacity, View } from 'react-native'
+import { StatusBar, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
 import { Chip, Divider, TextInput } from 'react-native-paper'
 import { createuser, loginUser } from '../axios/axios_services/loginService'
@@ -13,7 +13,7 @@ import Icon from 'react-native-vector-icons/FontAwesome6'
 import { appstyle } from '../styles/appstyle'
 
 const Signin = () => {
-  const [allValues, setAllValues] = useState({ email: '', phoneNo: '', password: 'radhekrishna', secureTextEntry: true })
+  const [allValues, setAllValues] = useState({ email: '', phoneNo: '', password: '', secureTextEntry: true })
   const navigation = useNavigation()
 
   const dispatch = useDispatch()
@@ -39,7 +39,8 @@ const Signin = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      <View style={{ padding: 10, flex: 1, backgroundColor: appstyle.pri, justifyContent: 'space-between' }}>
+      <StatusBar translucent barStyle={"dark-content"} backgroundColor={"transparent"} />
+      <View style={{ padding: 20, flex: 1, backgroundColor: appstyle.pri, justifyContent: 'flex-end' }}>
         <View>
           <AppText style={{ fontWeight: '900', color: appstyle.tri, fontSize: 25, textAlign: 'center', marginVertical: 20 }}>Become A Member!</AppText>
           <AppTextInput

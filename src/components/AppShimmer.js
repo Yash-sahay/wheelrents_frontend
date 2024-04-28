@@ -5,7 +5,7 @@ const ShimmerPlaceHolder = createShimmerPlaceholder(LinearGradient)
 
 const AppShimmer = ({children, visible, style}) => {
   return (
-    <ShimmerPlaceHolder visible={visible} style={visible ? null : style}>
+    <ShimmerPlaceHolder contentStyle={{borderRadius: 100}} visible={visible} style={visible ? null : style}>
         {children}
   </ShimmerPlaceHolder>
   )
