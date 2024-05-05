@@ -5,7 +5,7 @@ import AppTextInput from '../../components/AppTextInput'
 import AppButton from '../../components/AppButton'
 import { Button, Chip, Icon } from 'react-native-paper'
 import AppDropDown from '../../components/AppDropDown'
-import { get_vehicle_categories } from '../../axios/axios_services/homeService'
+import { get_vehicle_categories, get_vehicle_sub_categroy_by_id } from '../../axios/axios_services/homeService'
 import { updateVehicle, vehicleAdd } from '../../axios/axios_services/vehicleService'
 import FontAwesome from 'react-native-vector-icons/FontAwesome6'
 import ImagePicker from 'react-native-image-crop-picker';
@@ -24,6 +24,7 @@ const AddVehicle = ({ route }) => {
     const data = route.params
     const [allValues, setAllValues] = useState(data ? data : {})
     const [categoryList, setCategoryList] = useState([])
+    const [subCategoryList, setSubCategoryList] = useState([])
     const [isLoading, setIsLoading] = useState(false)
     const [currStep, setCurrStep] = useState(1)
     const [images, setImages] = useState([null, null, null, null])
@@ -46,6 +47,16 @@ const AddVehicle = ({ route }) => {
             console.error(error)
         }
     }
+    const getAllSubcategoryCategory = async (item) => {
+        try {
+            const res = await get_vehicle_sub_categroy_by_id({vehicleTypeId: item?._id});
+            if (res.data) {
+                setSubCategoryList(res.data);
+            }
+        } catch (error) {
+            console.error(error)
+        }
+    }
 
     const addUpdateVehicle = async () => {
         try {
@@ -59,6 +70,7 @@ const AddVehicle = ({ route }) => {
             data.append('name', allValues?.name || "");
             data.append('vehicleNo', allValues?.vehicleNo || "");
             data.append('vehicleCategory', allValues?.vehicleCategory || "");
+            data.append('vehicleType', allValues?.vehicleType || "");
             data.append('transmission', allValues?.transmission || "");
             data.append('fuelType', allValues?.fuelType || "");
             data.append('cost', allValues?.cost || "");
@@ -82,7 +94,7 @@ const AddVehicle = ({ route }) => {
             if (res.data?.success) {
                 navigation.navigate("HostDashboard")
             } else {
-                alert(JSON.stringify(res.data))
+                alert(JSON.stringify(res?.data))
             }
             setIsLoading(false)
         } catch (error) {
@@ -100,7 +112,12 @@ const AddVehicle = ({ route }) => {
             })
             setImages(arr)
         }
+
+        if(route.params?.vehicleCatId){
+            getAllSubcategoryCategory({ _id: route.params?.vehicleCatId})
+        }
     }, [])
+
 
     const AddPictures = ({ onPress, uri, index, data, setter }) => {
         const addImage = () => {
@@ -255,10 +272,21 @@ const AddVehicle = ({ route }) => {
                                 name="vehicleCategory"
                                 allValues={allValues}
                                 data={categoryList}
+                                onChange={(item) => getAllSubcategoryCategory(item)}
                                 labelField={'name'}
                                 valueField={'name'}
                                 label={"Vehicle Category"}
                             />
+                            {(allValues?.vehicleCategory) &&
+                                <AppDropDown
+                                setter={setAllValues}
+                                name="vehicleType"
+                                allValues={allValues}
+                                data={subCategoryList}
+                                labelField={'name'}
+                                valueField={'name'}
+                                label={"Vehicle Type"}
+                            />}
                             <View>
                                 <AppText style={{ fontWeight: 'bold', paddingVertical: 10, marginTop: 10 }}>Fuel Type</AppText>
                                 <View style={{ flexWrap: 'wrap', flexDirection: 'row' }}>

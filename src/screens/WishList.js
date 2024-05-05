@@ -13,7 +13,7 @@ import { baseURL, dateSimplify } from '../../common';
 import FontAwesome from 'react-native-vector-icons/FontAwesome6'
 import { CardComponent } from './Result';
 
-const Wishlist = ({navigation}) => {
+const Wishlist = ({ navigation }) => {
   const dispatch = useDispatch()
   const [wishlistItems, setWishlistItems] = useState([null, null, null, null]);
   const { bookingStartDate, bookingEndDate } = useSelector(state => state.userReducer);
@@ -35,7 +35,7 @@ const Wishlist = ({navigation}) => {
         startDate: bookingStartDate,
         endDate: bookingEndDate
       }
-      const res = await get_wishlist_by_user({data});
+      const res = await get_wishlist_by_user({ data });
       setWishlistItems(res.data)
     } catch (error) {
     }
@@ -66,7 +66,7 @@ const Wishlist = ({navigation}) => {
       }
     };
     return (
-      <CardComponent item={item} keyId={index} navigation={navigation} handleAddToWishlist={handleAddToWishlist}/>
+      <CardComponent item={item} keyId={index} navigation={navigation} handleAddToWishlist={handleAddToWishlist} />
     )
   };
 
@@ -74,14 +74,17 @@ const Wishlist = ({navigation}) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <AppHeader name={"WishList"} ui2  />
+      <AppHeader name={"WishList"} ui2 />
       <AppBottomBar />
       <View style={styles.container}>
         {wishlistItems?.length === 0 ? (
-          <AppText style={styles.emptyMessage}>Your wishlist is empty.</AppText>
+          <View style={{ ...StyleSheet.absoluteFillObject, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <FontAwesome color={appstyle.textBlack} name="car-burst" size={100} />
+            <AppText style={styles.emptyMessage}>Your wishlist is empty.</AppText>
+          </View>
         ) : (
           <VirtualizedList
-            contentContainerStyle={{paddingBottom: 100}}
+            contentContainerStyle={{ paddingBottom: 100 }}
             showsVerticalScrollIndicator={false}
             data={wishlistItems}
             getItemCount={getItemCount}
@@ -107,7 +110,9 @@ const styles = StyleSheet.create({
   },
   emptyMessage: {
     fontSize: 17,
-    color: appstyle.tri,
+    color: appstyle.textSec,
+    marginTop: 20,
+    fontWeight: 'bold'
   },
   cardContainer: {
     marginBottom: 15,

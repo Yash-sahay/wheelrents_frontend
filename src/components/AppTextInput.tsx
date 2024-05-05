@@ -11,7 +11,7 @@ const AppTextInput = (props: TextInputProps ) => {
     if(props.setter && props?.allValues && props?.name)  {
       props?.setter({...props?.allValues, [props?.name]: text})
     };
-    props.onChange && props?.onChange(text);
+    props?.onChange && props?.onChange(text);
 }}/>
 }
 

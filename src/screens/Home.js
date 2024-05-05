@@ -1,4 +1,4 @@
-import { Dimensions, FlatList, Image, Pressable, ScrollView, View, VirtualizedList } from 'react-native'
+import { Dimensions, FlatList, Image, Pressable, ScrollView, TouchableOpacity, View, VirtualizedList } from 'react-native'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Button, Text, Card, TextInput, Icon } from 'react-native-paper'
 import { useDispatch, useSelector } from 'react-redux'
@@ -12,6 +12,7 @@ import AppButton from '../components/AppButton'
 import AppBottomBar from '../components/AppBottomBar'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import FontAwesome from 'react-native-vector-icons/FontAwesome6'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import Fontisto from 'react-native-vector-icons/Fontisto'
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import AppDatePicker from '../components/AppDatePicker'
@@ -178,39 +179,39 @@ const Home = () => {
               <AppText style={{ fontSize: 20, fontWeight: '900' }}>Category</AppText>
               <CategoryList />
             </View>
-            <View style={{backgroundColor: '#f7f7f7', zIndex: 2, paddingTop: 20}}>
-            <View style={{ paddingHorizontal: 20 }}>
-              <AppText style={{ fontSize: 20, marginTop: 20, fontWeight: '900' }}>Most Relevent</AppText>
-            </View>
-            <Carousel
-              data={dataList}
-              loop
-              firstItem={0}
-              renderItem={({ item, index }) => <CardComponent latitude={lat} longitude={long} item={item} keyId={index} handleAddToWishlist={handleAddToWishlist} getAllVehicle={getAllVehicle} />}
-              sliderWidth={Device_Width + 50}
-              itemWidth={Device_Width - 50}
-              onSnapToItem={(index) => setActiveSlide(index)}
-            />
-            <View>
-              <Pagination
-                dotsLength={dataList.length}
-                activeDotIndex={activeSlide}
-                dotStyle={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: 5,
-                  marginHorizontal: 8,
-                  // backgroundColor: 'rgba(255, 255, 255, 0.92)'
-                }}
-                inactiveDotStyle={{
-                  // Define styles for inactive dots here
-                }}
-                inactiveDotOpacity={0.4}
-                inactiveDotScale={0.6}
+            <View style={{ backgroundColor: '#f7f7f7', zIndex: 2, paddingTop: 20 }}>
+              <View style={{ paddingHorizontal: 20 }}>
+                <AppText style={{ fontSize: 20, marginTop: 20, fontWeight: '900' }}>Most Relevent</AppText>
+              </View>
+              <Carousel
+                data={dataList}
+                loop
+                firstItem={0}
+                renderItem={({ item, index }) => <CardComponent latitude={lat} longitude={long} item={item} keyId={index} handleAddToWishlist={handleAddToWishlist} getAllVehicle={getAllVehicle} />}
+                sliderWidth={Device_Width + 50}
+                itemWidth={Device_Width - 50}
+                onSnapToItem={(index) => setActiveSlide(index)}
               />
+              <View>
+                <Pagination
+                  dotsLength={dataList.length}
+                  activeDotIndex={activeSlide}
+                  dotStyle={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: 5,
+                    marginHorizontal: 8,
+                    // backgroundColor: 'rgba(255, 255, 255, 0.92)'
+                  }}
+                  inactiveDotStyle={{
+                    // Define styles for inactive dots here
+                  }}
+                  inactiveDotOpacity={0.4}
+                  inactiveDotScale={0.6}
+                />
 
 
-            </View>
+              </View>
             </View>
             <View>
               <Image resizeMode={'contain'} style={{ width: '100%', height: 100, marginTop: -8 }} source={require("../../assets/images/greyWave.png")} />
@@ -236,6 +237,7 @@ const Home = () => {
 
 
 const CategoryList = () => {
+  const navigation = useNavigation()
   const [categoryList, setCategoryList] = useState([null, null, null, null])
   const getAllCategory = async () => {
     try {
@@ -262,7 +264,7 @@ const CategoryList = () => {
         data={categoryList}
         renderItem={({ item, index }) => {
           return (
-            <View key={index} style={{ justifyContent: 'center', alignItems: 'center', marginTop: 10, marginBottom: 5, marginRight: 15, marginLeft: index > 0 ? 0 : 3 }}>
+            <Pressable onPress={() => navigation.navigate("SubCategoryView", item)} key={index} style={{ justifyContent: 'center', alignItems: 'center', marginTop: 10, marginBottom: 5, marginRight: 15, marginLeft: index > 0 ? 0 : 3 }}>
               <AppShimmer style={{ height: 80, width: 120, borderRadius: 20, elevation: 2, shadowColor: appstyle.shadowColor }} visible={item == null ? false : true}>
               </AppShimmer>
               {item && <View style={{ height: 80, minWidth: 120, backgroundColor: appstyle.pri, elevation: 2, shadowColor: appstyle.shadowColor, borderRadius: 20, borderWidth: 1, borderColor: appstyle.pri, flexDirection: 'row', justifyContent: 'center', alignItems: "center" }}>
@@ -272,7 +274,7 @@ const CategoryList = () => {
                   <AppText style={{ fontWeight: '700', marginTop: -5, fontSize: 10, color: appstyle.textSec, marginLeft: 10 }} >{'View all'}</AppText>
                 </View>
               </View>}
-            </View>
+            </Pressable>
           )
         }}
       />
@@ -378,8 +380,13 @@ function CardComponent({ item, handleAddToWishlist, latitude, keyId, longitude }
       <Card.Content style={styles.content}>
         <AppShimmer style={{ ...styles.infoText, borderRadius: 20 }} visible={item == null ? false : true}>
           <AppText style={styles.infoText}>
-            <FontAwesome name="user-gear" size={12} /> {item?.transmission}{'   '}
-            <FontAwesome name="gas-pump" size={12} /> {item?.fuelType}
+            <FontAwesome name="user-gear" size={12} /> {item?.transmission}{'  -  '}
+            <FontAwesome name="gas-pump" size={12} /> {item?.fuelType}{'  -  '}
+            {item?.vehicleCategory == "car" ? (
+              <AppText style={{ color: appstyle.textSec, fontWeight: '900' }}><FontAwesome name="car" size={12} /> {item?.vehicleType} </AppText>
+            ) : (
+              <AppText style={{ color: appstyle.textSec, fontWeight: '900' }}><MaterialCommunityIcons name="motorbike" size={12} /> {item?.vehicleType}</AppText>
+            )}
           </AppText>
         </AppShimmer>
         <AppShimmer style={{ ...styles.title, width: 60, borderRadius: 20 }} visible={item == null ? false : true}>

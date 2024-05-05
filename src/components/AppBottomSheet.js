@@ -5,11 +5,13 @@ import { useDispatch } from 'react-redux';
 import { updateUserDetails } from '../redux/reducer/userReducer';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
+import { Icon } from 'react-native-paper';
+import { appstyle } from '../styles/appstyle';
 
-const AppBottomSheet = ({children, snapPoints, bottomSheet, setBottomSheet, bottomSheetRef}) => {
+const AppBottomSheet = ({children, snapPoints, bottomSheet, setBottomSheet }) => {
       const dispatch = useDispatch()
       // ref
-      // const bottomSheetRef = useRef(null);
+      const bottomSheetRef = useRef(null);
 
       const animationConfigs = useBottomSheetSpringConfigs({
         damping: 10,
@@ -46,6 +48,7 @@ const AppBottomSheet = ({children, snapPoints, bottomSheet, setBottomSheet, bott
     <>
       {bottomSheet && (
         <View style={{ position: 'absolute', height: '100%', width: '100%', bottom: 0, left: 0, zIndex: 10 }} >
+          <Icon source={"close"} color={appstyle.tri} size={20} />
           <GestureHandlerRootView>
           <BottomSheet
             enablePanDownToClose={true}

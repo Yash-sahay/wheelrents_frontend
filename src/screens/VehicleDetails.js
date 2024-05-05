@@ -154,7 +154,7 @@ const VehicleDetails = ({ route, navigation }) => {
                         <View style={{ width: '100%', alignItems: 'center', paddingBottom: 40, backgroundColor: appstyle.tri }}>
                             <Carousel
                                 data={data?.files}
-                                renderItem={({ item, index }) => <Animated.Image sharedTransitionTag={data?.tag + index}
+                                renderItem={({ item, index }) => <Animated.Image
                                     resizeMode="cover" style={{ width: '100%', borderRadius: 10, height: 200 }} source={{ uri: baseURL() + "public/vehicle/" + item?.fileName }} />}
                                 sliderWidth={Device_Width}
                                 itemWidth={Device_Width - 50}
@@ -166,7 +166,7 @@ const VehicleDetails = ({ route, navigation }) => {
                         <View style={{ width: '100', padding: 10, paddingBottom: 0 }}>
                             <AppText style={{ fontWeight: 'bold', fontSize: 20, color: appstyle.textBlack, textTransform: "capitalize" }}>Overview</AppText>
                         </View>
-                        <View style={{ width: '100%', flexDirection: 'row', paddingTop: 10 }}>
+                        <View style={{ width: '100%', flexDirection: 'row', paddingTop: 10, flexWrap: 'wrap' }}>
                             <View style={{ height: 100, width: 120, padding: 10, marginLeft: 10, backgroundColor: appstyle.tri, borderRadius: 15, elevation: 10, shadowColor: appstyle.shadowColor }}>
                                 <MaterialCommunityIcons size={30} color={appstyle.pri} name="car-shift-pattern" />
                                 <AppText style={{ fontSize: 12, color: '#eee', marginTop: 10 }}>Transmission</AppText>
@@ -176,6 +176,12 @@ const VehicleDetails = ({ route, navigation }) => {
                                 <MaterialCommunityIcons size={30} color={appstyle.pri} name="fuel" />
                                 <AppText style={{ fontSize: 12, color: '#eee', marginTop: 10 }}>Power Source</AppText>
                                 <AppText style={{ fontWeight: 'bold', color: appstyle.pri, textTransform: "capitalize" }} >{data?.fuelType || "N/A"}</AppText>
+                            </View>
+                            <View style={{ height: 100, width: 120, padding: 10, marginLeft: 10, backgroundColor: appstyle.tri, borderRadius: 15, elevation: 10, shadowColor: appstyle.shadowColor }}>
+                                {data?.vehicleCategory == 'car' && <MaterialCommunityIcons size={30} color={appstyle.pri} name="car" />}
+                                {data?.vehicleCategory == 'bike' && <MaterialCommunityIcons size={30} color={appstyle.pri} name="motorbike" />}
+                                <AppText style={{ fontSize: 12, color: '#eee', marginTop: 10 }}>Vehicle Type</AppText>
+                                <AppText style={{ fontWeight: 'bold', color: appstyle.pri, textTransform: "capitalize" }} >{data?.vehicleType || "N/A"}</AppText>
                             </View>
                         </View>
 

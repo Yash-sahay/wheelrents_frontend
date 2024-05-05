@@ -5,7 +5,7 @@ import AppText from './AppText';
 import { appstyle } from '../styles/appstyle';
 
   
-  const AppDropDown = ({label, data, labelField, valueField, setter, allValues, search, name}) => {
+  const AppDropDown = ({label, data, labelField, valueField, setter, allValues, search, name, onChange}) => {
     
     const [isFocus, setIsFocus] = useState(false);
 
@@ -40,6 +40,7 @@ import { appstyle } from '../styles/appstyle';
           onFocus={() => setIsFocus(true)}
           onBlur={() => setIsFocus(false)}
           onChange={item => {
+            onChange && onChange({...item})
             setter({...allValues, [name]: item?.[valueField]});
             setIsFocus(false);
           }}

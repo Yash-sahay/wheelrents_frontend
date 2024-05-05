@@ -93,7 +93,7 @@ const AppBottomBar = () => {
     return (
         <>
             <Animated.View style={[style.container]}>
-                <LinearGradient colors={['transparent', '#ffffff94', '#ffffffdb']} style={[style.linearGradient]} >
+                <LinearGradient colors={['transparent', 'transparent', '#ffffff2e', '#ffffff75']} style={[style.linearGradient]} >
                     <Animated.View style={[style.child, styleHeader]}>
                         {role.includes("host") && navigationHost?.map(items => <IconsTile {...items} active={currRoute == items?.routeName} />)}
                         {role.includes("client") && navigationClient?.map(items => <IconsTile {...items} active={currRoute == items?.routeName} />)}

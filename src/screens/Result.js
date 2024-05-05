@@ -19,6 +19,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome6';
 import Geolocation from '@react-native-community/geolocation';
 import Animated from 'react-native-reanimated';
 import AppShimmer from '../components/AppShimmer';
+import { updateUserDetails } from '../redux/reducer/userReducer';
 
 
 
@@ -28,6 +29,7 @@ const SearchResultScreen = ({ navigation, route }) => {
 
   const [searchResults, setSearchResults] = useState([null, null, null, null]);
   const [isLoading, setisLoading] = useState(false)
+  const dispatch = useDispatch()
 
   const onChangeSearch = query => {
     setSearchQuery(query);
@@ -96,10 +98,16 @@ const SearchResultScreen = ({ navigation, route }) => {
       <View style={{ padding: 20, paddingTop: 30, elevation: 10, backgroundColor: appstyle.pri }}>
         <AppText style={{ fontWeight: 'bold', fontSize: 30, color: appstyle.textBlack }}>Explore</AppText>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <View 
+           onTouchEnd={() => {
+            dispatch(updateUserDetails({"searchString": route?.params?.searchString}))
+            navigation.navigate("Search")
+          }}
+          >
           <Searchbar
-            // onFocus={() => setFocus(true)}
+            onFocus={() => setFocus(true)}
             // onBlur={() => setFocus(false)}
-            editable={true}
+            editable={false}
             inputStyle={styles.searchBar}
             // onSubmitEditing={(val) => submitEdit(val)}
             placeholderTextColor={appstyle.textSec}
@@ -110,6 +118,7 @@ const SearchResultScreen = ({ navigation, route }) => {
             onChangeText={onChangeSearch}
             value={route?.params?.searchString}
           />
+          </View>
           <View style={[styles.filterButtonContainer]}>
             <TouchableOpacity
               onPress={() => navigation.goBack()}

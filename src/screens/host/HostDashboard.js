@@ -1,4 +1,4 @@
-import { View, VirtualizedList, FlatList, Dimensions, Platform, ScrollView, RefreshControl } from 'react-native'
+import { View, VirtualizedList, FlatList, Dimensions, Platform, ScrollView, RefreshControl, Pressable } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import AppButton from '../../components/AppButton'
 import { deleteVehicleFromHost, getAllVehicle } from '../../axios/axios_services/vehicleService'
@@ -87,7 +87,7 @@ const HostDashboard = () => {
         getAllVehicleByUser()
         setDeleteLoader(false)
       }
-      
+
     } catch (error) {
       setDeleteLoader(false)
       console.error(error)
@@ -149,8 +149,8 @@ const HostDashboard = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 0, paddingBottom: 100 }}
         onScroll={onScroll}
-        refreshControl={<RefreshControl refreshing={false} onRefresh={() => { getAllVehicleByUser(); getTotalTranx()}} />}
-        
+        refreshControl={<RefreshControl refreshing={false} onRefresh={() => { getAllVehicleByUser(); getTotalTranx() }} />}
+
         style={{ backgroundColor: appstyle.pri, height: '100%', paddingVertical: 15, paddingTop: 0, position: 'relative' }}>
         <AppText style={{ fontSize: 20, marginTop: 20, fontWeight: '900', marginLeft: 20 }}>Overview</AppText>
         <View style={{ width: '100%', flexDirection: 'row', paddingTop: 10, marginLeft: 10 }}>
@@ -159,17 +159,19 @@ const HostDashboard = () => {
             <AppText style={{ fontSize: 12, color: '#ddd', fontWeight: 'bold' }}>Today's Income</AppText>
             <AppText style={{ color: appstyle.pri, fontSize: 25, fontWeight: 'bold', marginTop: -10, color: '#008542', textTransform: "capitalize" }} >₹{amountFormatter(trnx?.todaysEarning) || "N/A"}</AppText>
           </View>
-          <View style={{ height: 120, padding: 15,  width: '55%', flexDirection: 'row', justifyContent: 'space-between', marginLeft: 10, backgroundColor: appstyle.tri, borderRadius: 15, elevation: 10, shadowColor: appstyle.shadowColor }}>
-            <View style={{height: '100%', justifyContent: 'space-between'}}>
+          <Pressable 
+          onPress={() => navigation.navigate("TransactionHistory")}
+          style={{ height: 120, padding: 15, width: '55%', flexDirection: 'row', justifyContent: 'space-between', marginLeft: 10, backgroundColor: appstyle.tri, borderRadius: 15, elevation: 10, shadowColor: appstyle.shadowColor }}>
+            <View style={{ height: '100%', justifyContent: 'space-between' }}>
               <FontAwesome size={25} color={'#ddd'} name="money-bills" />
               <AppText style={{ fontSize: 12, color: '#ddd', fontWeight: 'bold' }}>Total Income</AppText>
               <AppText style={{ fontWeight: 'bold', fontSize: 25, color: '#008542', marginTop: -10, textTransform: "capitalize" }} >₹{amountFormatter(trnx?.totalEarning) || "N/A"}</AppText>
             </View>
-            <View style={{height: '100%', flexDirection: 'row', alignItems: 'center', borderLeftWidth: 1, borderStyle: 'dashed', borderColor: appstyle.textSec }}>
-            
-            <AppText style={{ fontSize: 20, color: appstyle.textSec, fontWeight: 'bold', transform: [{rotate: '-90deg'}], marginRight: -20 }}><MaterialCommunityIcons size={15} color={appstyle.textSec} name="view-dashboard-outline" /> view</AppText>
+            <View style={{ height: '100%', flexDirection: 'row', alignItems: 'center', borderLeftWidth: 1, borderStyle: 'dashed', borderColor: appstyle.textSec }}>
+
+              <AppText style={{ fontSize: 20, color: appstyle.textSec, fontWeight: 'bold', transform: [{ rotate: '-90deg' }], marginRight: -20 }}><MaterialCommunityIcons size={15} color={appstyle.textSec} name="view-dashboard-outline" /> view</AppText>
             </View>
-          </View>
+          </Pressable>
         </View>
         <AppText style={{ fontSize: 20, marginTop: 20, fontWeight: '900', marginLeft: 20 }}>Your Listed Vechicles</AppText>
         {/* <AppText style={{ fontWeight: 'bold', fontSize: 20, marginTop: 5, marginLeft: 15 }}>Your Listed Vehicles</AppText> */}
@@ -228,9 +230,15 @@ const CardComponent = ({ item, navigation, key, setModalValue }) => (
       {item?.available ? 'Not booked yet' : 'Booked at selected time period!'}
     </AppText>
     <Card.Content>
-
-      <AppText style={{ color: appstyle.textSec, fontWeight: '900', marginTop: 10, }}><Chip style={{ backgroundColor: "#f4f4f2" }} textStyle={{ color: appstyle.textBlack }} ><FontAwesome name="user-gear" size={12} />  {item?.transmission}</Chip>    <Chip style={{ backgroundColor: "#f4f4f2" }} textStyle={{ color: appstyle.textBlack }} ><FontAwesome name="gas-pump" size={12} />  {item?.fuelType}</Chip></AppText>
+      <AppText style={{ color: appstyle.textSec, fontWeight: '900', marginTop: 10, }}>
+        <Chip style={{ backgroundColor: "#f4f4f2" }} textStyle={{ color: appstyle.textBlack }} ><FontAwesome name="user-gear" size={12} />  {item?.transmission}</Chip>    <Chip style={{ backgroundColor: "#f4f4f2" }} textStyle={{ color: appstyle.textBlack }} ><FontAwesome name="gas-pump" size={12} />  {item?.fuelType}</Chip></AppText>
       <AppText variant="bodyMedium" style={{ fontWeight: '900', marginTop: 10, fontSize: 20, textTransform: "capitalize" }}>{item?.name}</AppText>
+      
+        {item?.vehicleCategory == "car" ? (
+        <AppText style={{ color: appstyle.textSec, fontWeight: '900' }}><FontAwesome name="car" size={12} />  {item?.vehicleType} </AppText>
+      ) : (
+        <AppText style={{ color: appstyle.textSec, fontWeight: '900' }}><MaterialCommunityIcons name="motorbike" size={12} />  {item?.vehicleType}</AppText>
+        )}
       {/* <AppText variant="bodyMedium" style={{ fontWeight: '900', marginTop: 10 }}>{item?.available ? "Available" : "Booked"}</AppText> */}
       <AppText style={{ color: '#008542', fontWeight: "bold", fontSize: 25 }}>₹{amountFormatter(item?.cost)}/hr</AppText>
       <AppText variant="bodyMedium" style={{ color: appstyle.textSec, fontWeight: '900', marginTop: 10 }}>Added on {dateSimplify(item?.date)}</AppText>
@@ -241,7 +249,7 @@ const CardComponent = ({ item, navigation, key, setModalValue }) => (
         <AppButton textColor={'tomato'} onPress={() => setModalValue({ visible: true, id: item?._id, name: item?.name })} style={{ marginLeft: 10 }} icon={'delete'} >Delete</AppButton>
       </View>
     </Card.Actions>
-  </Card>
+  </Card >
 );
 
 export default HostDashboard

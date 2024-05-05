@@ -414,7 +414,7 @@ const Tab = ({ title, onPress, icon, isActive }) => {
     >
       {icon && (
         <MotiView  
-        transition={{ delay: 5, damping: 12, mass: 1 }}
+        transition={{ delay: 5, damping: 15, mass: 1 }}
         animate={{ opacity: isActive ? 1 : 0, translateY: isActive ? 0 : 100 }}>
           <AntDesign color={isActive ? appstyle.priBack : appstyle.textSec} style={{ marginRight: 8 }} name={icon} size={16} />
         </MotiView>

@@ -32,6 +32,8 @@ import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ChatScreen from '../screens/Commons/ChatScreen';
 import SplashScreen from '../components/SplashScreen';
+import SubCategoryView from '../screens/SubCategoryView';
+import TransactionHistory from '../screens/host/TransactionHistory';
 
 const Stack = createNativeStackNavigator();
 const { width } = Dimensions.get("window")
@@ -110,6 +112,7 @@ const Navigation = () => {
                   <Stack.Screen options={{ animationEnabled: false }} name="HostDashboard" component={HostDashboard} />
                   <Stack.Screen name="AddVehicle" component={AddVehicle} />
                   <Stack.Screen name="Withdraw" options={{ animationEnabled: false, animation: "none" }} component={Withdraw} />
+                  <Stack.Screen name="TransactionHistory" options={{ animationEnabled: false, animation: "slide_from_right" }} component={TransactionHistory} />
                 </>
               )}
               {role?.includes('client') && (
@@ -126,6 +129,7 @@ const Navigation = () => {
               <Stack.Screen options={{ animationEnabled: false, animation: "none" }} name="Booking" component={Booking} />
               <Stack.Screen options={{ animation: "slide_from_bottom" }} name="QRScanner" component={QRScanner} />
               <Stack.Screen options={{ animation: "slide_from_bottom" }} name="ChatScreen" component={ChatScreen} />
+              <Stack.Screen options={{  }} name="SubCategoryView" component={SubCategoryView} />
               <Stack.Screen options={{}} name="Result" component={SearchResultScreen} />
               <Stack.Screen name="PaymentOverView" component={PaymentOverView} />
             </>
