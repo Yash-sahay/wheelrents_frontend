@@ -1,5 +1,5 @@
 // WishlistScreen.js
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, VirtualizedList, TouchableOpacity, StyleSheet } from 'react-native';
 import { Card, Title, Paragraph, IconButton, Chip } from 'react-native-paper';
 import AppHeader from '../components/AppHeader';
@@ -12,11 +12,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { baseURL, dateSimplify } from '../../common';
 import FontAwesome from 'react-native-vector-icons/FontAwesome6'
 import { CardComponent } from './Result';
+import LottieView from 'lottie-react-native';
 
 const Wishlist = ({ navigation }) => {
   const dispatch = useDispatch()
   const [wishlistItems, setWishlistItems] = useState([null, null, null, null]);
   const { bookingStartDate, bookingEndDate } = useSelector(state => state.userReducer);
+
+  const wishListAnimationRef = useRef(null)
 
   const removeFromWishlist = (itemId) => {
     // Remove the item from the wishlist based on its id
@@ -79,7 +82,10 @@ const Wishlist = ({ navigation }) => {
       <View style={styles.container}>
         {wishlistItems?.length === 0 ? (
           <View style={{ ...StyleSheet.absoluteFillObject, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <FontAwesome color={appstyle.textBlack} name="car-burst" size={100} />
+            <LottieView
+              ref={wishListAnimationRef}
+              style={{ height: 350, width: 350, marginTop: -100}}
+              source={require('../../assets/animation/wishlist_empty.json')} autoPlay loop={false} />
             <AppText style={styles.emptyMessage}>Your wishlist is empty.</AppText>
           </View>
         ) : (
@@ -111,7 +117,7 @@ const styles = StyleSheet.create({
   emptyMessage: {
     fontSize: 17,
     color: appstyle.textSec,
-    marginTop: 20,
+    marginTop: -70,
     fontWeight: 'bold'
   },
   cardContainer: {

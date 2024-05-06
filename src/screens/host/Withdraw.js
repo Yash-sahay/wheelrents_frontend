@@ -27,6 +27,11 @@ const Withdraw = ({navigation}) => {
   const [allValues, setAllValues] = useState({});
 
   const animationRef = useRef(null);
+  const moneyanimationRef = useRef(null);
+
+
+
+  
 
 
 
@@ -54,6 +59,9 @@ const Withdraw = ({navigation}) => {
         arr[indexValue].checked = true
       }
       setResults(arr)
+      if(arr.length < 1){
+        moneyanimationRef.current?.play(15, 200);
+      }
     } catch (error) {
       console.error(error)
     }
@@ -114,7 +122,7 @@ const Withdraw = ({navigation}) => {
 
 
   const CardTransaction = ({ item, index }) => (
-    <AppShimmer visible={item ? true : false} style={[{ backgroundColor: '#f4f4f2', height: 70, width: '100%', borderRadius: 20, marginTop: 10, borderWidth: 2, borderColor: 'transparent' }, item?.checked && { borderWidth: 2, borderColor: appstyle.textSec }]}>
+    <AppShimmer key={index} visible={item ? true : false} style={[{ backgroundColor: '#f4f4f2', height: 70, width: '100%', borderRadius: 20, marginTop: 10, borderWidth: 2, borderColor: 'transparent' }, item?.checked && { borderWidth: 2, borderColor: appstyle.textSec }]}>
       <Pressable onPress={() => item?.nonSelectable && handleCheck(item, index)}>
         <Card.Title
           style={[{ backgroundColor: '#f4f4f2', borderRadius: 20, marginTop: 10, borderWidth: 2, borderColor: 'transparent' }, item?.checked && { borderWidth: 2, borderColor: 'darkgreen' }]}
@@ -227,15 +235,41 @@ const Withdraw = ({navigation}) => {
         <AppButton
           onPress={withdraw}
           style={{ marginVertical: 20, backgroundColor: totalWithdraw() < 1 ? 'lightgrey' : appstyle.tri }} disabled={totalWithdraw() < 1}>Withdraw</AppButton>
+        
+        {results?.length > 0 ? (
+        <>
         <AppText style={{ fontWeight: 'bold', fontSize: 15, color: appstyle.textBlack, paddingVertical: 10 }}>Your Earnings</AppText>
         <FlatList
           keyExtractor={(item) => item?._id}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 150 }}
           data={results}
-          renderItem={({ item, index }) => <CardTransaction item={item} index={index} />}
+          renderItem={({ item, index }) => <CardTransaction key={index} item={item} index={index} />}
         // keyExtractor={}
-        />
+        /> 
+        </>
+        ) : (
+          <MotiView 
+          from={{opacity: 0, translateY: 30}}
+          animate={{opacity: 1, translateY: 0}}
+          exit={{opacity: 0, translateY: 30}}
+          transition={{damping: 20}}
+          style={{width: '100%', alignItems: 'center'}}>
+          <LottieView
+          ref={moneyanimationRef}
+          style={{ height: 350, width: 350 }}
+          source={require('../../../assets/animation/amount_not_available.json')} autoPlay loop={false} />
+          <MotiView 
+          from={{opacity: 0, translateY: 30}}
+          animate={{opacity: 1, translateY: 0}}
+          exit={{opacity: 0, translateY: 30}}
+          transition={{damping: 20}}
+          delay={300}
+          style={{width: '100%', alignItems: 'center'}}>
+          <AppText style={{marginTop: -80, color: appstyle.textSec, fontWeight: 'bold', opacity: 0.8}}>There is no earnings to show</AppText>
+          </MotiView>
+          </MotiView>
+        )}
 
       </View>
     </>
