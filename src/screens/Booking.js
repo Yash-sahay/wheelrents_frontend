@@ -25,22 +25,22 @@ import QRCode from 'react-native-qrcode-svg';
 import { useSelector } from 'react-redux';
 import PaymentOverView from './PaymentOverView';
 import { MotiView } from 'moti';
+import LottieView from 'lottie-react-native';
 
 
 
 const TABS = [
-  { id: 'pending', title: 'Pending', content: 'Pending Bookings', icon: 'exclamationcircle' },
-  { id: 'active', title: 'Active', content: 'Active Bookings', icon: 'checkcircle' },
-  { id: 'started', title: 'Running', content: 'Running Trips', icon: 'dashboard' },
-  // { id: 'completed', title: 'Completed', content: 'Completed Bookings' },
+  { id: 'all', title: 'Running', content: 'My Trips', icon: 'enviroment' },
+  { id: 'completed', title: 'Completed', content: 'Completed Trips', icon: 'checkcircle' },
 ];
 
 
-const Booking = ({ navigation }) => {
+const Booking = ({ navigation, customTabValue }) => {
   const [bookings, setBookings] = useState([]);
-  const [tabValue, setTabValue] = useState(TABS[0]);
+  const [tabValue, setTabValue] = useState(TABS[customTabValue || 0]);
   const [modalValue, setModalValue] = useState({});
   const [loader, setLoader] = useState(false)
+  const [getBookingLoader, setBookingLoader] = useState(false)
   const [hourCount, setHourCount] = useState(0)
   // ref
   const bottomSheetRef = useRef(null);
@@ -109,11 +109,14 @@ const Booking = ({ navigation }) => {
 
   const getBookings = async () => {
     try {
+      setBookingLoader(true)
       const bookings = await getBookingsForHost({ isClient: clientRole, bookingStatus: tabValue?.id })
 
       setSelectedBookingId(bookings?.data?.[0]?._id);
       setBookings(bookings?.data)
+      setBookingLoader(false)
     } catch (error) {
+      setBookingLoader(false)
       console.error("err", error)
     }
   }
@@ -177,13 +180,7 @@ const Booking = ({ navigation }) => {
   }
 
   function openExternalApp(url) {
-    Linking.canOpenURL(url).then(supported => {
-      if (supported) {
-        Linking.openURL(url);
-      } else {
-        console.log('Don\'t know how to open URI: ' + url);
-      }
-    });
+    Linking.openURL(url);
   }
 
 
@@ -228,11 +225,11 @@ const Booking = ({ navigation }) => {
             </>
           )}
           {(!clientRole && selectedBookingId === item?._id && item?.bookingStatus != "pending") && (
-                <TouchableOpacity onPress={() => openPhone(item?.clientNumber)} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15, marginTop: 10, borderBottomWidth: 1, paddingBottom: 10, borderColor: '#f4f4f2' }}>
-                  <AppText style={{ color: appstyle.textBlack, fontWeight: '900', fontSize: 16 }}><MaterialCommunityIcons name="phone-dial" size={18} color={appstyle.textBlack} />  {item?.clientNumber}</AppText>
-                  <MaterialCommunityIcons name="chevron-right" size={20} color={appstyle.textBlack} />
-                </TouchableOpacity>
-              )}
+            <TouchableOpacity onPress={() => openPhone(item?.clientNumber)} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15, marginTop: 10, borderBottomWidth: 1, paddingBottom: 10, borderColor: '#f4f4f2' }}>
+              <AppText style={{ color: appstyle.textBlack, fontWeight: '900', fontSize: 16 }}><MaterialCommunityIcons name="phone-dial" size={18} color={appstyle.textBlack} />  {item?.clientNumber}</AppText>
+              <MaterialCommunityIcons name="chevron-right" size={20} color={appstyle.textBlack} />
+            </TouchableOpacity>
+          )}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15, paddingTop: 10 }}>
             <AppText style={{ fontWeight: 'bold', fontSize: 14, color: appstyle.textSec }}>Pick Up</AppText>
             <AppText style={{ fontWeight: 'bold', fontSize: 14, color: appstyle.textSec }}>Drop Off</AppText>
@@ -383,14 +380,34 @@ const Booking = ({ navigation }) => {
       <AppBottomBar />
       <AppHeader ui2 name={"Bookings"} />
       <BookingTabs onChange={(tabVal) => setTabValue(prev => ({ ...tabVal }))}>
-        <AppText style={styles.title}>{tabValue?.content}</AppText>
-        <FlatList
-          data={bookings}
-          style={{}}
-          renderItem={renderBookingItem}
-          keyExtractor={(item) => item?._id}
-          contentContainerStyle={styles.flatListContent}
-        />
+        {!getBookingLoader ? (
+          <>
+
+            {bookings.length == 0 ? (
+              <>
+                <AppText style={{...styles.title, color: appstyle.textSec}}>{"No Bookings Found!"}</AppText>
+                <View style={{ alignItems: 'center', justifyContent: 'flex-start', width: '100%', borderRadius: 100 }}>
+                  <LottieView source={require("../../assets/animation/nobooking.json")} style={{ height: '74%', width: '100%', borderRadius: 100, overflow: 'hidden' }} autoPlay loop />
+                  <AppButton outlined icon={"home"} onPress={() => navigation.navigate("Home")}>Go to Home</AppButton>
+                </View>
+              </>
+            ) : (
+              <>
+                <AppText style={styles.title}>{tabValue?.content}</AppText>
+                <FlatList
+                  data={bookings}
+                  renderItem={renderBookingItem}
+                  keyExtractor={(item) => item?._id}
+                  contentContainerStyle={styles.flatListContent}
+                />
+              </>
+            )}
+          </>
+        ) : (
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <LottieView source={require("../../assets/animation/vehicle_loading.json")} style={{ height: 200, width: 200, marginTop: -100 }} autoPlay loop />
+          </View>
+        )}
       </BookingTabs>
       {/* <View style={styles.container}>
             </View> */}
@@ -407,15 +424,15 @@ const Booking = ({ navigation }) => {
 
 const Tab = ({ title, onPress, icon, isActive }) => {
   return (
-  
+
     <TouchableOpacity
       style={[styles.tab, isActive && styles.activeTab]}
       onPress={onPress}
     >
       {icon && (
-        <MotiView  
-        transition={{ delay: 5, damping: 15, mass: 1 }}
-        animate={{ opacity: isActive ? 1 : 0, translateY: isActive ? 0 : 100 }}>
+        <MotiView
+          transition={{ delay: 5, damping: 15, mass: 1 }}
+          animate={{ opacity: isActive ? 1 : 0, translateY: isActive ? 0 : 100 }}>
           <AntDesign color={isActive ? appstyle.priBack : appstyle.textSec} style={{ marginRight: 8 }} name={icon} size={16} />
         </MotiView>
       )}

@@ -4,7 +4,7 @@ import { Camera, useCameraDevice, useCodeScanner } from 'react-native-vision-cam
 import AppText from '../components/AppText';
 import AppHeader from '../components/AppHeader';
 import { appstyle } from '../styles/appstyle';
-import { booking_status_change } from '../axios/axios_services/bookingService';
+import { booking_payment, booking_status_change } from '../axios/axios_services/bookingService';
 import AppButton from '../components/AppButton';
 import { useNavigation } from '@react-navigation/native';
 

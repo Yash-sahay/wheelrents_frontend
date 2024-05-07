@@ -54,7 +54,7 @@ const AppLoader = () => {
                             style={{ backgroundColor: 'transparent', }}
                             from={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
+                            // exit={{ opacity: 0 }}
                             transition={{delay: 500}}
                         >
                             <LottieView
