@@ -1,4 +1,4 @@
-import { Dimensions, PermissionsAndroid, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, Dimensions, PermissionsAndroid, StyleSheet, TouchableOpacity, View } from 'react-native';
 // import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 
@@ -34,30 +34,56 @@ import ChatScreen from '../screens/Commons/ChatScreen';
 import SplashScreen from '../components/SplashScreen';
 import SubCategoryView from '../screens/SubCategoryView';
 import TransactionHistory from '../screens/host/TransactionHistory';
+import messaging from '@react-native-firebase/messaging';
 
 const Stack = createNativeStackNavigator();
 const { width } = Dimensions.get("window")
 
 const Navigation = () => {
 
+  async function requestUserPermission() {
+    const authStatus = await messaging().requestPermission();
+    PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+    if (enabled) {
+      console.log('Authorization status:', authStatus);
+    }
+  }
+
+  useEffect(() => {
+    requestUserPermission()
+  }, [])
+
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      // Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
+    });
+
+    return unsubscribe;
+  }, []);
+
+
 
   // const navigation = useNavigation()
   const { isLoggedIn } = useSelector(state => state?.userReducer);
   const { role, bookingStartDate, bookingEndDate } = useSelector(state => state.userReducer)
-  const dispatch = useDispatch() 
-  
+  const dispatch = useDispatch()
+
   useEffect(() => {
     const minimumStartDate = new Date(new Date().getTime() + 5 * 60 * 60 * 1000);
     const minimubEndDate = new Date(new Date().getTime() + 10 * 60 * 60 * 1000);
-    dispatch(updateUserDetails({bookingEndDate: minimubEndDate, bookingStartDate: minimumStartDate }))
-    
+    dispatch(updateUserDetails({ bookingEndDate: minimubEndDate, bookingStartDate: minimumStartDate }))
+
     requestLocationPermission(updateLocationDetails)
   }, [])
 
-  const updateLocationDetails =(locationObj) => {
-    dispatch(updateLocationReducer({...locationObj}))
+  const updateLocationDetails = (locationObj) => {
+    dispatch(updateLocationReducer({ ...locationObj }))
   }
-  
+
 
   useEffect(() => {
     async function requestLocationPermission() {
@@ -96,7 +122,7 @@ const Navigation = () => {
     <>
       <AppLoader />
       {/* <AppBottomBar/> */}
-      <SplashScreen {...{loaded, setloaded}}/>
+      <SplashScreen {...{ loaded, setloaded }} />
       <NavigationContainer initialRouteName="Home">
         <Stack.Navigator
           screenOptions={{ headerShown: false }}>
@@ -129,7 +155,7 @@ const Navigation = () => {
               <Stack.Screen options={{ animationEnabled: false, animation: "none" }} name="Booking" component={Booking} />
               <Stack.Screen options={{ animation: "slide_from_bottom" }} name="QRScanner" component={QRScanner} />
               <Stack.Screen options={{ animation: "slide_from_bottom" }} name="ChatScreen" component={ChatScreen} />
-              <Stack.Screen options={{  }} name="SubCategoryView" component={SubCategoryView} />
+              <Stack.Screen options={{}} name="SubCategoryView" component={SubCategoryView} />
               <Stack.Screen options={{}} name="Result" component={SearchResultScreen} />
               <Stack.Screen name="PaymentOverView" component={PaymentOverView} />
             </>

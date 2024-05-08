@@ -1,7 +1,7 @@
 import Geolocation from '@react-native-community/geolocation';
 import axios from 'axios';
 import { PermissionsAndroid } from 'react-native';
-
+import messaging from '@react-native-firebase/messaging';
 
 
 export function baseURL() {
@@ -179,6 +179,15 @@ export async function requestLocationPermission(setter) {
     console.warn(err)
   }
 }
+
+
+
+export async function getDeviceToken () {
+  await messaging().registerDeviceForRemoteMessages();
+  const token = await messaging().getToken();
+  return token
+}
+
 
 
 

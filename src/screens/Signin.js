@@ -25,7 +25,7 @@ const Signin = () => {
       const { id, name } = user.data.user
 
       if (name) {
-        alert('Hoorray! ' + name + ' Please Login now and using weelrents.')
+        alert('Hoorray! ' + name + ' Please Login now and start using weelrents.')
         navigation.navigate('Login')
       }
     } catch (error) {

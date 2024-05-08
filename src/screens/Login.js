@@ -1,5 +1,5 @@
 import { Image, StatusBar, TouchableOpacity, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Divider, TextInput } from 'react-native-paper'
 import { loginUser } from '../axios/axios_services/loginService'
 import { useNavigation } from '@react-navigation/native'
@@ -12,24 +12,36 @@ import AppText from '../components/AppText'
 import Icon from 'react-native-vector-icons/FontAwesome6'
 import { updateLoaderReducer } from '../redux/reducer/loaderReducer'
 import { appstyle } from '../styles/appstyle'
+import { getDeviceToken } from '../../common'
 
 const Login = () => {
   const [allValues, setAllValues] = useState({ email: 'yash@gmail.com', password: 'radhekrishna', secureTextEntry: true })
   const navigation = useNavigation()
+  const [fcm, setfcm] = useState(null)
 
   const dispatch = useDispatch()
+
+  useEffect(() => {
+    fcmGet()
+  }, [])
+
+  const fcmGet = async() => {
+    const fcmToken = await getDeviceToken()
+    setfcm(fcmToken)
+  }
 
   const loginfun = async () => {
     try {
       dispatch(updateLoaderReducer({ loading: true}))
-      const payload = { ...allValues }
+      const payload = { ...allValues, fcm_token: fcm }
       const login = await loginUser({ data: payload })
       const { id, name, userType, email } = login.data.user
       const obj = {
         username: name,
         userId: id,
         role: userType,
-        email: email
+        email: email,
+        fcm_token: fcm
       }
       dispatch(updateUserDetails({ isLoggedIn: true, ...obj }))
       dispatch(updateLoaderReducer({ loading: false}))
