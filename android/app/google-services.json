@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "279174890025",
+    "project_id": "wheelrents",
+    "storage_bucket": "wheelrents.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:279174890025:android:beb4c2edf6f64791469238",
+        "android_client_info": {
+          "package_name": "com.wheelrents"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkGVDp_8LBcCyS_6-NAq7w2txkvLn_CzE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
