@@ -8,7 +8,7 @@ import AppButton from '../components/AppButton';
 import { MD3Colors, ProgressBar } from 'react-native-paper';
 import Animated from 'react-native-reanimated';
 import { booking_payment, booking_status_change, delete_booking_by_id, extend_trip, finish_trip, getBookingsForHost } from '../axios/axios_services/bookingService';
-import { amountFormatter, baseURL, calculateDistance, calculateTimePercentage, dateSimplify, timeSimplify } from '../../common';
+import { amountFormatter, baseURL, calculateDistance, calculateTimePercentage, dateSimplify, payWithRazorPay, timeSimplify } from '../../common';
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
@@ -159,6 +159,7 @@ const Booking = ({ navigation, customTabValue }) => {
     const hours = Math.floor((remainingTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
 
+
     return {
       days: days,
       hours: hours,
@@ -187,15 +188,16 @@ const Booking = ({ navigation, customTabValue }) => {
   const renderBookingItem = ({ item }) => {
     // Example usage:
     const endTime = new Date(item?.endDate).getTime(); // Example end time
-    const remainingTime = calculateRemainingTime(false, endTime, parseInt(item?.extendedHours));
-    const newEndTime = new Date().getTime() - (parseInt(item?.extendedHours) * 60 * 60 * 1000)
+    const remainingTime = calculateRemainingTime(false, endTime, parseInt(item?.extendedHours || 0));
+    const newEndTime = new Date().getTime() - (parseInt(item?.extendedHours || 0) * 60 * 60 * 1000)
+    
     const editionalTime = calculateRemainingTime(endTime, newEndTime);
     const distance = JSON.stringify(parseInt(item?.latitude)) != "null" ? calculateDistance({ latitude: lat, longitude: long }, { latitude: item?.latitude, longitude: item?.longitude }) + " Km" : "N/A"
 
     return (
       <Animated.View style={styles.bookingCard} onTouchEnd={() => handleCardPress(item._id)}>
         <View style={{ width: '100%' }}>
-          <View style={{ width: '100%', flexDirection: 'row', padding: 15, borderBottomWidth: selectedBookingId === item?._id ? 1 : 0, paddingBottom: 10, borderColor: '#f4f4f2', justifyContent: 'flex-start' }}>
+          <View style={{ width: '100%', flexDirection: 'row', padding: 15, borderBottomWidth: true ? 1 : 0, paddingBottom: 10, borderColor: '#f4f4f2', justifyContent: 'flex-start' }}>
             <View>
               <Image source={{ uri: baseURL() + "public/vehicle/" + item?.images?.[0]?.fileName }} style={styles.carImage} />
             </View>
@@ -210,7 +212,7 @@ const Booking = ({ navigation, customTabValue }) => {
               <AppText variant="titleLarge" style={{ color: '#008542', fontWeight: '900', fontSize: 25 }}>₹{amountFormatter(item?.totalPrice)}</AppText>
             </View>
           </View>
-          {(clientRole && selectedBookingId === item?._id) && (
+          {(clientRole && true) && (
             <>
               {item?.bookingStatus != "pending" && (
                 <TouchableOpacity onPress={() => openPhone(item?.hostNumber)} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15, marginTop: 10, borderBottomWidth: 1, paddingBottom: 10, borderColor: '#f4f4f2' }}>
@@ -224,7 +226,7 @@ const Booking = ({ navigation, customTabValue }) => {
               </TouchableOpacity>
             </>
           )}
-          {(!clientRole && selectedBookingId === item?._id && item?.bookingStatus != "pending") && (
+          {(!clientRole && true && item?.bookingStatus != "pending") && (
             <TouchableOpacity onPress={() => openPhone(item?.clientNumber)} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15, marginTop: 10, borderBottomWidth: 1, paddingBottom: 10, borderColor: '#f4f4f2' }}>
               <AppText style={{ color: appstyle.textBlack, fontWeight: '900', fontSize: 16 }}><MaterialCommunityIcons name="phone-dial" size={18} color={appstyle.textBlack} />  {item?.clientNumber}</AppText>
               <MaterialCommunityIcons name="chevron-right" size={20} color={appstyle.textBlack} />
@@ -251,7 +253,7 @@ const Booking = ({ navigation, customTabValue }) => {
               color={calculateTimePercentage(new Date(item?.startDate), new Date(item?.endDate), parseInt(item?.extendedHours)) > 1 ? 'tomato' : 'black'}
             />}
           </View>
-          {(!clientRole && selectedBookingId === item?._id && tabValue.title != "Completed") && (
+          {(!clientRole && true && tabValue.title != "Completed") && (
             <>
               {item?.bookingStatus == "pending" && (
                 <View style={{ flexDirection: 'row', justifyContent: 'flex-end', padding: 10, borderTopWidth: 1, borderColor: '#f4f4f2' }}>
@@ -284,7 +286,7 @@ const Booking = ({ navigation, customTabValue }) => {
             </>
           )}
 
-          {(clientRole && selectedBookingId === item?._id && tabValue.title != "Completed") && (
+          {(clientRole && true && tabValue.title != "Completed") && (
             <>
               {item?.bookingStatus == "active" && (
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', padding: 10, borderTopWidth: 1, borderColor: '#f4f4f2' }}>
@@ -294,7 +296,7 @@ const Booking = ({ navigation, customTabValue }) => {
               {item?.bookingStatus == "pending" && (
                 <View style={{ flexDirection: 'row', justifyContent: item?.payment == "pending" ? 'flex-end' : 'center', padding: 10, borderTopWidth: 1, borderColor: '#f4f4f2' }}>
                   {item?.payment == "pending" ? (
-                    <AppButton icon="cash" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={appstyle.tri} onPress={() => handleApprove(item?._id)} >Pay to activate your trip</AppButton>
+                    <AppButton icon="cash" style={{ paddingHorizontal: 10 }} textColor={'white'} buttonColor={appstyle.tri} onPress={() =>  payWithRazorPay({amount: item?.totalPrice, successCallback: () => handleApprove(item?._id) }) } >Pay to activate your trip</AppButton>
                   ) : (
                     <AppText style={{ fontWeight: '600', color: 'hsl(43,85%,33%)', fontSize: 12, }}>● Waiting for the vehicle owner to accept the request...</AppText>
                   )}
@@ -396,6 +398,8 @@ const Booking = ({ navigation, customTabValue }) => {
                 <AppText style={styles.title}>{tabValue?.content}</AppText>
                 <FlatList
                   data={bookings}
+                  refreshing={false}
+                  onRefresh={getBookings}
                   renderItem={renderBookingItem}
                   keyExtractor={(item) => item?._id}
                   contentContainerStyle={styles.flatListContent}

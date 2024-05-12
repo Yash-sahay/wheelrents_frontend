@@ -354,7 +354,7 @@ function CardComponent({ item, handleAddToWishlist, latitude, keyId, longitude }
   const distance = JSON.stringify(parseInt(item?.latitude)) != "null" ? calculateDistance({ latitude, longitude }, { latitude: item?.latitude, longitude: item?.longitude }) + " Km" : "N/A"
 
   return (
-    <Card key={keyId} style={styles.card}>
+    <Card onPress={() => navigation.navigate('VehicleDetails', { ...item, tag: "carData" + keyId })} key={keyId} style={styles.card}>
       <Pressable onPress={() => handleAddToWishlist(item)} style={styles.addToWishlistBtn}>
         <AppShimmer style={{ height: 20, width: 20, borderRadius: 20, }} visible={item == null ? false : true}>
           <Fontisto name={"heart"} style={{ elevation: 30 }} color={item?.isWishList ? '#ff3b30' : '#ddd'} size={20} />

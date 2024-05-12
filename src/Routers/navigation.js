@@ -36,12 +36,21 @@ import SubCategoryView from '../screens/SubCategoryView';
 import TransactionHistory from '../screens/host/TransactionHistory';
 import messaging from '@react-native-firebase/messaging';
 
+import notifee, { AndroidImportance } from '@notifee/react-native';
+import { updateNotificationReducer } from '../redux/reducer/notificationReducer';
+
 const Stack = createNativeStackNavigator();
 const { width } = Dimensions.get("window")
 
 const Navigation = () => {
 
+
+  const { notifications } = useSelector(state => state.notificationReducer)
+
+  let noti = notifications
+
   async function requestUserPermission() {
+    await notifee.requestPermission()
     const authStatus = await messaging().requestPermission();
     PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
     const enabled =
@@ -57,9 +66,60 @@ const Navigation = () => {
     requestUserPermission()
   }, [])
 
+  async function onDisplayNotification(remoteMessage) {
+    // Request permissions (required for iOS)
+    await notifee.requestPermission()
+
+    // Create a channel (required for Android)
+    const channelId = await notifee.createChannel({
+      id: 'default',
+      name: 'Default Channel',
+      importance: AndroidImportance.HIGH,
+
+    });
+
+    noti?.push({
+      title: remoteMessage?.notification?.title,
+      body: remoteMessage?.notification?.body,
+    })
+
+
+    setTimeout(() => {
+      
+      dispatch(updateNotificationReducer({
+        newNotification: true,
+        notifications: noti?.reverse()
+      }))
+    }, 1500);
+
+    // Display a notification
+    await notifee.displayNotification({
+      title: remoteMessage?.notification?.title,
+      body: remoteMessage?.notification?.body,
+      android: {
+        channelId,
+        importance: AndroidImportance.HIGH,
+        color: '#000000', // red
+
+        // smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
+        // pressAction is needed if you want the notification to open the app when pressed
+        pressAction: {
+          id: 'default',
+        },
+      },
+    });
+  }
+
+
+
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async remoteMessage => {
-      // Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
+      //   Toast.show({
+      //     type:  "tomatoToast",
+      //     text1: remoteMessage?.notification?.title || "",
+      //     text2: remoteMessage?.notification?.body
+      //   });
+      onDisplayNotification(remoteMessage)
     });
 
     return unsubscribe;

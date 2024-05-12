@@ -89,6 +89,7 @@ const styles = StyleSheet.create({
     },
     itemAppText: {
         fontSize: 16,
+        fontWeight: 'bold',
     },
     indicator: {
         position: 'absolute',

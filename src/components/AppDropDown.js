@@ -5,14 +5,14 @@ import AppText from './AppText';
 import { appstyle } from '../styles/appstyle';
 
   
-  const AppDropDown = ({label, data, labelField, valueField, setter, allValues, search, name, onChange}) => {
+  const AppDropDown = ({label, data, labelField, valueField, setter, allValues, search, name, onChange, renderLeftIcon}) => {
     
     const [isFocus, setIsFocus] = useState(false);
 
     const renderLabel = () => {
       if(isFocus || allValues?.[name]) {      
         return (
-          <Text style={[styles.label, isFocus && { color: 'rgba(0,0,0,0.7)', fontWeight: '600', borderRadius: 20 }]}>
+          <Text style={[{...styles.label, left: 7}, isFocus && { color: 'rgba(0,0,0,0.7)', fontWeight: '600', borderRadius: 20 }]}>
             {label}
           </Text>
         );
@@ -24,10 +24,11 @@ import { appstyle } from '../styles/appstyle';
         {renderLabel()}
         <Dropdown
           style={[styles.dropdown, isFocus && { borderWidth: 2, borderColor: appstyle.tri }]}
-          placeholderStyle={styles.placeholderStyle}
-          selectedTextStyle={styles.selectedTextStyle}
+          placeholderStyle={{...styles.placeholderStyle, }}
+          selectedTextStyle={{...styles.selectedTextStyle}}
           inputSearchStyle={styles.inputSearchStyle}
           iconStyle={styles.iconStyle}
+          renderLeftIcon={() => renderLeftIcon && <View style={{display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: 18, marginRight: 22}}>{renderLeftIcon && renderLeftIcon()}</View>}
           itemTextStyle={styles?.itemTextStyle}
           data={data}
           search={search}
@@ -69,7 +70,6 @@ import { appstyle } from '../styles/appstyle';
       position: 'absolute',
       backgroundColor: appstyle.pri,
       color: appstyle.tri,
-      left: 7,
       top: 13,
       zIndex: 999,
       paddingHorizontal: 8,

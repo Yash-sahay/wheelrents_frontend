@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import AppText from '../../components/AppText'
 import AppTextInput from '../../components/AppTextInput'
 import AppButton from '../../components/AppButton'
-import { Button, Chip, Icon } from 'react-native-paper'
+import { Button, Chip, Icon, TextInput } from 'react-native-paper'
 import AppDropDown from '../../components/AppDropDown'
 import { get_vehicle_categories, get_vehicle_sub_categroy_by_id } from '../../axios/axios_services/homeService'
 import { updateVehicle, vehicleAdd } from '../../axios/axios_services/vehicleService'
@@ -22,7 +22,7 @@ const Device_Width = Dimensions.get('window').width
 
 const AddVehicle = ({ route }) => {
     const data = route.params
-    const [allValues, setAllValues] = useState(data ? data : {})
+    const [allValues, setAllValues] = useState(data ? data : {vehicleNo: ""})
     const [categoryList, setCategoryList] = useState([])
     const [subCategoryList, setSubCategoryList] = useState([])
     const [isLoading, setIsLoading] = useState(false)
@@ -266,11 +266,14 @@ const AddVehicle = ({ route }) => {
 
                     {currStep == 1 && (
                         <>
-                            <AppTextInput setter={setAllValues} name="name" allValues={allValues} label={"Vehicle Name"} mode="outlined" />
+                            <AppTextInput setter={setAllValues} 
+                            left={<TextInput.Icon icon="car" />}
+                            name="name" allValues={allValues} label={"Vehicle Name"} mode="outlined" />
                             <AppDropDown
                                 setter={setAllValues}
                                 name="vehicleCategory"
                                 allValues={allValues}
+                                renderLeftIcon={() => <TextInput.Icon icon="clipboard-list" />}
                                 data={categoryList}
                                 onChange={(item) => getAllSubcategoryCategory(item)}
                                 labelField={'name'}
@@ -283,6 +286,7 @@ const AddVehicle = ({ route }) => {
                                 name="vehicleType"
                                 allValues={allValues}
                                 data={subCategoryList}
+                                renderLeftIcon={() => <TextInput.Icon icon="clipboard-list-outline" />}
                                 labelField={'name'}
                                 valueField={'name'}
                                 label={"Vehicle Type"}
@@ -316,7 +320,9 @@ const AddVehicle = ({ route }) => {
                                         allValues={allValues}>CNG</CustomChip>
                                 </View>
                             </View>
-                            <AppTextInput setter={setAllValues} name="vehicleNo" allValues={allValues} label={"Vehicle No"} mode="outlined" />
+                            <AppTextInput setter={setAllValues} 
+                             left={allValues?.vehicleNo?.length < 1 ? <TextInput.Icon icon="numeric" />  : ''}
+                            name="vehicleNo" allValues={allValues} label={"Vehicle No"} mode="outlined" />
 
                             <View>
                                 <AppText style={{ fontWeight: 'bold', paddingVertical: 10, marginTop: 10 }}>Transmission</AppText>
@@ -336,7 +342,9 @@ const AddVehicle = ({ route }) => {
                                         allValues={allValues}>Automatic</CustomChip>
                                 </View>
                             </View>
-                            <AppTextInput setter={setAllValues} name="cost" allValues={allValues} label={`Cost "Per hour"`} inputMode="numeric" mode="outlined" />
+                            <AppTextInput setter={setAllValues} name="cost"
+                            left={<TextInput.Icon color={"green"} icon="cash" />}
+                            allValues={allValues} label={`Cost "Per hour"`} inputMode="numeric" mode="outlined" />
                             <AppButton onPress={() => setCurrStep(currStep + 1)} style={{ marginTop: 20 }}>
                                 Next
                             </AppButton>

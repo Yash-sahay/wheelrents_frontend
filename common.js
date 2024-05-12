@@ -2,17 +2,19 @@ import Geolocation from '@react-native-community/geolocation';
 import axios from 'axios';
 import { PermissionsAndroid } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
+import RazorpayCheckout from 'react-native-razorpay';
+import { appstyle } from './src/styles/appstyle';
 
 
 export function baseURL() {
-  return "http://192.168.1.2:5000/" // Local
+  return "http://192.168.1.4:5000/" // Local
   return "https://wheelrents-api.onrender.com/" // Live
 }
 
 export function dateSimplify(date, extendedHours) {
   if (date) {
     let newdate = new Date(date);
-    if(extendedHours > 0){
+    if (extendedHours > 0) {
       newdate = new Date(newdate.getTime() + (extendedHours * 60 * 60 * 1000))
     }
     const day = newdate.toLocaleString('en-US', { weekday: 'short' });
@@ -34,7 +36,7 @@ export function timeSimplify(currentDate, extendedHours) {
   if (currentDate) {
     let currTimeInmill = new Date(currentDate)?.getTime()
     let hours = new Date(currentDate).getHours();
-    if(extendedHours){
+    if (extendedHours) {
       hours = new Date(currTimeInmill + (extendedHours * 60 * 60 * 1000)).getHours()
       currTimeInmill = currTimeInmill + (extendedHours * 60 * 60 * 1000)
     }
@@ -60,7 +62,7 @@ export function calculateTimePercentage(startTime, endTime, extendedTime) {
   const currentTime = new Date().getTime();
   let totalTime = endTime - startTime;
   const elapsedTime = currentTime - startTime;
-  if(extendedTime > 0){
+  if (extendedTime > 0) {
     totalTime = totalTime + (extendedTime * 60 * 60 * 1000)
   }
   // Calculate percentage
@@ -182,12 +184,37 @@ export async function requestLocationPermission(setter) {
 
 
 
-export async function getDeviceToken () {
+export async function getDeviceToken() {
   await messaging().registerDeviceForRemoteMessages();
   const token = await messaging().getToken();
   return token
 }
 
+
+export async function payWithRazorPay({successCallback, failedCallback, amount = 0}) {
+  var options = {
+    description: 'Credits towards consultation',
+    // image: 'https://i.imgur.com/3g7nmJC.png',
+    currency: 'INR',
+    key: 'rzp_test_XMzTCklzZV4CuY', // Your api key
+    amount: amount * 100,
+    name: 'Pay to wheelrents',
+    // prefill: {
+    //   email: 'admin@wheelrents.com',
+    //   contact: '9191919191',
+    //   name: 'Razorpay Software'
+    // },
+    theme: { color: appstyle.tri, }
+  }
+  RazorpayCheckout.open(options).then((data) => {
+    // handle success
+    successCallback && successCallback(data)
+  }).catch((error) => {
+    // handle failure
+    failedCallback && failedCallback(`Error: ${error.code} | ${error.description}`)
+  });
+
+}
 
 
 

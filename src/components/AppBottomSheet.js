@@ -5,7 +5,7 @@ import { useDispatch } from 'react-redux';
 import { updateUserDetails } from '../redux/reducer/userReducer';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
-import { Icon } from 'react-native-paper';
+import { Icon, IconButton } from 'react-native-paper';
 import { appstyle } from '../styles/appstyle';
 
 const AppBottomSheet = ({children, snapPoints, bottomSheet, setBottomSheet }) => {
@@ -48,7 +48,7 @@ const AppBottomSheet = ({children, snapPoints, bottomSheet, setBottomSheet }) =>
     <>
       {bottomSheet && (
         <View style={{ position: 'absolute', height: '100%', width: '100%', bottom: 0, left: 0, zIndex: 10 }} >
-          <Icon source={"close"} color={appstyle.tri} size={20} />
+        
           <GestureHandlerRootView>
           <BottomSheet
             enablePanDownToClose={true}
@@ -60,6 +60,9 @@ const AppBottomSheet = ({children, snapPoints, bottomSheet, setBottomSheet }) =>
             snapPoints={snapPointsMemo}
             // onChange={handleSheetChanges}
           >
+            <View style={{width: '100%', alignItems: 'flex-end', paddingHorizontal: 15}}>
+              <IconButton onPress={() => bottomSheetRef.current?.close()} style={{backgroundColor: appstyle.accent}} icon={'close'} color={appstyle.tri} size={20} />
+            </View>
             {children}
           </BottomSheet>
         </GestureHandlerRootView>

@@ -1,109 +1,91 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, VirtualizedList } from 'react-native';
-import AppHeader from '../../components/AppHeader';
-import { appstyle } from '../../styles/appstyle';
+import { View, StyleSheet, FlatList } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import AppHeader from '../../components/AppHeader'
+import { appstyle } from '../../styles/appstyle'
+import { get_transaction_details } from '../../axios/axios_services/bookingService'
+import moment from 'moment';
+import AppText from '../../components/AppText'
+import { Avatar, Card, Divider, IconButton } from 'react-native-paper'
+import { amountFormatter } from '../../../common'
+import { useSelector } from 'react-redux'
 
-const NotificationCard = ({ notification }) => {
-  return (
-    <TouchableOpacity style={styles.container}>
-      <Image source={{ uri: notification.image }} style={styles.image} />
-      <View style={styles.textContainer}>
-        <Text style={styles.title}>{notification.title}</Text>
-        <Text style={styles.message}>{notification.message}</Text>
-      </View>
-    </TouchableOpacity>
-  );
-};
 
 const Notification = () => {
-  const notifications = [
-    {
-      id: '1',
-      title: 'New Message',
-      message: 'You have a new message from John Doe',
-      image: 'https://example.com/user1.jpg',
-    },
-    {
-      id: '2',
-      title: 'Reminder',
-      message: "Don't forget to complete your task today!",
-      image: 'https://example.com/remind.jpg',
-    },
-    // Add more notifications as needed
-  ];
+    
+  const {notifications} = useSelector(state => state.notificationReducer)
 
-  const getItemCount = () => notifications.length;
 
-  const getItem = (data, index) => notifications[index];
+    const renderWithdrawItem = ({ item, index, itemLast }) => (
+        <Card.Title
+            title={item?.title}
+            style={{marginBottom: 10}}
+            subtitle={item?.body}
+            titleStyle={{color: appstyle.textBlack, fontWeight: '600', textTransform: "capitalize" }}
+            subtitleStyle={{fontSize: 13, color: appstyle.textSec}}
+            left={(props) => <Avatar.Icon {...props} style={{ backgroundColor: appstyle.accent}} color={appstyle.textBlack} icon={'bell'} />}
+        />
+    );
 
-  const renderNotification = ({ item }) => (
-    <NotificationCard key={item.id} notification={item} />
-  );
+    return (
+        <View style={{ flex: 1, backgroundColor: appstyle.pri }}>
+            <AppHeader ui2 name={"Notifications"} />
 
-  return (
-    <>
-    <AppHeader ui2/>
-    <View style={styles.screenContainer}>
-      {/* <Text style={styles.header}>Notifications</Text> */}
-      <VirtualizedList
-        data={notifications}
-        keyExtractor={(item) => item.id}
-        getItemCount={getItemCount}
-        getItem={getItem}
-        renderItem={renderNotification}
-        contentContainerStyle={styles.listContainer}
-      />
-    </View>
-    </>
-  );
+            <AppText style={{ ...styles.dateHeading, fontSize: 20 }}>{"Latest"}</AppText>
+            <View style={{ paddingHorizontal: 0, paddingRight: 20 }}>
+                <FlatList
+                    data={notifications}
+                    renderItem={({ item, index, }) => renderWithdrawItem({ item, index })}
+                    keyExtractor={(item) => item._id}
+                />
+            </View>
+        </View>
+    );
 };
 
 const styles = StyleSheet.create({
-  screenContainer: {
-    flex: 1,
-    backgroundColor: appstyle.pri,
-    // padding: 16,
-  },
-  header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  container: {
-    flexDirection: 'row',
-    backgroundColor: appstyle.accent,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: appstyle.priBack,
-    marginBottom: 16,
-    padding: 12,
-    elevation: 15,
-    shadowColor: appstyle.shadowColor,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 2,
-  },
-  image: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginRight: 12,
-  },
-  textContainer: {
-    flex: 1,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  message: {
-    fontSize: 16,
-    color: '#555',
-  },
-  listContainer: {
-    padding: 16
-  }
+    itemContainer: {
+        padding: 10,
+        position: 'relative',
+        display: 'flex',
+    },
+    itemAppText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    indicator: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        backgroundColor: 'orange',
+        borderRadius: 20,
+        padding: 5,
+    },
+    completedIndicator: {
+        backgroundColor: 'green',
+    },
+    dateHeading: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        padding: 10,
+        paddingLeft: 20
+    },
+    rejected: {
+        backgroundColor: '#FF0000',
+        color: '#FFFFFF',
+    },
+    rejectionIndicator: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        backgroundColor: '#FF0000',
+        borderRadius: 20,
+        padding: 5,
+    },
+    rejectionAppText: {
+        color: '#FFFFFF',
+        fontSize: 12,
+    },
 });
 
-export default Notification;
+
+export default Notification

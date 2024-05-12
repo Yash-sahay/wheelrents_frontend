@@ -1,6 +1,6 @@
 import { View, Text, TextInput, Dimensions, TouchableOpacity, Easing, FlatList, StatusBar, StyleSheet } from 'react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Appbar, Button, Chip, IconButton, Searchbar } from 'react-native-paper';
+import { Appbar, Badge, Button, Chip, IconButton, Searchbar } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import FontAwesome from 'react-native-vector-icons/FontAwesome6';
@@ -16,6 +16,7 @@ import AppBottomSheet from './AppBottomSheet';
 import { appstyle } from '../styles/appstyle';
 import { updateUserDetails } from '../redux/reducer/userReducer';
 import StateSelection from './StateSelection';
+import { updateNotificationReducer } from '../redux/reducer/notificationReducer';
 
 const Device_Width = Dimensions.get('window').width - 20;
 
@@ -115,6 +116,7 @@ const AppHeader = ({ mode = "light", ui2, name, isExtended, filterPress, filters
     const [bottomSheet, setBottomSheet] = useState(false);
 
     const { currRoute, role, searchString, recentSearches, username, email } = useSelector(state => state.userReducer)
+    const { newNotification } = useSelector(state => state.notificationReducer)
     const { city, state, country } = useSelector(state => state.locationReducer)
     const searchRef = useRef(null)
 
@@ -179,6 +181,13 @@ const AppHeader = ({ mode = "light", ui2, name, isExtended, filterPress, filters
         dispatch(updateUserDetails({ recentSearches: recentSearches?.length > 0 ? [...recentSearches, searchString] : [searchString] }))
     }
 
+    const notificationClick = () => {
+        navigation.navigate('Notification')
+        if(newNotification){
+            dispatch(updateNotificationReducer({newNotification: false}))
+        }
+    }
+
 
     if (!ui2) {
         return (
@@ -200,7 +209,11 @@ const AppHeader = ({ mode = "light", ui2, name, isExtended, filterPress, filters
                         </TouchableOpacity>
                         <View style={{ flexDirection: 'row' }}>
                             {role?.includes('client') && <IconButton onPress={() => navigation.navigate("QRScanner")} style={{ backgroundColor: appstyle.accent, elevation: 10, shadowColor: appstyle.shadowColor, borderWidth: 1, borderColor: '#fff' }} iconColor={appstyle.tri} size={20} icon="qrcode-scan" />}
-                            <IconButton onPress={() => navigation.navigate('Notification')} style={{ backgroundColor: mode == "dark" ? '#1d1d1d' : appstyle.accent, elevation: 10, shadowColor: appstyle.shadowColor, borderWidth: mode == "dark" ? 0 : 1, borderColor: '#fff' }} iconColor={mode == "dark" ? appstyle.pri : appstyle.tri} size={20} icon="bell" />
+                            <View>
+                            {newNotification && <Badge style={{position: 'absolute', top: 5, right: 5, zIndex: 1}} size={14}></Badge>}
+                            <IconButton onPress={() =>  notificationClick()} style={{ backgroundColor: mode == "dark" ? '#1d1d1d' : appstyle.accent, elevation: 10, shadowColor: appstyle.shadowColor, borderWidth: mode == "dark" ? 0 : 1, borderColor: '#fff' }} iconColor={mode == "dark" ? appstyle.pri : appstyle.tri} size={20} icon="bell" />
+                            </View>
+                            
                         </View>
                     </Animated.View>
                     <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'flex-end' }}>

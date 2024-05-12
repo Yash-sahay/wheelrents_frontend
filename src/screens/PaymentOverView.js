@@ -1,5 +1,5 @@
 import React from 'react'
-import { amountFormatter, dateSimplify, timeSimplify } from '../../common'
+import { amountFormatter, dateSimplify, payWithRazorPay, timeSimplify } from '../../common'
 import { appstyle } from '../styles/appstyle'
 import { ScrollView, StatusBar, View } from 'react-native'
 import AppText from '../components/AppText'
@@ -28,7 +28,7 @@ const PaymentOverView = ({ route, navigation }) => {
             }
             const final = await finish_trip(payload)
             navigation.goBack()
-            alert("done")
+
         } catch (error) {
             console.error("err", error)
         }
@@ -37,7 +37,7 @@ const PaymentOverView = ({ route, navigation }) => {
     return (
         <>
             <StatusBar animated barStyle={"light-content"} backgroundColor={appstyle.tri} />
-            <AppHeader ui2  name={"Payment Overview"}/>
+            <AppHeader ui2 name={"Payment Overview"} />
             <ScrollView style={{ backgroundColor: appstyle.pri }} contentContainerStyle={{ paddingBottom: 100 }}>
                 <View style={{ flex: 1, padding: 20, paddingTop: 20 }}>
                     <CustomTile style={{ backgroundColor: '#f4f4f2' }}>
@@ -132,8 +132,14 @@ const PaymentOverView = ({ route, navigation }) => {
                     <AppText style={{ fontWeight: 'bold', fontSize: 20, color: "#008542" }}>₹{amountFormatter((extendChargeAmt + nonInformedExtendedChargeAmt))}</AppText>
                 </View>
                 {role.includes("client") ? (
-                    <AppButton onPress={() => { finishTripApi() }} icon={'clock-end'} style={{ paddingVertical: 3, }} >Pay to end trip</AppButton>
-                ): (
+                    <>
+                        {((extendChargeAmt || 0) + (nonInformedExtendedChargeAmt || 0)) > 1 ? (
+                            <AppButton onPress={() => { payWithRazorPay({amount: extendChargeAmt + nonInformedExtendedChargeAmt, successCallback: () =>  finishTripApi()}) }} icon={'clock-end'} style={{ paddingVertical: 3, }} >Pay to end trip</AppButton>
+                        ) : (
+                            <AppButton onPress={() => { finishTripApi() }} icon={'clock-end'} style={{ paddingVertical: 3, }} >End trip</AppButton>
+                        )}
+                    </>
+                ) : (
                     <AppText style={{ fontWeight: 'bold', fontSize: 20, color: appstyle.textSec }}>Amount Payble</AppText>
                 )}
             </View>

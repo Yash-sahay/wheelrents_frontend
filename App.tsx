@@ -23,12 +23,16 @@ import { store } from './src/redux/store';
 import 'react-native-gesture-handler'
 import { appstyle } from './src/styles/appstyle';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
+import AppText from './src/components/AppText'
 
 
 
 type SectionProps = PropsWithChildren<{
   title: string;
 }>;
+
+
 
 
 function App(): React.JSX.Element {

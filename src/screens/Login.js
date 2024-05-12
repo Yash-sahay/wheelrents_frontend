@@ -1,4 +1,4 @@
-import { Image, StatusBar, TouchableOpacity, View } from 'react-native'
+import { Image, StatusBar, TouchableOpacity, View, Keyboard } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Divider, TextInput } from 'react-native-paper'
 import { loginUser } from '../axios/axios_services/loginService'
@@ -32,6 +32,7 @@ const Login = () => {
 
   const loginfun = async () => {
     try {
+      Keyboard.dismiss()
       dispatch(updateLoaderReducer({ loading: true}))
       const payload = { ...allValues, fcm_token: fcm }
       const login = await loginUser({ data: payload })
@@ -67,6 +68,10 @@ const Login = () => {
             right={<TextInput.Icon icon={'account'} />}
             mode="outlined"
             label="Email"
+            keyboardType="email-address"
+            textContentType="emailAddress"
+            returnKeyType="done"
+            autoCapitalize='none'
             name={'email'}
             setter={setAllValues}
             allValues={allValues}
