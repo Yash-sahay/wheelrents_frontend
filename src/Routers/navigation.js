@@ -174,7 +174,7 @@ const Navigation = () => {
   useEffect(() => {
     setTimeout(() => {
       setloaded(true)
-    }, 2000);
+    }, 3200);
   }, [])
 
 

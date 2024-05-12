@@ -60,7 +60,7 @@ const AppBottomSheet = ({children, snapPoints, bottomSheet, setBottomSheet }) =>
             snapPoints={snapPointsMemo}
             // onChange={handleSheetChanges}
           >
-            <View style={{width: '100%', alignItems: 'flex-end', paddingHorizontal: 15}}>
+            <View style={{width: '100%', alignItems: 'flex-end', paddingHorizontal: 15, marginTop: -5, marginBottom: 10}}>
               <IconButton onPress={() => bottomSheetRef.current?.close()} style={{backgroundColor: appstyle.accent}} icon={'close'} color={appstyle.tri} size={20} />
             </View>
             {children}

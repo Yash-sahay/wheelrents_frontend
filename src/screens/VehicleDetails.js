@@ -1,4 +1,4 @@
-import { View, Text, FlatList, Dimensions, Image, TouchableOpacity, StyleSheet, ScrollView, Linking } from 'react-native'
+import { View, Text, FlatList, Dimensions, Image, TouchableOpacity, StyleSheet, PixelRatio, ScrollView, Linking } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import AppHeader from '../components/AppHeader';
 import { Card, Divider } from 'react-native-paper';
@@ -24,6 +24,8 @@ const Device_Width = Dimensions.get('window').width
 const Device_Height = Dimensions.get('window').height
 
 const VehicleDetails = ({ route, navigation }) => {
+
+    const overViewCardWidth = Device_Width / 3 - 15
     const data = route.params
     const [currentIndex, setCurrentIndex] = useState(0)
     const { bookingStartDate, bookingEndDate } = useSelector(state => state.userReducer)
@@ -86,7 +88,7 @@ const VehicleDetails = ({ route, navigation }) => {
 
     return (
         <>
-            <AppBottomSheet bottomSheetRef={bottomSheetRef} snapPoints={['60%', '97%']} bottomSheet={bottomSheet} setBottomSheet={setBottomSheet}>
+            <AppBottomSheet bottomSheetRef={bottomSheetRef} snapPoints={['65%', '97%']} bottomSheet={bottomSheet} setBottomSheet={setBottomSheet}>
                 {bookingDetails?.id ? (
                     <View style={{ width: "100%", height: '60%', alignItems: 'center', justifyContent: 'space-between', padding: 20 }}>
                         <MotiView
@@ -121,7 +123,7 @@ const VehicleDetails = ({ route, navigation }) => {
                                 translateY: 100,
                             }}
                         >
-                        <MaterialCommunityIcons color={'#48c681'} name="bookmark-check" size={200} />
+                            <MaterialCommunityIcons color={'#48c681'} name="bookmark-check" size={200} />
                         </MotiView>
                         <MotiView
                             style={{ width: "100%" }}
@@ -167,20 +169,20 @@ const VehicleDetails = ({ route, navigation }) => {
                             <AppText style={{ fontWeight: 'bold', fontSize: 20, color: appstyle.textBlack, textTransform: "capitalize" }}>Overview</AppText>
                         </View>
                         <View style={{ width: '100%', flexDirection: 'row', paddingTop: 10, flexWrap: 'wrap' }}>
-                            <View style={{ height: 100, width: 120, padding: 10, marginLeft: 10, backgroundColor: appstyle.tri, borderRadius: 15, elevation: 10, shadowColor: appstyle.shadowColor }}>
+                            <View style={{ width: overViewCardWidth, padding: 10, paddingVertical: 15, marginLeft: 10, backgroundColor: appstyle.tri, borderRadius: 15, elevation: 10, shadowColor: appstyle.shadowColor }}>
                                 <MaterialCommunityIcons size={30} color={appstyle.pri} name="car-shift-pattern" />
-                                <AppText style={{ fontSize: 12, color: '#eee', marginTop: 10 }}>Transmission</AppText>
+                                <AppText style={{ fontSize: PixelRatio.get() * 3.5, color: '#eee', marginTop: 10 }}>Transmission</AppText>
                                 <AppText style={{ color: appstyle.pri, fontWeight: 'bold', textTransform: "capitalize" }} >{data?.transmission || "N/A"}</AppText>
                             </View>
-                            <View style={{ height: 100, width: 120, padding: 10, marginLeft: 10, backgroundColor: appstyle.tri, borderRadius: 15, elevation: 10, shadowColor: appstyle.shadowColor }}>
+                            <View style={{ width: overViewCardWidth, padding: 10, marginLeft: 10, backgroundColor: appstyle.tri, borderRadius: 15, elevation: 10, shadowColor: appstyle.shadowColor }}>
                                 <MaterialCommunityIcons size={30} color={appstyle.pri} name="fuel" />
-                                <AppText style={{ fontSize: 12, color: '#eee', marginTop: 10 }}>Power Source</AppText>
+                                <AppText style={{ fontSize: PixelRatio.get() * 3.5, color: '#eee', marginTop: 10 }}>Power Source</AppText>
                                 <AppText style={{ fontWeight: 'bold', color: appstyle.pri, textTransform: "capitalize" }} >{data?.fuelType || "N/A"}</AppText>
                             </View>
-                            <View style={{ height: 100, width: 120, padding: 10, marginLeft: 10, backgroundColor: appstyle.tri, borderRadius: 15, elevation: 10, shadowColor: appstyle.shadowColor }}>
+                            <View style={{ width: overViewCardWidth, padding: 10, marginLeft: 10, backgroundColor: appstyle.tri, borderRadius: 15, elevation: 10, shadowColor: appstyle.shadowColor }}>
                                 {data?.vehicleCategory == 'car' && <MaterialCommunityIcons size={30} color={appstyle.pri} name="car" />}
                                 {data?.vehicleCategory == 'bike' && <MaterialCommunityIcons size={30} color={appstyle.pri} name="motorbike" />}
-                                <AppText style={{ fontSize: 12, color: '#eee', marginTop: 10 }}>Vehicle Type</AppText>
+                                <AppText style={{ fontSize: PixelRatio.get() * 3.5, color: '#eee', marginTop: 10 }}>Vehicle Type</AppText>
                                 <AppText style={{ fontWeight: 'bold', color: appstyle.pri, textTransform: "capitalize" }} >{data?.vehicleType || "N/A"}</AppText>
                             </View>
                         </View>

@@ -7,6 +7,7 @@ import { appstyle } from '../styles/appstyle';
 import { booking_payment, booking_status_change } from '../axios/axios_services/bookingService';
 import AppButton from '../components/AppButton';
 import { useNavigation } from '@react-navigation/native';
+import LottieView from 'lottie-react-native';
 
 
 const QRScanner = ({  }) => {
@@ -32,7 +33,7 @@ const QRScanner = ({  }) => {
   //   };
   // }, []);
 
-  const [scaning, setScaning] = useState({ scaned: false, id: null })
+  const [scaning, setScaning] = useState({ scaned: false, id: null, success: false })
 
   const requestCameraPermission = async () => {
     try {
@@ -87,7 +88,7 @@ const QRScanner = ({  }) => {
       const payload = { bookingId: id }
       res = await booking_payment(payload)
       setLoader(false)
-      setScaning({ id: null })
+      setScaning({ id: null, success: true })
     } catch (error) {
       // setLoader(false)
       console.error("delete error", error)
@@ -104,19 +105,24 @@ const QRScanner = ({  }) => {
     <>
       <AppHeader ui2 name={"Scan"} />
       <View style={styles.container}>
-        {scaning.scaned ? (
+        {scaning?.scaned ? (
           <>
+          {scaning?.success ? (
+            <>
            <View style={{paddingHorizontal: 20, width: '100%', zIndex: 10}}> 
               <AppText style={{textAlign: 'center', fontWeight: "700", fontSize: 20, padding: 40, color: appstyle.textBlack }}>Your booking has begun. Enjoy your trip!</AppText>
             </View>
-            <Image
-              style={{ width: '100%', height: 500,marginTop: -100, }}
-              source={require('../../assets/images/success.gif')}
-            />
-            <View onTouchEnd={() => navigation.navigate("Booking")} style={{paddingHorizontal: 30, width: '100%', marginTop: -60, zIndex: 100}}> 
+            <LottieView source={require("../../assets/animation/success_animation.json")} style={{ height: 400, width: '100%', borderRadius: 100, overflow: 'hidden' }} autoPlay loop={false} />
+            <View onTouchEnd={() => navigation.navigate("Booking")} style={{paddingHorizontal: 30, width: '100%', zIndex: 100}}> 
               <AppButton icon={'book-play'} >View Bookings</AppButton>
               <AppText style={{marginTop: -30, textAlign: 'center', fontWeight: "600", fontSize: 16, padding: 40, color: appstyle.textSec }}>We wish you a safe and enjoyable journey!</AppText>
             </View>
+            </>
+          ): (
+            <>
+            <LottieView source={require("../../assets/animation/app_loader.json")} style={{ height: '90%', width: '100%', borderRadius: 100, overflow: 'hidden' }} autoPlay loop />
+            </>
+          )}
           </>
         ) : (
           <>
