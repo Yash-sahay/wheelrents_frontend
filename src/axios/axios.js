@@ -23,6 +23,7 @@ axiosInstance.interceptors.request.use(
     async (config) => {
         const authObj = await getStoredToken();
         if (authObj?.access) {
+            config.timeout = 1000 * 5
             // config.headers.common['Authorization'] = `Bearer ${authObj?.access}` || "";
             config.headers.Authorization = `Bearer ${authObj?.access}` || ""
         }

@@ -8,6 +8,7 @@ import { AnimatePresence, MotiView } from 'moti'
 const SplashScreen = ({ loaded, setloaded }) => {
     return (
         <AnimatePresence exitBeforeEnter>
+             <StatusBar barStyle={"light-content"} backgroundColor={appstyle.tri} />
            { !loaded && <MotiView  
              from={{
                 opacity: 1,
@@ -18,7 +19,7 @@ const SplashScreen = ({ loaded, setloaded }) => {
             exit={{
                 opacity: 0,
               }}
-           style={{ height: "100%", width: "100%", position: 'absolute', alignItems: 'center', justifyContent: 'center', zIndex: 9999999999, backgroundColor: 'black' }}>
+           style={{ height: "100%", width: "100%", position: 'absolute', alignItems: 'center', justifyContent: 'center', zIndex: 9999999999, backgroundColor: appstyle.tri }}>
                 <StatusBar animated backgroundColor={'transparent'} barStyle={"dark-content"} translucent />
                 <MotiView
                     from={{

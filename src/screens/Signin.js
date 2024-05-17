@@ -13,7 +13,7 @@ import Icon from 'react-native-vector-icons/FontAwesome6'
 import { appstyle } from '../styles/appstyle'
 
 const Signin = () => {
-  const [allValues, setAllValues] = useState({ email: '', phoneNo: '', password: '', secureTextEntry: true })
+  const [allValues, setAllValues] = useState({ email: '', phoneNo: '', password: '', userType: 'client', secureTextEntry: true })
   const navigation = useNavigation()
 
   const dispatch = useDispatch()
@@ -56,6 +56,10 @@ const Signin = () => {
             mode="outlined"
             label="Email"
             name={'email'}
+            keyboardType="email-address"
+            textContentType="emailAddress"
+            returnKeyType="done"
+            autoCapitalize='none'
             setter={setAllValues}
             allValues={allValues}
           />
@@ -63,6 +67,7 @@ const Signin = () => {
             right={<TextInput.Icon icon={'phone'} />}
             mode="outlined"
             label="Phone Number"
+            maxLength={10}
             keyboardType="phone-pad"
             name={'phoneNo'}
             setter={setAllValues}
@@ -85,7 +90,6 @@ const Signin = () => {
             <AppText style={{ fontWeight: 'bold', paddingVertical: 10, marginTop: 5 }}>Select purpose</AppText>
             <View style={{ flexWrap: 'wrap', flexDirection: 'row' }}>
               <CustomChip
-                icon={'fuel'}
                 style={{ marginLeft: 4 }}
                 keyValue={'userType'}
                 name={"client"}

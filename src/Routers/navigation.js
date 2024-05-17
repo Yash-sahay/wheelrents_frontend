@@ -38,6 +38,7 @@ import messaging from '@react-native-firebase/messaging';
 
 import notifee, { AndroidImportance } from '@notifee/react-native';
 import { updateNotificationReducer } from '../redux/reducer/notificationReducer';
+import AppOnboarding from '../components/AppOnboarding';
 
 const Stack = createNativeStackNavigator();
 const { width } = Dimensions.get("window")
@@ -188,6 +189,7 @@ const Navigation = () => {
           screenOptions={{ headerShown: false }}>
           {!isLoggedIn ? (
             <>
+              <Stack.Screen name="AppOnboarding" component={AppOnboarding} />
               <Stack.Screen name="Login" component={Login} />
               <Stack.Screen name="Signin" component={Signin} />
             </>
