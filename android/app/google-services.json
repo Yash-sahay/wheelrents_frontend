@@ -12,7 +12,20 @@
           "package_name": "com.wheelrents"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "279174890025-ump6v3dtug998khab58g51gg1ekti21l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wheelrents",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "279174890025-66gv8036ju0un4gm5ulqv6rcag6fp8ft.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDkGVDp_8LBcCyS_6-NAq7w2txkvLn_CzE"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "279174890025-66gv8036ju0un4gm5ulqv6rcag6fp8ft.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "279174890025-r96mq2l02ksqj0dron357vt1c0ictcfl.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.wheelrents"
+              }
+            }
+          ]
         }
       }
     }

@@ -1,4 +1,4 @@
-import { StatusBar, TouchableOpacity, View } from 'react-native'
+import { Image, StatusBar, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
 import { Chip, Divider, TextInput } from 'react-native-paper'
 import { createuser, loginUser } from '../axios/axios_services/loginService'
@@ -11,12 +11,24 @@ import AppTextInput from '../components/AppTextInput'
 import AppText from '../components/AppText'
 import Icon from 'react-native-vector-icons/FontAwesome6'
 import { appstyle } from '../styles/appstyle'
+import { onGoogleButtonPress } from '../../common'
 
-const Signin = () => {
-  const [allValues, setAllValues] = useState({ email: '', phoneNo: '', password: '', userType: 'client', secureTextEntry: true })
+const Signin = ({ route }) => {
+
+  const data = route.params
+
+  
+  // alert(JSON.stringify(data))
+  const [allValues, setAllValues] = useState({name: '', email: '', phoneNo: '', password: '', userType: 'client', secureTextEntry: true })
   const navigation = useNavigation()
-
+  
   const dispatch = useDispatch()
+  
+  const onSuccess = (data) => {
+    console.warn(data?.token?.user)
+    setAllValues(prev => ({...prev, email: data?.token?.user?.email || "", name: data?.token?.user?.name, }))
+  }
+
 
   const createUserFun = async () => {
     try {
@@ -110,6 +122,14 @@ const Signin = () => {
               theme={{ colors: { primary: appstyle.textSec } }}
             />
             <AppText style={{ textAlign: 'center', width: 30, top: -10, left: '45%', position: 'absolute', backgroundColor: appstyle.pri, fontWeight: 'bold', color: appstyle.textSec }}>OR</AppText>
+          </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+            <TouchableOpacity style={{ backgroundColor: "transparent", borderWidth: 1, borderColor: appstyle.textSec, height: 60, width: "45%", marginTop: -2, borderRadius: 20, paddingVertical: 10, paddingHorizontal: 22, alignItems: 'center', justifyContent: 'center' }}>
+              <Image style={{ height: 20, width: 16 }} source={require("../../assets/images/apple-icon-black.png")} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => onGoogleButtonPress({ onSuccess })} style={{ backgroundColor: "transparent", borderWidth: 1, borderColor: appstyle.textSec, height: 60, width: "45%", marginTop: -2, marginLeft: 10, borderRadius: 20, paddingVertical: 10, paddingHorizontal: 22, alignItems: 'center', justifyContent: 'center' }}>
+              <Image style={{ height: 20, width: 16 }} source={require("../../assets/images/google-icon.png")} />
+            </TouchableOpacity>
           </View>
         </View>
         <View>

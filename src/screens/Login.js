@@ -12,14 +12,21 @@ import AppText from '../components/AppText'
 import Icon from 'react-native-vector-icons/FontAwesome6'
 import { updateLoaderReducer } from '../redux/reducer/loaderReducer'
 import { appstyle } from '../styles/appstyle'
-import { getDeviceToken } from '../../common'
+import { getDeviceToken, onGoogleButtonPress } from '../../common'
 
-const Login = () => {
-  const [allValues, setAllValues] = useState({ email: 'yash@gmail.com', password: 'radhekrishna', secureTextEntry: true })
+const Login = ({route}) => {
+  const data = route.params
+  const [allValues, setAllValues] = useState({ email: data?.token?.user?.email || "", password: '', secureTextEntry: true })
   const navigation = useNavigation()
   const [fcm, setfcm] = useState(null)
 
+
   const dispatch = useDispatch()
+
+  const onSuccess = (data) => {
+    setAllValues(prev => ({...prev, email: data?.token?.user?.email || ""}))
+  }
+
 
   useEffect(() => {
     fcmGet()
@@ -98,10 +105,18 @@ const Login = () => {
             <AppText style={{ textAlign: 'center', width: 30, top: -10, left: '45%', position: 'absolute', backgroundColor: appstyle.pri, fontWeight: 'bold', color: appstyle.textSec }}>OR</AppText>
           </View>
         </View>
+        <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+            <TouchableOpacity style={{ backgroundColor: "transparent", borderWidth: 1, borderColor: appstyle.textSec, height: 60, width: "45%", marginTop: -2, borderRadius: 20, paddingVertical: 10, paddingHorizontal: 22, alignItems: 'center', justifyContent: 'center' }}>
+              <Image style={{ height: 20, width: 16 }} source={require("../../assets/images/apple-icon-black.png")} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => onGoogleButtonPress({ onSuccess })} style={{ backgroundColor: "transparent", borderWidth: 1, borderColor: appstyle.textSec, height: 60, width: "45%", marginTop: -2, marginLeft: 10, borderRadius: 20, paddingVertical: 10, paddingHorizontal: 22, alignItems: 'center', justifyContent: 'center' }}>
+              <Image style={{ height: 20, width: 16 }} source={require("../../assets/images/google-icon.png")} />
+            </TouchableOpacity>
+          </View>
         <View>
         <AppButton mode="outlined" style={{ marginTop: 20 }} onPress={loginfun}>Log In    <Icon name={'arrow-right'} size={14} color={appstyle.pri} /></AppButton>
         <TouchableOpacity onPress={() => navigation.navigate('Signin')}>
-          <AppText style={{ textAlign: 'center', fontWeight: 'bold', color: appstyle.textSec, marginVertical: 10 }}>Do not have an account? <AppText style={{color: '#0163f7', textDecorationLine: 'underline', textDecorationColor: '#0163f7', textDecorationStyle: 'dashed'}}>Sign In</AppText></AppText>
+          <AppText style={{ textAlign: 'center', fontWeight: 'bold', color: appstyle.textSec, marginVertical: 10 }}>Do not have an account? <AppText style={{color: '#0163f7', textDecorationLine: 'underline', textDecorationColor: '#0163f7', textDecorationStyle: 'dashed'}}>Sign up</AppText></AppText>
         </TouchableOpacity>
         </View>
       </View>

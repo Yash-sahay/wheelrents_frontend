@@ -7,7 +7,7 @@ import { appstyle } from './src/styles/appstyle';
 
 
 export function baseURL() {
-  return "http://192.168.1.4:5000/" // Local
+  // return "http://192.168.1.4:5000/" // Local
   return "https://wheelrents-api.onrender.com/" // Live
 }
 
@@ -191,7 +191,7 @@ export async function getDeviceToken() {
 }
 
 
-export async function payWithRazorPay({successCallback, failedCallback, amount = 0}) {
+export async function payWithRazorPay({ successCallback, failedCallback, amount = 0 }) {
   var options = {
     description: 'Credits towards consultation',
     // image: 'https://i.imgur.com/3g7nmJC.png',
@@ -217,6 +217,35 @@ export async function payWithRazorPay({successCallback, failedCallback, amount =
 }
 
 
+
+
+import auth from '@react-native-firebase/auth';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+
+export async function onGoogleButtonPress({onSuccess}) {
+
+  try {
+    GoogleSignin.configure({
+      androidClientId: '279174890025-ump6v3dtug998khab58g51gg1ekti21l.apps.googleusercontent.com',
+      // webClientId: '279174890025-ump6v3dtug998khab58g51gg1ekti21l.apps.googleusercontent.com',
+      offlineAccess: false,
+    });
+    // Check if your device supports Google Play
+    await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+    // Get the users ID token
+    const userInfo = await GoogleSignin.signIn();
+
+
+    // Create a Google credential with the token
+    const googleCredential = auth.GoogleAuthProvider.credential(userInfo);
+    console.warn(googleCredential)
+    onSuccess && onSuccess(googleCredential)
+    // Sign-in the user with the credential
+    // return auth().signInWithCredential(googleCredential);
+  } catch (error) {
+    console.error(error)
+  }
+}
 
 
 

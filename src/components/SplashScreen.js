@@ -5,7 +5,16 @@ import { appstyle } from '../styles/appstyle'
 import { AnimatePresence, MotiView } from 'moti'
 
 
-const SplashScreen = ({ loaded, setloaded }) => {
+const SplashScreen = () => {
+
+    
+  const [loaded, setloaded] = useState(false)
+  useEffect(() => {
+    setTimeout(() => {
+      setloaded(true)
+    }, 3200);
+  }, [])
+
     return (
         <AnimatePresence exitBeforeEnter>
              <StatusBar barStyle={"light-content"} backgroundColor={appstyle.tri} />

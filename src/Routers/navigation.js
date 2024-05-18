@@ -45,7 +45,6 @@ const { width } = Dimensions.get("window")
 
 const Navigation = () => {
 
-
   const { notifications } = useSelector(state => state.notificationReducer)
 
   let noti = notifications
@@ -171,19 +170,13 @@ const Navigation = () => {
 
   }, [])
 
-  const [loaded, setloaded] = useState(false)
-  useEffect(() => {
-    setTimeout(() => {
-      setloaded(true)
-    }, 3200);
-  }, [])
 
 
   return (
     <>
       <AppLoader />
       {/* <AppBottomBar/> */}
-      <SplashScreen {...{ loaded, setloaded }} />
+      <SplashScreen />
       <NavigationContainer initialRouteName="Home">
         <Stack.Navigator
           screenOptions={{ headerShown: false }}>
